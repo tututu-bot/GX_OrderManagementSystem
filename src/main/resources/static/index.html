@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+    ============================================================
+    【管兴订单管理系统 - 主页面】
+    ============================================================
+    页面功能：系统主页面，左侧导航 + 顶部用户区 + 内容展示
+    设计风格：Anthropic 极简风格
+        - 白色卡片，浅灰背景 (#FAFAFA)
+        - 紫罗兰色 (#6B4BFF) 品牌强调
+        - 大量留白，细边框，圆角 8-12px
+    技术栈：Vue 3 + Element Plus（CDN 引入）
+
+    【页面执行顺序】
+    1. 加载 HTML → 引入 CSS/JS
+    2. Vue 应用挂载到 #app
+    3. onMounted 执行：检查 Token → 加载用户 → 加载数据
+    4. 渲染页面
+
+    【数据流向】
+    页面 ← Vue 响应式数据 ← fetch API（携带 JWT Token）← Spring Boot 后端 ← MySQL
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管兴订单管理系统</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus@2.9.0/dist/index.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #FAFAFA;
+            color: #1A1A1A;
+        }
+
+        /* ---------- 整体布局 ---------- */
+        .app-layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* ---------- 左侧导航栏 ---------- */
+        .sidebar {
+            width: 220px;
+            background: #FFFFFF;
+            border-right: 1px solid #E5E5E5;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-brand {
+            padding: 24px;
+            border-bottom: 1px solid #E5E5E5;
+        }
+
+        .sidebar-brand h2 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1A1A1A;
+            letter-spacing: -0.02em;
+        }
+
+        .sidebar-brand p {
+            font-size: 13px;
+            color: #666666;
+            margin-top: 4px;
+        }
+
+        .nav-menu {
+            list-style: none;
+            padding: 12px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #666666;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .nav-item:hover {
+            background: #F5F3FF;
+            color: #6B4BFF;
+        }
+
+        .nav-item.active {
+            background: #F5F3FF;
+            color: #6B4BFF;
+        }
+
+        /* ---------- 右侧主内容区 ---------- */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* ---------- 顶部 Header ---------- */
+        .topbar {
+            height: 64px;
+            background: #FFFFFF;
+            border-bottom: 1px solid #E5E5E5;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 32px;
+        }
+
+        .topbar-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        .user-trigger {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .user-trigger:hover {
+            background: #F5F5F5;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: #6B4BFF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .user-name {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A1A1A;
+        }
+
+        /* ---------- 内容区 ---------- */
+        .content {
+            flex: 1;
+            padding: 32px;
+            overflow-y: auto;
+        }
+
+        .page-card {
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 12px;
+            padding: 28px;
+        }
+
+        .page-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        /* ---------- 按钮 ---------- */
+        .btn {
+            height: 36px;
+            padding: 0 16px;
+            font-size: 14px;
+            font-weight: 500;
+            font-family: inherit;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            color: #FFFFFF;
+            background: #6B4BFF;
+        }
+
+        .btn-primary:hover {
+            background: #5538D9;
+        }
+
+        .btn-danger {
+            color: #FFFFFF;
+            background: #DC2626;
+        }
+
+        .btn-danger:hover {
+            background: #B91C1C;
+        }
+
+        .btn-sm {
+            height: 28px;
+            padding: 0 12px;
+            font-size: 13px;
+        }
+
+        /* ---------- 表格 ---------- */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        .data-table th {
+            text-align: left;
+            padding: 12px 16px;
+            font-weight: 500;
+            color: #666666;
+            background: #FAFAFA;
+            border-bottom: 1px solid #E5E5E5;
+            font-size: 13px;
+        }
+
+        .data-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid #F0F0F0;
+            color: #1A1A1A;
+        }
+
+        .data-table tr:hover td {
+            background: #FAFAFA;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag-success {
+            background: #DCFCE7;
+            color: #16A34A;
+        }
+
+        .tag-warning {
+            background: #FEF3C7;
+            color: #D97706;
+        }
+
+        .tag-default {
+            background: #F3F4F6;
+            color: #666666;
+        }
+
+        .tag-danger {
+            background: #FEE2E2;
+            color: #DC2626;
+        }
+
+        /* ---------- 弹窗 ---------- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: #FFFFFF;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 480px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+
+        .modal-header {
+            padding: 24px 28px 0;
+        }
+
+        .modal-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        .modal-body {
+            padding: 24px 28px;
+        }
+
+        .modal-footer {
+            padding: 0 28px 24px;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        .form-row {
+            margin-bottom: 18px;
+        }
+
+        .form-row label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A1A1A;
+            margin-bottom: 6px;
+        }
+
+        .form-row input,
+        .form-row select,
+        .form-row textarea {
+            width: 100%;
+            height: 40px;
+            padding: 0 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #1A1A1A;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-row input:focus,
+        .form-row select:focus,
+        .form-row textarea:focus {
+            border-color: #6B4BFF;
+            box-shadow: 0 0 0 3px rgba(107, 75, 255, 0.1);
+        }
+
+        .form-row input:disabled {
+            background: #F5F5F5;
+            color: #9CA3AF;
+        }
+
+        .form-row textarea {
+            height: auto;
+            padding: 10px 12px;
+            resize: vertical;
+        }
+
+        .btn-secondary {
+            color: #666666;
+            background: #F5F5F5;
+        }
+
+        .btn-secondary:hover {
+            background: #E5E5E5;
+        }
+
+        /* ---------- 下拉菜单 ---------- */
+        .dropdown-menu {
+            position: absolute;
+            top: 52px;
+            right: 0;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            min-width: 160px;
+            z-index: 100;
+            overflow: hidden;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            font-size: 14px;
+            color: #1A1A1A;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .dropdown-item:hover {
+            background: #F5F3FF;
+            color: #6B4BFF;
+        }
+
+        .dropdown-divider {
+            height: 1px;
+            background: #E5E5E5;
+            margin: 4px 0;
+        }
+
+        .user-dropdown-wrap {
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="app-layout">
+        <!-- ========== 左侧导航栏 ========== -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <h2>管兴订单系统</h2>
+                <p>销售订单管理平台</p>
+            </div>
+            <ul class="nav-menu">
+                <li class="nav-item" :class="{ active: activeMenu === 'customer' }" @click="activeMenu = 'customer'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    客户管理
+                </li>
+                <li class="nav-item" :class="{ active: activeMenu === 'order' }" @click="activeMenu = 'order'">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                    </svg>
+                    订单列表
+                </li>
+            </ul>
+        </aside>
+
+        <!-- ========== 右侧主内容区 ========== -->
+        <div class="main-area">
+            <!-- ---------- 顶部 Header ---------- -->
+            <header class="topbar">
+                <div class="topbar-title">{{ activeMenu === 'customer' ? '客户管理' : '订单列表' }}</div>
+                <div class="user-dropdown-wrap">
+                    <div class="user-trigger" @click="showDropdown = !showDropdown">
+                        <div class="user-avatar">{{ (currentUser.realName || currentUser.account || '?').charAt(0) }}</div>
+                        <span class="user-name">{{ currentUser.realName || currentUser.account }}</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#666666" stroke-width="2">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <!-- 下拉菜单 -->
+                    <div v-if="showDropdown" class="dropdown-menu">
+                        <div class="dropdown-item" @click="showDropdown = false; openUserEdit()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            修改信息
+                        </div>
+                        <div class="dropdown-divider"></div>
+                        <div class="dropdown-item" @click="logout()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                <polyline points="16 17 21 12 16 7"></polyline>
+                                <line x1="21" y1="12" x2="9" y2="12"></line>
+                            </svg>
+                            登出
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- ---------- 内容区 ---------- -->
+            <main class="content">
+                <!-- ===== 客户管理 ===== -->
+                <div v-if="activeMenu === 'customer'" class="page-card">
+                    <div class="page-header-row">
+                        <h2 class="page-title">客户列表</h2>
+                        <button class="btn btn-primary" @click="openCustomerDialog()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            新增客户
+                        </button>
+                    </div>
+
+                    <!-- 搜索和筛选区域 -->
+                    <div style="display:flex;gap:12px;margin-bottom:20px;">
+                        <!-- 关键词搜索（客户名称 / 联系人模糊查询） -->
+                        <input
+                            type="text"
+                            v-model="searchKeyword"
+                            placeholder="搜索客户名称或联系人..."
+                            style="flex:1;max-width:320px;height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;"
+                            @input="applyCustomerFilter"
+                        >
+                        <!-- 客户分类筛选下拉 -->
+                        <select
+                            v-model="categoryFilter"
+                            style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;"
+                            @change="applyCustomerFilter"
+                        >
+                            <option value="">全部分类</option>
+                            <option value="零售">零售</option>
+                            <option value="批发">批发</option>
+                            <option value="老客户">老客户</option>
+                        </select>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>客户名称</th>
+                                <th>分类</th>
+                                <th>联系人</th>
+                                <th>电话</th>
+                                <th>地址</th>
+                                <th>累计欠款</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="customerLoading">
+                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                            </tr>
+                            <tr v-else-if="filteredCustomerList.length === 0">
+                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">暂无客户数据</td>
+                            </tr>
+                            <tr v-for="item in filteredCustomerList" :key="item.id">
+                                <td>{{ item.customerName }}</td>
+                                <td>
+                                    <span class="tag" :class="item.category === '批发' ? 'tag-success' : item.category === '老客户' ? 'tag-warning' : 'tag-default'">
+                                        {{ item.category }}
+                                    </span>
+                                </td>
+                                <td>{{ item.contactName || '-' }}</td>
+                                <td>{{ item.phone || '-' }}</td>
+                                <td>{{ item.address || '-' }}</td>
+                                <td>{{ item.totalDebt }} 元</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" @click="openCustomerDialog(item)" style="margin-right:8px;">查看详情</button>
+                                    <button class="btn btn-sm btn-danger" @click="deleteCustomer(item.id)">删除</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ===== 订单列表 ===== -->
+                <div v-if="activeMenu === 'order'" class="page-card">
+                    <div class="page-header-row">
+                        <h2 class="page-title">订单列表</h2>
+                    </div>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>单据编号</th>
+                                <th>客户ID</th>
+                                <th>销售人员</th>
+                                <th>单据日期</th>
+                                <th>本单金额</th>
+                                <th>已收款</th>
+                                <th>本次欠款</th>
+                                <th>收款方式</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="orderLoading">
+                                <td colspan="9" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                            </tr>
+                            <tr v-else-if="orderList.length === 0">
+                                <td colspan="9" style="text-align:center;color:#9CA3AF;padding:40px;">暂无订单数据</td>
+                            </tr>
+                            <tr v-for="item in orderList" :key="item.id">
+                                <td>{{ item.orderNo }}</td>
+                                <td>{{ item.customerId }}</td>
+                                <td>{{ item.salesPerson || '-' }}</td>
+                                <td>{{ item.orderDate || '-' }}</td>
+                                <td>{{ item.totalAmount }} 元</td>
+                                <td>{{ item.receivedAmount }} 元</td>
+                                <td>
+                                    <span class="tag" :class="item.currentDebt > 0 ? 'tag-danger' : 'tag-success'">
+                                        {{ item.currentDebt }} 元
+                                    </span>
+                                </td>
+                                <td>{{ item.paymentMethod || '-' }}</td>
+                                <td>
+                                    <span class="tag" :class="item.status === 'COMPLETED' ? 'tag-success' : item.status === 'CANCELLED' ? 'tag-default' : 'tag-warning'">
+                                        {{ item.status }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ========== 用户信息修改弹窗 ========== -->
+    <div v-if="showUserDialog" class="modal-overlay" @click.self="showUserDialog = false">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>修改用户信息</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <label>账号</label>
+                    <input type="text" v-model="userForm.account" disabled>
+                </div>
+                <div class="form-row">
+                    <label>用户姓名</label>
+                    <input type="text" v-model="userForm.realName">
+                </div>
+                <div class="form-row">
+                    <label>地址</label>
+                    <input type="text" v-model="userForm.address">
+                </div>
+                <div class="form-row">
+                    <label>联系方式</label>
+                    <input type="text" v-model="userForm.phone">
+                </div>
+                <div class="form-row">
+                    <label>其他信息</label>
+                    <textarea v-model="userForm.extraInfo" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showUserDialog = false">取消</button>
+                <button class="btn btn-primary" :disabled="userSaving" @click="saveUser">
+                    {{ userSaving ? '保存中...' : '保存' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 客户新增/客户详情弹窗 ========== -->
+    <div v-if="showCustomerDialog" class="modal-overlay" @click.self="showCustomerDialog = false">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>{{ customerForm.id ? '编辑客户' : '新增客户' }}</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <!-- 客户名称必填，用红色星号标识 -->
+                    <label>客户名称 <span style="color:#DC2626;">*</span></label>
+                    <input type="text" v-model="customerForm.customerName" placeholder="请输入客户名称（必填）">
+                    <div v-if="customerNameError" style="font-size:13px;color:#DC2626;margin-top:4px;">{{ customerNameError }}</div>
+                </div>
+                <div class="form-row">
+                    <label>客户分类</label>
+                    <select v-model="customerForm.category">
+                        <option value="零售">零售</option>
+                        <option value="批发">批发</option>
+                        <option value="老客户">老客户</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <label>联系人</label>
+                    <input type="text" v-model="customerForm.contactName" placeholder="请输入联系人">
+                </div>
+                <div class="form-row">
+                    <label>联系电话</label>
+                    <input type="text" v-model="customerForm.phone" placeholder="请输入联系电话">
+                </div>
+                <div class="form-row">
+                    <label>地址</label>
+                    <input type="text" v-model="customerForm.address" placeholder="请输入地址">
+                </div>
+                <div class="form-row">
+                    <label>备注</label>
+                    <textarea v-model="customerForm.remark" rows="2" placeholder="备注信息"></textarea>
+                </div>
+                <!-- 累计欠款：编辑已有客户时显示但不可修改，新增时隐藏 -->
+                <div v-if="customerForm.id" class="form-row">
+                    <label>累计欠款（只读）</label>
+                    <input type="text" :value="customerForm.totalDebt + ' 元'" disabled>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showCustomerDialog = false">取消</button>
+                <button class="btn btn-primary" :disabled="customerSaving" @click="saveCustomer">
+                    {{ customerSaving ? '保存中...' : '保存' }}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script>
+<script src="https://unpkg.com/element-plus@2.9.0/dist/index.full.js"></script>
+<script>
+    const { createApp, ref, reactive, onMounted } = Vue;
+    const { ElMessage, ElMessageBox } = ElementPlus;
+
+    createApp({
+        setup() {
+            /* ========== 导航 & 用户数据 ========== */
+            const activeMenu = ref('customer');
+            const currentUser = ref({});
+            const token = ref('');
+            const showDropdown = ref(false);
+            const showUserDialog = ref(false);
+            const userSaving = ref(false);
+            const userForm = reactive({ id: null, account: '', realName: '', address: '', phone: '', extraInfo: '' });
+
+            /* ========== 客户管理数据 ========== */
+            // customerList: 从后端返回的原始客户列表
+            const customerList = ref([]);
+            const customerLoading = ref(false);
+            const showCustomerDialog = ref(false);
+            const customerSaving = ref(false);
+            const customerForm = reactive({ id: null, customerName: '', category: '零售', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
+            // customerNameError: 客户名称校验错误信息
+            const customerNameError = ref('');
+
+            // searchKeyword: 搜索关键词（模糊匹配客户名称或联系人）
+            const searchKeyword = ref('');
+            // categoryFilter: 客户分类筛选（空字符串表示全部）
+            const categoryFilter = ref('');
+            // filteredCustomerList: 经过搜索和筛选后的客户列表（用于表格展示）
+            const filteredCustomerList = ref([]);
+
+            /* ========== 订单列表数据 ========== */
+            const orderList = ref([]);
+            const orderLoading = ref(false);
+
+            /* ========== JWT Token 请求辅助函数 ========== */
+            const getAuthHeaders = () => ({
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer ' + token.value
+            });
+
+            const handleResponse = async (res) => {
+                if (res.status === 401) {
+                    ElMessage.error('登录已过期，请重新登录');
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('currentUser');
+                    window.location.href = '/login.html';
+                    return null;
+                }
+                return await res.json();
+            };
+
+            /* ========== 页面初始化 ========== */
+            onMounted(() => {
+                const storedToken = localStorage.getItem('token');
+                const userStr = localStorage.getItem('currentUser');
+                if (!storedToken || !userStr) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                token.value = storedToken;
+                currentUser.value = JSON.parse(userStr);
+                Object.assign(userForm, currentUser.value);
+                loadCustomers();
+                loadOrders();
+            });
+
+            /* ========== 用户操作 ========== */
+            const openUserEdit = () => {
+                Object.assign(userForm, currentUser.value);
+                showUserDialog.value = true;
+            };
+
+            const logout = () => {
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                window.location.href = '/login.html';
+            };
+
+            const saveUser = async () => {
+                userSaving.value = true;
+                try {
+                    const res = await fetch('/api/user', {
+                        method: 'PUT',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(userForm)
+                    });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200 && result.data) {
+                        ElMessage.success('保存成功');
+                        currentUser.value = { ...userForm };
+                        localStorage.setItem('currentUser', JSON.stringify(currentUser.value));
+                        showUserDialog.value = false;
+                    } else if (result) {
+                        ElMessage.error('保存失败');
+                    }
+                } catch (e) {
+                    ElMessage.error('网络错误');
+                } finally {
+                    userSaving.value = false;
+                }
+            };
+
+            /* ========== 客户管理 ========== */
+            // ---------- 加载客户列表 ----------
+            const loadCustomers = async () => {
+                customerLoading.value = true;
+                try {
+                    const res = await fetch('/api/customer', { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) customerList.value = result.data;
+                    applyCustomerFilter(); // 加载完成后应用筛选
+                } catch (e) {
+                    ElMessage.error('加载客户列表失败');
+                } finally {
+                    customerLoading.value = false;
+                }
+            };
+
+            // ---------- 应用搜索和分类筛选 ----------
+            // 根据 searchKeyword 和 categoryFilter 过滤 customerList
+            // 过滤结果存入 filteredCustomerList，供表格渲染
+            const applyCustomerFilter = () => {
+                let list = customerList.value;
+                // 关键词筛选：客户名称或联系人包含搜索词（忽略大小写）
+                if (searchKeyword.value.trim()) {
+                    const kw = searchKeyword.value.trim().toLowerCase();
+                    list = list.filter(item =>
+                        (item.customerName || '').toLowerCase().includes(kw) ||
+                        (item.contactName || '').toLowerCase().includes(kw)
+                    );
+                }
+                // 分类筛选
+                if (categoryFilter.value) {
+                    list = list.filter(item => item.category === categoryFilter.value);
+                }
+                filteredCustomerList.value = list;
+            };
+
+            // ---------- 打开客户弹窗 ----------
+            const openCustomerDialog = (row) => {
+                customerNameError.value = ''; // 清空校验错误
+                if (row) {
+                    Object.assign(customerForm, row);
+                } else {
+                    Object.assign(customerForm, { id: null, customerName: '', category: '零售', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
+                }
+                showCustomerDialog.value = true;
+            };
+
+            // ---------- 保存客户 ----------
+            const saveCustomer = async () => {
+                // 客户名称必填校验
+                if (!customerForm.customerName.trim()) {
+                    customerNameError.value = '请输入客户名称';
+                    return;
+                }
+                customerNameError.value = '';
+                customerSaving.value = true;
+                try {
+                    const method = customerForm.id ? 'PUT' : 'POST';
+                    const res = await fetch('/api/customer', {
+                        method,
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(customerForm)
+                    });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200 && result.data) {
+                        ElMessage.success(customerForm.id ? '修改成功' : '新增成功');
+                        showCustomerDialog.value = false;
+                        customerNameError.value = ''; // 清空校验错误
+                        loadCustomers();
+                    } else if (result) {
+                        ElMessage.error('操作失败');
+                    }
+                } catch (e) {
+                    ElMessage.error('网络错误');
+                } finally {
+                    customerSaving.value = false;
+                }
+            };
+
+            const deleteCustomer = async (id) => {
+                try {
+                    await ElMessageBox.confirm('确定删除该客户吗？', '提示', { type: 'warning' });
+                    const res = await fetch(`/api/customer/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200 && result.data) {
+                        ElMessage.success('删除成功');
+                        loadCustomers();
+                    } else if (result) {
+                        ElMessage.error('删除失败');
+                    }
+                } catch (e) {
+                    if (e !== 'cancel') ElMessage.error('删除失败');
+                }
+            };
+
+            /* ========== 订单列表 ========== */
+            const loadOrders = async () => {
+                orderLoading.value = true;
+                try {
+                    const res = await fetch('/api/order', { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) orderList.value = result.data;
+                } catch (e) {
+                    ElMessage.error('加载订单列表失败');
+                } finally {
+                    orderLoading.value = false;
+                }
+            };
+
+            return {
+                activeMenu, currentUser, token, showDropdown,
+                showUserDialog, userForm, userSaving, openUserEdit, logout, saveUser,
+                customerList, customerLoading, showCustomerDialog, customerForm, customerSaving,
+                openCustomerDialog, saveCustomer, deleteCustomer,
+                searchKeyword, categoryFilter, filteredCustomerList, applyCustomerFilter, customerNameError,
+                orderList, orderLoading
+            };
+        }
+    }).use(ElementPlus).mount('#app');
+</script>
+</body>
+</html>

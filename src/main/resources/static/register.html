@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<!--
+    ============================================================
+    【管兴订单管理系统 - 注册页面】
+    ============================================================
+    页面功能：新用户注册
+    设计风格：Anthropic 极简风格
+        - 纯白卡片，浅灰背景
+        - 紫罗兰色 (#6B4BFF) 品牌强调
+        - 大量留白，圆角 8-12px
+    技术栈：Vue 3 + Element Plus（CDN 引入）
+
+    【注册流程】
+    1. 填写表单 → 前端校验
+    2. 调用 POST /api/user/register
+    3. 后端用 BCrypt 加密密码后存入数据库
+    4. 注册成功 → 跳转到登录页
+-->
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>注册 - 管兴订单管理系统</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus@2.9.0/dist/index.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #FAFAFA;
+            color: #1A1A1A;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .register-card {
+            width: 100%;
+            max-width: 440px;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 12px;
+            padding: 48px 40px;
+        }
+
+        .register-header {
+            margin-bottom: 32px;
+        }
+
+        .register-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1A1A1A;
+            margin-bottom: 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .register-header p {
+            font-size: 15px;
+            color: #666666;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: #1A1A1A;
+            margin-bottom: 8px;
+        }
+
+        .form-input {
+            width: 100%;
+            height: 44px;
+            padding: 0 14px;
+            font-size: 15px;
+            font-family: inherit;
+            color: #1A1A1A;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input::placeholder {
+            color: #9CA3AF;
+        }
+
+        .form-input:focus {
+            border-color: #6B4BFF;
+            box-shadow: 0 0 0 3px rgba(107, 75, 255, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            height: 44px;
+            margin-top: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: inherit;
+            color: #FFFFFF;
+            background: #6B4BFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #5538D9;
+        }
+
+        .btn-primary:disabled {
+            background: #C4B5FD;
+            cursor: not-allowed;
+        }
+
+        .register-footer {
+            margin-top: 24px;
+            text-align: center;
+            font-size: 14px;
+            color: #666666;
+        }
+
+        .register-footer a {
+            color: #6B4BFF;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        .register-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .error-msg {
+            margin-top: 4px;
+            font-size: 13px;
+            color: #DC2626;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="register-card">
+        <div class="register-header">
+            <h1>创建账号</h1>
+            <p>填写以下信息完成注册</p>
+        </div>
+
+        <form @submit.prevent="handleRegister">
+            <div class="form-group">
+                <label class="form-label">账号</label>
+                <input class="form-input" type="text" v-model="form.account" placeholder="请输入账号">
+                <div v-if="errors.account" class="error-msg">{{ errors.account }}</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">密码</label>
+                <input class="form-input" type="password" v-model="form.password" placeholder="请输入密码">
+                <div v-if="errors.password" class="error-msg">{{ errors.password }}</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">确认密码</label>
+                <input class="form-input" type="password" v-model="form.confirmPassword" placeholder="请再次输入密码">
+                <div v-if="errors.confirmPassword" class="error-msg">{{ errors.confirmPassword }}</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">用户姓名</label>
+                <input class="form-input" type="text" v-model="form.realName" placeholder="请输入真实姓名">
+                <div v-if="errors.realName" class="error-msg">{{ errors.realName }}</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">地址</label>
+                <input class="form-input" type="text" v-model="form.address" placeholder="请输入地址">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">联系方式</label>
+                <input class="form-input" type="text" v-model="form.phone" placeholder="请输入手机号码">
+            </div>
+
+            <button type="submit" class="btn-primary" :disabled="loading">
+                {{ loading ? '注册中...' : '注册' }}
+            </button>
+        </form>
+
+        <div class="register-footer">
+            已有账号？<a @click="goLogin">返回登录</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script>
+<script src="https://unpkg.com/element-plus@2.9.0/dist/index.full.js"></script>
+<script>
+    const { createApp, ref, reactive } = Vue;
+    const { ElMessage } = ElementPlus;
+
+    createApp({
+        setup() {
+            /* ========== 数据定义 ========== */
+            const loading = ref(false);
+
+            // form: 注册表单数据
+            const form = reactive({
+                account: '',
+                password: '',
+                confirmPassword: '',
+                realName: '',
+                address: '',
+                phone: '',
+                status: 1
+            });
+
+            // errors: 表单校验错误
+            const errors = reactive({
+                account: '',
+                password: '',
+                confirmPassword: '',
+                realName: ''
+            });
+
+            /* ========== 表单校验 ========== */
+            const validate = () => {
+                let valid = true;
+                errors.account = '';
+                errors.password = '';
+                errors.confirmPassword = '';
+                errors.realName = '';
+
+                if (!form.account.trim()) {
+                    errors.account = '请输入账号';
+                    valid = false;
+                }
+                if (!form.password) {
+                    errors.password = '请输入密码';
+                    valid = false;
+                }
+                if (form.password !== form.confirmPassword) {
+                    errors.confirmPassword = '两次输入的密码不一致';
+                    valid = false;
+                }
+                if (!form.realName.trim()) {
+                    errors.realName = '请输入用户姓名';
+                    valid = false;
+                }
+                return valid;
+            };
+
+            /* ========== 注册处理 ========== */
+            const handleRegister = async () => {
+                if (!validate()) return;
+
+                loading.value = true;
+                try {
+                    const { confirmPassword, ...submitData } = form;
+                    const res = await fetch('/api/user/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(submitData)
+                    });
+                    const result = await res.json();
+
+                    if (result.code === 200 && result.data) {
+                        ElMessage.success('注册成功，请登录');
+                        setTimeout(() => window.location.href = '/login.html', 1000);
+                    } else {
+                        ElMessage.error('注册失败，账号可能已存在');
+                    }
+                } catch (e) {
+                    ElMessage.error('网络错误，请稍后重试');
+                } finally {
+                    loading.value = false;
+                }
+            };
+
+            /* ========== 跳转登录页 ========== */
+            const goLogin = () => {
+                window.location.href = '/login.html';
+            };
+
+            return { form, errors, loading, handleRegister, goLogin };
+        }
+    }).use(ElementPlus).mount('#app');
+</script>
+</body>
+</html>

@@ -3,10 +3,14 @@ package com.example.gx_ordersystem.controller;
 import com.example.gx_ordersystem.common.Result;
 import com.example.gx_ordersystem.entity.User;
 import com.example.gx_ordersystem.service.UserService;
+import com.example.gx_ordersystem.util.BCryptUtil;
+import com.example.gx_ordersystem.util.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户管理控制器
@@ -29,27 +33,64 @@ public class UserController {
     private UserService userService;
 
     /**
-     * 新增用户
+     * 用户登录
+     * 请求方式: POST
+     * 请求路径: /api/user/login
+     * 请求体: { account: "账号", password: "密码" }
+     *
+     * 验证账号密码后生成 JWT Token 返回给前端
+     * 前端拿到 Token 后存储在 localStorage，后续请求携带在请求头中
+     *
+     * @param loginForm 登录表单 { account, password }
+     * @return Result { token: "JWT字符串", user: { ...用户信息 } }
+     */
+    @PostMapping("/login")
+    public Result<Map<String, Object>> login(@RequestBody Map<String, String> loginForm) {
+        String account = loginForm.get("account");
+        String password = loginForm.get("password");
+
+        // 根据账号查询用户
+        User user = userService.lambdaQuery().eq(User::getAccount, account).one();
+        if (user == null) {
+            return Result.error("账号不存在");
+        }
+        // 使用 BCrypt 验证密码（将用户输入的明文密码与数据库中的加密密码比对）
+        if (!BCryptUtil.matches(password, user.getPassword())) {
+            return Result.error("密码错误");
+        }
+
+        // 生成 JWT Token
+        String token = JwtUtil.generateToken(user.getId(), user.getAccount());
+
+        // 构造返回数据
+        Map<String, Object> data = new HashMap<>();
+        data.put("token", token);
+        data.put("user", user);
+
+        return Result.success(data);
+    }
+
+    /**
+     * 新增用户（注册）
      * 请求方式: POST
      * 请求路径: /api/user/register
-     * 请求体: User对象的JSON格式
      *
-     * @param user 用户对象（包含account, password, realName, address, phone, extraInfo等字段）
-     * @return Result<Boolean> 成功返回true，失败返回false
+     * 注册流程：
+     * 1. 接收用户提交的注册信息（包含明文密码）
+     * 2. 使用 BCrypt 对明文密码进行加密
+     * 3. 将加密后的密码存入数据库
+     * 4. 数据库中存储的是加密后的密文，而非明文密码
      *
-     * 示例请求:
-     * POST /api/user/register
-     * {
-     *   "account": "zhangsan",
-     *   "password": "123456",
-     *   "realName": "张三",
-     *   "address": "东莞市",
-     *   "phone": "13800138000",
-     *   "extraInfo": "管理员"
-     * }
+     * @param user 用户对象（password 字段为明文，会被加密后存储）
+     * @return Result<Boolean> 成功返回true
      */
     @PostMapping("/register")
     public Result<Boolean> register(@RequestBody User user) {
+        // 使用 BCrypt 加密用户输入的明文密码
+        // BCrypt 会自动生成随机盐值，每次加密结果都不同，安全性高
+        String encodedPassword = BCryptUtil.encode(user.getPassword());
+        user.setPassword(encodedPassword);
+
         return Result.success(userService.save(user));
     }
 
@@ -57,12 +98,6 @@ public class UserController {
      * 删除用户
      * 请求方式: DELETE
      * 请求路径: /api/user/{id}
-     * 路径参数: id - 用户ID
-     *
-     * @param id 用户ID
-     * @return Result<Boolean> 删除成功返回true
-     *
-     * 示例请求: DELETE /api/user/1
      */
     @DeleteMapping("/{id}")
     public Result<Boolean> delete(@PathVariable Long id) {
@@ -73,18 +108,6 @@ public class UserController {
      * 修改用户信息
      * 请求方式: PUT
      * 请求路径: /api/user
-     * 请求体: User对象的JSON格式（必须包含id字段）
-     *
-     * @param user 用户对象（包含需要更新的字段）
-     * @return Result<Boolean> 修改成功返回true
-     *
-     * 示例请求:
-     * PUT /api/user
-     * {
-     *   "id": 1,
-     *   "realName": "张三改",
-     *   "phone": "13900139000"
-     * }
      */
     @PutMapping
     public Result<Boolean> update(@RequestBody User user) {
@@ -95,12 +118,6 @@ public class UserController {
      * 根据ID查询用户
      * 请求方式: GET
      * 请求路径: /api/user/{id}
-     * 路径参数: id - 用户ID
-     *
-     * @param id 用户ID
-     * @return Result<User> 用户详情对象
-     *
-     * 示例请求: GET /api/user/1
      */
     @GetMapping("/{id}")
     public Result<User> getById(@PathVariable Long id) {
@@ -110,11 +127,7 @@ public class UserController {
     /**
      * 查询全部用户列表
      * 请求方式: GET
-     * 请求路径: /api/user
-     *
-     * @return Result<List<User>> 用户列表
-     *
-     * 示例请求: GET /api/user/list
+     * 请求路径: /api/user/list
      */
     @GetMapping("/list")
     public Result<List<User>> list() {
