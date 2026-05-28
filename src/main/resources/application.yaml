@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: GX_OrderSystem
+
+server:
+  port: 8081
+
