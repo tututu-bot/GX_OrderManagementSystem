@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### SQLite Database ###
+gx_order.db
+
+### Project History ###
+PROJECT_HISTORY.md

@@ -217,10 +217,35 @@
             background: #B91C1C;
         }
 
+        .btn-warning {
+            color: #FFFFFF;
+            background: #D97706;
+        }
+
+        .btn-warning:hover {
+            background: #B45309;
+        }
+
         .btn-sm {
             height: 28px;
             padding: 0 12px;
             font-size: 13px;
+        }
+
+        .btn-xs {
+            height: 24px;
+            padding: 0 8px;
+            font-size: 12px;
+        }
+
+        .btn-ghost {
+            color: #6B4BFF;
+            background: transparent;
+            border: 1px solid #6B4BFF;
+        }
+
+        .btn-ghost:hover {
+            background: #F5F3FF;
         }
 
         /* ---------- 表格 ---------- */
@@ -276,6 +301,11 @@
         .tag-danger {
             background: #FEE2E2;
             color: #DC2626;
+        }
+
+        .tag-primary {
+            background: #F5F3FF;
+            color: #6B4BFF;
         }
 
         /* ---------- 弹窗 ---------- */
@@ -415,6 +445,175 @@
         .user-dropdown-wrap {
             position: relative;
         }
+
+        /* ---------- 订单弹窗增强样式 ---------- */
+        .order-modal-card {
+            max-width: 860px;
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+
+        /* 商品明细卡片式布局 */
+        .item-card {
+            background: #FAFAFA;
+            border: 1px solid #E5E5E5;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .item-card:hover {
+            border-color: #D4D4D8;
+        }
+
+        .item-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .item-card-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        .item-card-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .item-card-grid .form-row {
+            margin-bottom: 0;
+        }
+
+        .item-card-grid .form-row input,
+        .item-card-grid .form-row select {
+            height: 36px;
+            font-size: 13px;
+        }
+
+        .item-card-grid .form-row label {
+            font-size: 12px;
+            color: #666666;
+            margin-bottom: 4px;
+        }
+
+        .item-summary {
+            text-align: right;
+            font-size: 13px;
+            color: #6B4BFF;
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        /* 金额汇总条 */
+        .amount-bar {
+            background: linear-gradient(135deg, #F5F3FF 0%, #EDE9FE 100%);
+            border: 1px solid #DDD6FE;
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            gap: 32px;
+            flex-wrap: wrap;
+            margin-top: 12px;
+        }
+
+        .amount-bar-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .amount-bar-label {
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .amount-bar-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1A1A1A;
+        }
+
+        .amount-bar-value.debt {
+            color: #DC2626;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9CA3AF;
+        }
+
+        .empty-state svg {
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
+
+        /* 详情弹窗 */
+        .detail-section {
+            margin-bottom: 20px;
+        }
+
+        .detail-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1A1A1A;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px 16px;
+        }
+
+        .detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .detail-item-label {
+            font-size: 12px;
+            color: #9CA3AF;
+        }
+
+        .detail-item-value {
+            font-size: 14px;
+            color: #1A1A1A;
+            font-weight: 500;
+        }
+
+        /* 详情表格 */
+        .detail-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .detail-table th {
+            text-align: left;
+            padding: 10px 12px;
+            font-weight: 500;
+            color: #666666;
+            background: #FAFAFA;
+            border-bottom: 1px solid #E5E5E5;
+            font-size: 12px;
+        }
+
+        .detail-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #F0F0F0;
+            color: #1A1A1A;
+        }
     </style>
 </head>
 <body>
@@ -427,7 +626,7 @@
                 <p>销售订单管理平台</p>
             </div>
             <ul class="nav-menu">
-                <li class="nav-item" :class="{ active: activeMenu === 'customer' }" @click="activeMenu = 'customer'">
+                <a href="#/customer" class="nav-item" :class="{ active: currentRoute === 'customer' }">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="9" cy="7" r="4"></circle>
@@ -435,8 +634,8 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                     客户管理
-                </li>
-                <li class="nav-item" :class="{ active: activeMenu === 'order' }" @click="activeMenu = 'order'">
+                </a>
+                <a href="#/order" class="nav-item" :class="{ active: currentRoute === 'order' }">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
@@ -444,7 +643,7 @@
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                     </svg>
                     订单列表
-                </li>
+                </a>
             </ul>
         </aside>
 
@@ -452,7 +651,7 @@
         <div class="main-area">
             <!-- ---------- 顶部 Header ---------- -->
             <header class="topbar">
-                <div class="topbar-title">{{ activeMenu === 'customer' ? '客户管理' : '订单列表' }}</div>
+                <div class="topbar-title">{{ currentRoute === 'customer' ? '客户管理' : '订单列表' }}</div>
                 <div class="user-dropdown-wrap">
                     <div class="user-trigger" @click="showDropdown = !showDropdown">
                         <div class="user-avatar">{{ (currentUser.realName || currentUser.account || '?').charAt(0) }}</div>
@@ -486,7 +685,7 @@
             <!-- ---------- 内容区 ---------- -->
             <main class="content">
                 <!-- ===== 客户管理 ===== -->
-                <div v-if="activeMenu === 'customer'" class="page-card">
+                <div v-if="currentRoute === 'customer'" class="page-card">
                     <div class="page-header-row">
                         <h2 class="page-title">客户列表</h2>
                         <button class="btn btn-primary" @click="openCustomerDialog()">
@@ -500,7 +699,6 @@
 
                     <!-- 搜索和筛选区域 -->
                     <div style="display:flex;gap:12px;margin-bottom:20px;">
-                        <!-- 关键词搜索（客户名称 / 联系人模糊查询） -->
                         <input
                             type="text"
                             v-model="searchKeyword"
@@ -508,7 +706,6 @@
                             style="flex:1;max-width:320px;height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;"
                             @input="applyCustomerFilter"
                         >
-                        <!-- 客户分类筛选下拉 -->
                         <select
                             v-model="categoryFilter"
                             style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;"
@@ -558,40 +755,98 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- 客户分页 -->
+                    <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
+                        <span style="font-size:13px;color:#666;">共 {{ customerTotal }} 条</span>
+                        <button class="btn btn-sm btn-secondary" @click="prevCustomerPage" :disabled="customerPageNum <= 1">上一页</button>
+                        <span style="font-size:14px;">{{ customerPageNum }} / {{ customerTotalPages }}</span>
+                        <button class="btn btn-sm btn-secondary" @click="nextCustomerPage" :disabled="customerPageNum >= customerTotalPages">下一页</button>
+                    </div>
                 </div>
 
                 <!-- ===== 订单列表 ===== -->
-                <div v-if="activeMenu === 'order'" class="page-card">
+                <div v-if="currentRoute === 'order'" class="page-card">
                     <div class="page-header-row">
                         <h2 class="page-title">订单列表</h2>
+                        <button class="btn btn-primary" @click="openOrderDialog()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            新增订单
+                        </button>
                     </div>
+
+                    <!-- 订单筛选区域 -->
+                    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">客户</label>
+                            <select v-model="orderFilter.customerId" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;min-width:140px;">
+                                <option value="">全部</option>
+                                <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.customerName }}</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">收款方式</label>
+                            <select v-model="orderFilter.paymentMethod" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;min-width:120px;">
+                                <option value="">全部</option>
+                                <option value="现金">现金</option>
+                                <option value="微信">微信</option>
+                                <option value="支付宝">支付宝</option>
+                                <option value="银行转账">银行转账</option>
+                                <option value="赊账">赊账</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">状态</label>
+                            <select v-model="orderFilter.status" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;min-width:120px;">
+                                <option value="">全部</option>
+                                <option value="进行中">进行中</option>
+                                <option value="已完成">已完成</option>
+                                <option value="已作废">已作废</option>
+                            </select>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">开始日期</label>
+                            <input type="date" v-model="orderFilter.orderDateStart" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">结束日期</label>
+                            <input type="date" v-model="orderFilter.orderDateEnd" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        </div>
+                        <button class="btn btn-primary" @click="orderPageNum = 1; loadOrders();" style="height:36px;">查询</button>
+                        <button class="btn btn-secondary" @click="resetOrderFilter" style="height:36px;">重置</button>
+                    </div>
+
                     <table class="data-table">
                         <thead>
                             <tr>
                                 <th>单据编号</th>
-                                <th>客户ID</th>
+                                <th>客户</th>
                                 <th>销售人员</th>
                                 <th>单据日期</th>
-                                <th>本单金额</th>
+                                <th>应收金额</th>
                                 <th>已收款</th>
                                 <th>本次欠款</th>
                                 <th>收款方式</th>
                                 <th>状态</th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="orderLoading">
-                                <td colspan="9" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                                <td colspan="10" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
                             </tr>
                             <tr v-else-if="orderList.length === 0">
-                                <td colspan="9" style="text-align:center;color:#9CA3AF;padding:40px;">暂无订单数据</td>
+                                <td colspan="10" style="text-align:center;color:#9CA3AF;padding:40px;">暂无订单数据</td>
                             </tr>
                             <tr v-for="item in orderList" :key="item.id">
                                 <td>{{ item.orderNo }}</td>
-                                <td>{{ item.customerId }}</td>
+                                <td>{{ getCustomerName(item.customerId) }}</td>
                                 <td>{{ item.salesPerson || '-' }}</td>
                                 <td>{{ item.orderDate || '-' }}</td>
-                                <td>{{ item.totalAmount }} 元</td>
+                                <td>{{ item.receivableAmount }} 元</td>
                                 <td>{{ item.receivedAmount }} 元</td>
                                 <td>
                                     <span class="tag" :class="item.currentDebt > 0 ? 'tag-danger' : 'tag-success'">
@@ -600,13 +855,26 @@
                                 </td>
                                 <td>{{ item.paymentMethod || '-' }}</td>
                                 <td>
-                                    <span class="tag" :class="item.status === 'COMPLETED' ? 'tag-success' : item.status === 'CANCELLED' ? 'tag-default' : 'tag-warning'">
-                                        {{ item.status }}
+                                    <span class="tag" :class="getStatusClass(item.status)">
+                                        {{ getStatusText(item.status) }}
                                     </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-xs btn-primary" @click="viewOrderDetail(item.id)" style="margin-right:4px;">查看</button>
+                                    <button v-if="item.status !== '已作废'" class="btn btn-xs btn-warning" @click="openEditOrderDialog(item)" style="margin-right:4px;">修改</button>
+                                    <button v-if="item.status !== '已作废'" class="btn btn-xs btn-danger" @click="cancelOrder(item.id)">作废</button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- 订单分页 -->
+                    <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
+                        <span style="font-size:13px;color:#666;">共 {{ orderTotal }} 条</span>
+                        <button class="btn btn-sm btn-secondary" @click="prevOrderPage" :disabled="orderPageNum <= 1">上一页</button>
+                        <span style="font-size:14px;">{{ orderPageNum }} / {{ orderTotalPages }}</span>
+                        <button class="btn btn-sm btn-secondary" @click="nextOrderPage" :disabled="orderPageNum >= orderTotalPages">下一页</button>
+                    </div>
                 </div>
             </main>
         </div>
@@ -657,7 +925,6 @@
             </div>
             <div class="modal-body">
                 <div class="form-row">
-                    <!-- 客户名称必填，用红色星号标识 -->
                     <label>客户名称 <span style="color:#DC2626;">*</span></label>
                     <input type="text" v-model="customerForm.customerName" placeholder="请输入客户名称（必填）">
                     <div v-if="customerNameError" style="font-size:13px;color:#DC2626;margin-top:4px;">{{ customerNameError }}</div>
@@ -686,7 +953,6 @@
                     <label>备注</label>
                     <textarea v-model="customerForm.remark" rows="2" placeholder="备注信息"></textarea>
                 </div>
-                <!-- 累计欠款：编辑已有客户时显示但不可修改，新增时隐藏 -->
                 <div v-if="customerForm.id" class="form-row">
                     <label>累计欠款（只读）</label>
                     <input type="text" :value="customerForm.totalDebt + ' 元'" disabled>
@@ -700,18 +966,333 @@
             </div>
         </div>
     </div>
+
+    <!-- ========== 新增/编辑订单弹窗 ========== -->
+    <div v-if="showOrderDialog" class="modal-overlay" @click.self="showOrderDialog = false">
+        <div class="modal-card order-modal-card">
+            <div class="modal-header">
+                <h3>{{ orderDialogMode === 'edit' ? '编辑订单' : '新增销售订单' }}</h3>
+            </div>
+            <div class="modal-body">
+                <!-- 客户选择 -->
+                <div class="form-row">
+                    <label>客户 <span style="color:#DC2626;">*</span></label>
+                    <select v-model="orderForm.customerId" @change="onOrderCustomerChange" :disabled="orderDialogMode === 'edit'">
+                        <option value="">请选择客户</option>
+                        <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.customerName }}（{{ c.phone || '无电话' }}）</option>
+                    </select>
+                </div>
+
+                <!-- 客户信息展示（选择后自动填充） -->
+                <div v-if="orderForm.customerId" class="detail-section" style="background:#F5F3FF;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+                    <div class="detail-grid" style="grid-template-columns: repeat(3, 1fr);">
+                        <div class="detail-item">
+                            <span class="detail-item-label">地址</span>
+                            <span class="detail-item-value">{{ orderForm.address || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">联系人</span>
+                            <span class="detail-item-value">{{ orderForm.contactName || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">电话</span>
+                            <span class="detail-item-value">{{ orderForm.phone || '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 基本信息 -->
+                <div style="display:flex;gap:16px;flex-wrap:wrap;">
+                    <div class="form-row" style="flex:1;min-width:180px;">
+                        <label>销售人员</label>
+                        <input type="text" v-model="orderForm.salesPerson">
+                    </div>
+                    <div class="form-row" style="flex:1;min-width:180px;">
+                        <label>单据日期</label>
+                        <input type="date" v-model="orderForm.orderDate">
+                    </div>
+                    <div class="form-row" style="flex:1;min-width:180px;">
+                        <label>交货日期</label>
+                        <input type="date" v-model="orderForm.deliveryDate">
+                    </div>
+                </div>
+
+                <!-- 商品明细区域（美化后） -->
+                <div style="margin-top:20px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+                        <label style="font-size:14px;font-weight:500;">商品明细</label>
+                        <button class="btn btn-sm btn-primary" @click="addOrderItem()">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            添加商品
+                        </button>
+                    </div>
+
+                    <!-- 商品明细卡片列表 -->
+                    <div v-for="(item, idx) in orderItems" :key="idx" class="item-card">
+                        <div class="item-card-header">
+                            <span class="item-card-title">商品 {{ idx + 1 }}</span>
+                            <button class="btn btn-xs btn-danger" @click="removeOrderItem(idx)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                                删除
+                            </button>
+                        </div>
+                        <div class="item-card-grid">
+                            <div class="form-row">
+                                <label>商品名称 <span style="color:#DC2626;">*</span></label>
+                                <input type="text" v-model="item.productName" placeholder="如：加厚白针织37#预缩">
+                            </div>
+                            <div class="form-row">
+                                <label>商品编号</label>
+                                <input type="text" v-model="item.productCode" placeholder="商品编号">
+                            </div>
+                            <div class="form-row">
+                                <label>规格型号</label>
+                                <input type="text" v-model="item.specification" placeholder="规格">
+                            </div>
+                            <div class="form-row">
+                                <label>单位</label>
+                                <input type="text" v-model="item.unit" placeholder="如：公斤">
+                            </div>
+                            <div class="form-row">
+                                <label>数量</label>
+                                <input type="number" v-model.number="item.quantity" @input="calcItemAmount(item)" placeholder="0" step="0.001">
+                            </div>
+                            <div class="form-row">
+                                <label>单价（元）</label>
+                                <input type="number" v-model.number="item.unitPrice" @input="calcItemAmount(item)" placeholder="0.00" step="0.01">
+                            </div>
+                            <div class="form-row">
+                                <label>金额（元）</label>
+                                <input type="text" :value="formatItemAmount(item)" disabled style="text-align:right;font-weight:600;color:#6B4BFF;">
+                            </div>
+                            <div class="form-row">
+                                <label>备注</label>
+                                <input type="text" v-model="item.remark" placeholder="备注">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 空状态提示 -->
+                    <div v-if="orderItems.length === 0" class="empty-state">
+                        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="1.5">
+                            <rect x="3" y="3" width="18" height="18" rx="2"></rect>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                        <p>暂无商品明细，请点击「添加商品」按钮添加</p>
+                    </div>
+
+                    <!-- 小计 -->
+                    <div v-if="orderItems.length > 0" class="item-summary">
+                        共 {{ orderItems.length }} 项商品，合计数量：{{ orderTotalQty }}，合计金额：{{ orderTotalAmount.toFixed(2) }} 元
+                    </div>
+                </div>
+
+                <!-- 收款信息 -->
+                <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;">
+                    <div class="form-row" style="flex:1;min-width:150px;">
+                        <label>收款方式 <span style="color:#DC2626;">*</span></label>
+                        <select v-model="orderForm.paymentMethod">
+                            <option value="">请选择</option>
+                            <option value="现金">现金</option>
+                            <option value="微信">微信</option>
+                            <option value="支付宝">支付宝</option>
+                            <option value="银行转账">银行转账</option>
+                            <option value="赊账">赊账</option>
+                        </select>
+                    </div>
+                    <div class="form-row" style="flex:1;min-width:120px;">
+                        <label>其他费用（元）</label>
+                        <input type="number" v-model.number="orderForm.otherFee" @input="calcOrderTotal" placeholder="0.00" step="0.01" style="text-align:right;">
+                    </div>
+                    <div class="form-row" style="flex:1;min-width:120px;">
+                        <label>本次收款（元）</label>
+                        <input type="number" v-model.number="orderForm.receivedAmount" @input="calcOrderTotal" placeholder="0.00" step="0.01" style="text-align:right;">
+                    </div>
+                </div>
+
+                <!-- 金额汇总条 -->
+                <div class="amount-bar">
+                    <div class="amount-bar-item">
+                        <span class="amount-bar-label">本单金额</span>
+                        <span class="amount-bar-value">{{ orderTotalAmount.toFixed(2) }} 元</span>
+                    </div>
+                    <div class="amount-bar-item">
+                        <span class="amount-bar-label">其他费用</span>
+                        <span class="amount-bar-value">{{ (orderForm.otherFee || 0).toFixed(2) }} 元</span>
+                    </div>
+                    <div class="amount-bar-item">
+                        <span class="amount-bar-label">应收金额</span>
+                        <span class="amount-bar-value">{{ orderReceivable.toFixed(2) }} 元</span>
+                    </div>
+                    <div class="amount-bar-item">
+                        <span class="amount-bar-label">本次收款</span>
+                        <span class="amount-bar-value">{{ (orderForm.receivedAmount || 0).toFixed(2) }} 元</span>
+                    </div>
+                    <div class="amount-bar-item">
+                        <span class="amount-bar-label">本次欠款</span>
+                        <span class="amount-bar-value" :class="orderCurrentDebt > 0 ? 'debt' : ''">{{ orderCurrentDebt.toFixed(2) }} 元</span>
+                    </div>
+                </div>
+
+                <!-- 欠款提示：只有收款方式为"赊账"时才产生欠款记录 -->
+                <div v-if="orderForm.paymentMethod === '赊账' && orderCurrentDebt > 0" style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:13px;color:#991B1B;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    本次交易为<strong>赊账</strong>，将产生 <strong>{{ orderCurrentDebt.toFixed(2) }} 元</strong> 欠款。保存后会在欠款记录中自动生成一条记录，并更新该客户的累计欠款。
+                </div>
+
+                <div class="form-row" style="margin-top:16px;">
+                    <label>备注</label>
+                    <textarea v-model="orderForm.remark" rows="2" placeholder="订单备注信息"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showOrderDialog = false">取消</button>
+                <button class="btn btn-primary" :disabled="orderSaving" @click="submitOrder">
+                    {{ orderSaving ? '保存中...' : (orderDialogMode === 'edit' ? '保存修改' : '生成订单') }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 订单详情弹窗 ========== -->
+    <div v-if="showOrderDetailDialog" class="modal-overlay" @click.self="showOrderDetailDialog = false">
+        <div class="modal-card order-modal-card">
+            <div class="modal-header">
+                <h3>订单详情</h3>
+            </div>
+            <div class="modal-body">
+                <!-- 基本信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">基本信息</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-item-label">单据编号</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.orderNo }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">客户名称</span>
+                            <span class="detail-item-value">{{ orderDetail.customerName }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">销售人员</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.salesPerson || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">单据日期</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.orderDate || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">交货日期</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.deliveryDate || '-' }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">状态</span>
+                            <span class="detail-item-value">
+                                <span class="tag" :class="getStatusClass(orderDetail.order?.status)">
+                                    {{ getStatusText(orderDetail.order?.status) }}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 金额信息 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">金额信息</div>
+                    <div class="detail-grid">
+                        <div class="detail-item">
+                            <span class="detail-item-label">本单金额</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.totalAmount }} 元</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">其他费用</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.otherFee || 0 }} 元</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">应收金额</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.receivableAmount }} 元</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">本次收款</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.receivedAmount || 0 }} 元</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">本次欠款</span>
+                            <span class="detail-item-value" style="color:#DC2626;">{{ orderDetail.order?.currentDebt || 0 }} 元</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-item-label">收款方式</span>
+                            <span class="detail-item-value">{{ orderDetail.order?.paymentMethod || '-' }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 商品明细 -->
+                <div class="detail-section">
+                    <div class="detail-section-title">商品明细（{{ orderDetail.items?.length || 0 }} 项）</div>
+                    <table class="detail-table">
+                        <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>商品编号</th>
+                                <th>商品名称</th>
+                                <th>规格</th>
+                                <th>单位</th>
+                                <th style="text-align:right;">数量</th>
+                                <th style="text-align:right;">单价</th>
+                                <th style="text-align:right;">金额</th>
+                                <th>备注</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(item, idx) in orderDetail.items" :key="item.id">
+                                <td>{{ idx + 1 }}</td>
+                                <td>{{ item.productCode || '-' }}</td>
+                                <td>{{ item.productName }}</td>
+                                <td>{{ item.specification || '-' }}</td>
+                                <td>{{ item.unit || '-' }}</td>
+                                <td style="text-align:right;">{{ item.quantity }}</td>
+                                <td style="text-align:right;">{{ item.unitPrice }}</td>
+                                <td style="text-align:right;font-weight:500;">{{ item.amount }}</td>
+                                <td>{{ item.remark || '-' }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 备注 -->
+                <div v-if="orderDetail.order?.remark" class="detail-section">
+                    <div class="detail-section-title">备注</div>
+                    <p style="font-size:14px;color:#666666;line-height:1.6;">{{ orderDetail.order.remark }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showOrderDetailDialog = false">关闭</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.js"></script>
 <script src="https://unpkg.com/element-plus@2.9.0/dist/index.full.js"></script>
 <script>
-    const { createApp, ref, reactive, onMounted } = Vue;
+    const { createApp, ref, reactive, onMounted, computed } = Vue;
     const { ElMessage, ElMessageBox } = ElementPlus;
 
     createApp({
         setup() {
             /* ========== 导航 & 用户数据 ========== */
-            const activeMenu = ref('customer');
+            const currentRoute = ref('customer');
             const currentUser = ref({});
             const token = ref('');
             const showDropdown = ref(false);
@@ -720,25 +1301,72 @@
             const userForm = reactive({ id: null, account: '', realName: '', address: '', phone: '', extraInfo: '' });
 
             /* ========== 客户管理数据 ========== */
-            // customerList: 从后端返回的原始客户列表
             const customerList = ref([]);
             const customerLoading = ref(false);
             const showCustomerDialog = ref(false);
             const customerSaving = ref(false);
             const customerForm = reactive({ id: null, customerName: '', category: '零售', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
-            // customerNameError: 客户名称校验错误信息
             const customerNameError = ref('');
-
-            // searchKeyword: 搜索关键词（模糊匹配客户名称或联系人）
             const searchKeyword = ref('');
-            // categoryFilter: 客户分类筛选（空字符串表示全部）
             const categoryFilter = ref('');
-            // filteredCustomerList: 经过搜索和筛选后的客户列表（用于表格展示）
             const filteredCustomerList = ref([]);
+
+            // 客户分页
+            const customerPageNum = ref(1);
+            const customerPageSize = ref(10);
+            const customerTotal = ref(0);
+            const customerTotalPages = ref(0);
 
             /* ========== 订单列表数据 ========== */
             const orderList = ref([]);
             const orderLoading = ref(false);
+
+            // 订单分页
+            const orderPageNum = ref(1);
+            const orderPageSize = ref(10);
+            const orderTotal = ref(0);
+            const orderTotalPages = ref(0);
+
+            // 订单筛选条件
+            const orderFilter = reactive({
+                customerId: '',
+                paymentMethod: '',
+                status: '',
+                orderDateStart: '',
+                orderDateEnd: ''
+            });
+
+            /* ========== 新增/编辑订单数据 ========== */
+            const showOrderDialog = ref(false);
+            const orderDialogMode = ref('add'); // 'add' 或 'edit'
+            const orderSaving = ref(false);
+            const orderForm = reactive({
+                id: null, customerId: '', address: '', contactName: '', phone: '',
+                salesPerson: '', orderDate: '', deliveryDate: '',
+                totalAmount: 0, otherFee: 0, receivableAmount: 0,
+                receivedAmount: 0, currentDebt: 0, totalDebt: 0,
+                paymentMethod: '', remark: '', status: '进行中'
+            });
+            const orderItems = ref([]);
+
+            /* ========== 订单详情数据 ========== */
+            const showOrderDetailDialog = ref(false);
+            const orderDetail = ref({ order: null, items: [], customerName: '' });
+
+            /* ========== 状态映射 ========== */
+            // 订单状态中文映射：后端存储中文，前端直接显示
+            // 如后端存储为英文，可通过此映射转换
+            const statusMap = {
+                '进行中': '进行中',
+                '已完成': '已完成',
+                '已作废': '已作废'
+            };
+
+            const statusClassMap = {
+                '进行中': 'tag-warning',
+                '已完成': 'tag-success',
+                '已作废': 'tag-default'
+            };
 
             /* ========== JWT Token 请求辅助函数 ========== */
             const getAuthHeaders = () => ({
@@ -757,6 +1385,16 @@
                 return await res.json();
             };
 
+            /* ========== 路由处理 ========== */
+            const updateRoute = () => {
+                const hash = window.location.hash;
+                if (hash === '#/order') {
+                    currentRoute.value = 'order';
+                } else {
+                    currentRoute.value = 'customer';
+                }
+            };
+
             /* ========== 页面初始化 ========== */
             onMounted(() => {
                 const storedToken = localStorage.getItem('token');
@@ -768,6 +1406,11 @@
                 token.value = storedToken;
                 currentUser.value = JSON.parse(userStr);
                 Object.assign(userForm, currentUser.value);
+
+                // 初始化路由并监听 hash 变化
+                updateRoute();
+                window.addEventListener('hashchange', updateRoute);
+
                 loadCustomers();
                 loadOrders();
             });
@@ -809,14 +1452,17 @@
             };
 
             /* ========== 客户管理 ========== */
-            // ---------- 加载客户列表 ----------
             const loadCustomers = async () => {
                 customerLoading.value = true;
                 try {
-                    const res = await fetch('/api/customer', { headers: getAuthHeaders() });
+                    const res = await fetch(`/api/customer/page?pageNum=${customerPageNum.value}&pageSize=${customerPageSize.value}`, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
-                    if (result && result.code === 200) customerList.value = result.data;
-                    applyCustomerFilter(); // 加载完成后应用筛选
+                    if (result && result.code === 200) {
+                        customerList.value = result.data.list;
+                        customerTotal.value = result.data.total;
+                        customerTotalPages.value = result.data.pages;
+                    }
+                    applyCustomerFilter();
                 } catch (e) {
                     ElMessage.error('加载客户列表失败');
                 } finally {
@@ -824,12 +1470,11 @@
                 }
             };
 
-            // ---------- 应用搜索和分类筛选 ----------
-            // 根据 searchKeyword 和 categoryFilter 过滤 customerList
-            // 过滤结果存入 filteredCustomerList，供表格渲染
+            const prevCustomerPage = () => { if (customerPageNum.value > 1) { customerPageNum.value--; loadCustomers(); } };
+            const nextCustomerPage = () => { if (customerPageNum.value < customerTotalPages.value) { customerPageNum.value++; loadCustomers(); } };
+
             const applyCustomerFilter = () => {
                 let list = customerList.value;
-                // 关键词筛选：客户名称或联系人包含搜索词（忽略大小写）
                 if (searchKeyword.value.trim()) {
                     const kw = searchKeyword.value.trim().toLowerCase();
                     list = list.filter(item =>
@@ -837,16 +1482,14 @@
                         (item.contactName || '').toLowerCase().includes(kw)
                     );
                 }
-                // 分类筛选
                 if (categoryFilter.value) {
                     list = list.filter(item => item.category === categoryFilter.value);
                 }
                 filteredCustomerList.value = list;
             };
 
-            // ---------- 打开客户弹窗 ----------
             const openCustomerDialog = (row) => {
-                customerNameError.value = ''; // 清空校验错误
+                customerNameError.value = '';
                 if (row) {
                     Object.assign(customerForm, row);
                 } else {
@@ -855,9 +1498,7 @@
                 showCustomerDialog.value = true;
             };
 
-            // ---------- 保存客户 ----------
             const saveCustomer = async () => {
-                // 客户名称必填校验
                 if (!customerForm.customerName.trim()) {
                     customerNameError.value = '请输入客户名称';
                     return;
@@ -875,7 +1516,6 @@
                     if (result && result.code === 200 && result.data) {
                         ElMessage.success(customerForm.id ? '修改成功' : '新增成功');
                         showCustomerDialog.value = false;
-                        customerNameError.value = ''; // 清空校验错误
                         loadCustomers();
                     } else if (result) {
                         ElMessage.error('操作失败');
@@ -907,9 +1547,20 @@
             const loadOrders = async () => {
                 orderLoading.value = true;
                 try {
-                    const res = await fetch('/api/order', { headers: getAuthHeaders() });
+                    let url = `/api/order/page?pageNum=${orderPageNum.value}&pageSize=${orderPageSize.value}`;
+                    if (orderFilter.customerId) url += `&customerId=${orderFilter.customerId}`;
+                    if (orderFilter.paymentMethod) url += `&paymentMethod=${orderFilter.paymentMethod}`;
+                    if (orderFilter.status) url += `&status=${orderFilter.status}`;
+                    if (orderFilter.orderDateStart) url += `&orderDateStart=${orderFilter.orderDateStart}`;
+                    if (orderFilter.orderDateEnd) url += `&orderDateEnd=${orderFilter.orderDateEnd}`;
+
+                    const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
-                    if (result && result.code === 200) orderList.value = result.data;
+                    if (result && result.code === 200) {
+                        orderList.value = result.data.list;
+                        orderTotal.value = result.data.total;
+                        orderTotalPages.value = result.data.pages;
+                    }
                 } catch (e) {
                     ElMessage.error('加载订单列表失败');
                 } finally {
@@ -917,13 +1568,315 @@
                 }
             };
 
+            const prevOrderPage = () => { if (orderPageNum.value > 1) { orderPageNum.value--; loadOrders(); } };
+            const nextOrderPage = () => { if (orderPageNum.value < orderTotalPages.value) { orderPageNum.value++; loadOrders(); } };
+            const resetOrderFilter = () => {
+                orderFilter.customerId = '';
+                orderFilter.paymentMethod = '';
+                orderFilter.status = '';
+                orderFilter.orderDateStart = '';
+                orderFilter.orderDateEnd = '';
+                orderPageNum.value = 1;
+                loadOrders();
+            };
+
+            // 根据客户ID获取客户名称（用于订单列表显示）
+            const getCustomerName = (customerId) => {
+                const c = customerList.value.find(c => c.id === customerId);
+                return c ? c.customerName : customerId;
+            };
+
+            // 获取状态中文文本
+            const getStatusText = (status) => {
+                return statusMap[status] || status || '未知';
+            };
+
+            // 获取状态样式类
+            const getStatusClass = (status) => {
+                return statusClassMap[status] || 'tag-default';
+            };
+
+            /* ========== 新增/编辑订单 ========== */
+            // 计算单个商品金额
+            const calcItemAmount = (item) => {
+                item.amount = ((item.quantity || 0) * (item.unitPrice || 0));
+            };
+
+            const formatItemAmount = (item) => {
+                return item.amount ? item.amount.toFixed(2) : '0.00';
+            };
+
+            const orderTotalQty = computed(() => orderItems.value.reduce((s, i) => s + (i.quantity || 0), 0));
+            const orderTotalAmount = computed(() => orderItems.value.reduce((s, i) => s + (i.amount || 0), 0));
+            const orderReceivable = computed(() => orderTotalAmount.value + (orderForm.otherFee || 0));
+            const orderCurrentDebt = computed(() => {
+                const debt = orderReceivable.value - (orderForm.receivedAmount || 0);
+                return debt > 0 ? debt : 0;
+            });
+
+            const calcOrderTotal = () => {};
+
+            // 打开新增订单弹窗
+            const openOrderDialog = () => {
+                orderDialogMode.value = 'add';
+                const today = new Date().toISOString().split('T')[0];
+                Object.assign(orderForm, {
+                    id: null, customerId: '', address: '', contactName: '', phone: '',
+                    salesPerson: currentUser.value.realName || currentUser.value.account,
+                    orderDate: today, deliveryDate: today,
+                    totalAmount: 0, otherFee: 0, receivableAmount: 0,
+                    receivedAmount: 0, currentDebt: 0, totalDebt: 0,
+                    paymentMethod: '', remark: '', status: '进行中'
+                });
+                orderItems.value = [];
+                showOrderDialog.value = true;
+            };
+
+            // 打开编辑订单弹窗
+            const openEditOrderDialog = async (row) => {
+                orderDialogMode.value = 'edit';
+                // 加载订单详情
+                const res = await fetch(`/api/order/detail/${row.id}`, { headers: getAuthHeaders() });
+                const result = await handleResponse(res);
+                if (!result || result.code !== 200) {
+                    ElMessage.error('加载订单详情失败');
+                    return;
+                }
+                const detail = result.data;
+                // 填充表单
+                Object.assign(orderForm, detail.order);
+                // 填充客户信息
+                const c = customerList.value.find(c => c.id === detail.order.customerId);
+                if (c) {
+                    orderForm.address = c.address || '';
+                    orderForm.contactName = c.contactName || '';
+                    orderForm.phone = c.phone || '';
+                }
+                // 填充明细
+                orderItems.value = detail.items.map(item => ({
+                    id: item.id,
+                    productCode: item.productCode || '',
+                    productName: item.productName || '',
+                    specification: item.specification || '',
+                    unit: item.unit || '',
+                    quantity: item.quantity || 0,
+                    unitPrice: item.unitPrice || 0,
+                    amount: item.amount || 0,
+                    remark: item.remark || ''
+                }));
+                showOrderDialog.value = true;
+            };
+
+            // 选择客户后自动填充客户信息
+            const onOrderCustomerChange = () => {
+                if (!orderForm.customerId) return;
+                const c = customerList.value.find(c => c.id === Number(orderForm.customerId));
+                if (c) {
+                    orderForm.address = c.address || '';
+                    orderForm.contactName = c.contactName || '';
+                    orderForm.phone = c.phone || '';
+                    orderForm.totalDebt = c.totalDebt || 0;
+                }
+            };
+
+            // 添加商品明细行
+            const addOrderItem = () => {
+                orderItems.value.push({
+                    productCode: '', productName: '', specification: '',
+                    unit: '', quantity: 0, unitPrice: 0, amount: 0, remark: ''
+                });
+            };
+
+            // 删除商品明细行
+            const removeOrderItem = (idx) => {
+                orderItems.value.splice(idx, 1);
+            };
+
+            // 提交订单
+            const submitOrder = async () => {
+                if (!orderForm.customerId) { ElMessage.warning('请选择客户'); return; }
+                if (orderItems.value.length === 0) { ElMessage.warning('请添加商品明细'); return; }
+                if (!orderForm.paymentMethod) { ElMessage.warning('请选择收款方式'); return; }
+
+                // 校验商品名称
+                for (let i = 0; i < orderItems.value.length; i++) {
+                    if (!orderItems.value[i].productName.trim()) {
+                        ElMessage.warning(`商品 ${i + 1} 的名称不能为空`);
+                        return;
+                    }
+                }
+
+                orderSaving.value = true;
+                try {
+                    const isEdit = orderDialogMode.value === 'edit';
+
+                    if (isEdit) {
+                        // 编辑模式：更新订单主表 + 删除旧明细 + 保存新明细
+                        const orderData = {
+                            ...orderForm,
+                            totalAmount: orderTotalAmount.value,
+                            receivableAmount: orderReceivable.value,
+                            currentDebt: orderCurrentDebt.value
+                        };
+
+                        const orderRes = await fetch('/api/order', {
+                            method: 'PUT',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify(orderData)
+                        });
+                        const orderResult = await handleResponse(orderRes);
+                        if (!orderResult || orderResult.code !== 200) {
+                            ElMessage.error('更新订单失败'); return;
+                        }
+
+                        // 删除旧明细（简化处理：先全部删除再重新保存）
+                        const oldItemsRes = await fetch(`/api/order/item/${orderForm.id}`, { headers: getAuthHeaders() });
+                        const oldItemsResult = await handleResponse(oldItemsRes);
+                        if (oldItemsResult && oldItemsResult.code === 200) {
+                            for (const oldItem of oldItemsResult.data) {
+                                await fetch(`/api/order/item/${oldItem.id}`, { method: 'DELETE', headers: getAuthHeaders() });
+                            }
+                        }
+
+                        // 保存新明细
+                        for (let i = 0; i < orderItems.value.length; i++) {
+                            const item = orderItems.value[i];
+                            const itemData = {
+                                orderId: orderForm.id,
+                                seqNo: i + 1,
+                                productCode: item.productCode,
+                                productName: item.productName,
+                                specification: item.specification,
+                                unit: item.unit,
+                                quantity: item.quantity,
+                                unitPrice: item.unitPrice,
+                                amount: item.amount,
+                                remark: item.remark
+                            };
+                            await fetch('/api/order/item', {
+                                method: 'POST',
+                                headers: getAuthHeaders(),
+                                body: JSON.stringify(itemData)
+                            });
+                        }
+
+                        ElMessage.success('订单修改成功');
+                    } else {
+                        // 新增模式
+                        const now = new Date();
+                        const pad = (n, len) => String(n).padStart(len, '0');
+                        const orderNo = 'XSDD' + now.getFullYear() + pad(now.getMonth() + 1, 2) + pad(now.getDate(), 2)
+                            + pad(now.getHours(), 2) + pad(now.getMinutes(), 2) + pad(now.getSeconds(), 2) + pad(now.getMilliseconds(), 3);
+
+                        const orderData = {
+                            ...orderForm,
+                            orderNo,
+                            totalAmount: orderTotalAmount.value,
+                            receivableAmount: orderReceivable.value,
+                            currentDebt: orderCurrentDebt.value
+                        };
+
+                        const orderRes = await fetch('/api/order', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify(orderData)
+                        });
+                        const orderResult = await handleResponse(orderRes);
+                        if (!orderResult || orderResult.code !== 200) {
+                            ElMessage.error('提交订单失败'); return;
+                        }
+
+                        const savedOrderId = orderResult.data.orderId;
+
+                        // 保存商品明细
+                        for (let i = 0; i < orderItems.value.length; i++) {
+                            const item = orderItems.value[i];
+                            const itemData = {
+                                orderId: savedOrderId,
+                                seqNo: i + 1,
+                                productCode: item.productCode,
+                                productName: item.productName,
+                                specification: item.specification,
+                                unit: item.unit,
+                                quantity: item.quantity,
+                                unitPrice: item.unitPrice,
+                                amount: item.amount,
+                                remark: item.remark
+                            };
+                            await fetch('/api/order/item', {
+                                method: 'POST',
+                                headers: getAuthHeaders(),
+                                body: JSON.stringify(itemData)
+                            });
+                        }
+
+                        ElMessage.success('订单创建成功');
+                    }
+
+                    showOrderDialog.value = false;
+                    loadOrders();
+                    loadCustomers(); // 更新客户欠款数据
+                } catch (e) {
+                    ElMessage.error(isEdit ? '订单修改失败' : '订单生成失败');
+                } finally {
+                    orderSaving.value = false;
+                }
+            };
+
+            // 查看订单详情
+            const viewOrderDetail = async (orderId) => {
+                try {
+                    const res = await fetch(`/api/order/detail/${orderId}`, { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        orderDetail.value = result.data;
+                        showOrderDetailDialog.value = true;
+                    } else {
+                        ElMessage.error('加载订单详情失败');
+                    }
+                } catch (e) {
+                    ElMessage.error('网络错误');
+                }
+            };
+
+            // 作废订单
+            const cancelOrder = async (orderId) => {
+                try {
+                    await ElMessageBox.confirm('确定作废该订单吗？若为赊账订单将回退欠款并更新客户累计欠款。', '提示', { type: 'warning' });
+                    const res = await fetch(`/api/order/cancel/${orderId}`, {
+                        method: 'PUT',
+                        headers: getAuthHeaders()
+                    });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200 && result.data) {
+                        ElMessage.success('订单已作废');
+                        loadOrders();
+                        loadCustomers(); // 更新客户欠款
+                    } else if (result) {
+                        ElMessage.error(result.msg || '作废失败');
+                    }
+                } catch (e) {
+                    if (e !== 'cancel') ElMessage.error('作废失败');
+                }
+            };
+
             return {
-                activeMenu, currentUser, token, showDropdown,
+                currentRoute, currentUser, token, showDropdown,
                 showUserDialog, userForm, userSaving, openUserEdit, logout, saveUser,
                 customerList, customerLoading, showCustomerDialog, customerForm, customerSaving,
                 openCustomerDialog, saveCustomer, deleteCustomer,
                 searchKeyword, categoryFilter, filteredCustomerList, applyCustomerFilter, customerNameError,
-                orderList, orderLoading
+                customerPageNum, customerPageSize, customerTotal, customerTotalPages,
+                prevCustomerPage, nextCustomerPage, loadCustomers,
+                orderList, orderLoading,
+                orderPageNum, orderPageSize, orderTotal, orderTotalPages,
+                orderFilter, prevOrderPage, nextOrderPage, resetOrderFilter, loadOrders,
+                showOrderDialog, orderDialogMode, orderSaving, orderForm, orderItems,
+                openOrderDialog, openEditOrderDialog, onOrderCustomerChange, addOrderItem, removeOrderItem,
+                calcOrderTotal, calcItemAmount, formatItemAmount, submitOrder,
+                orderTotalQty, orderTotalAmount, orderReceivable, orderCurrentDebt,
+                getCustomerName, getStatusText, getStatusClass,
+                showOrderDetailDialog, orderDetail, viewOrderDetail, cancelOrder
             };
         }
     }).use(ElementPlus).mount('#app');

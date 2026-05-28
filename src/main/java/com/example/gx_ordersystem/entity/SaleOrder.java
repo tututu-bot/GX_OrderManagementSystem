@@ -72,8 +72,8 @@ public class SaleOrder {
 
     /**
      * 单据状态
-     * 数据库字段: status， VARCHAR(20)，DEFAULT 'DRAFT'
-     * 取值: DRAFT(草稿) / CONFIRMED(已确认) / COMPLETED(已完成) / CANCELLED(已作废)
+     * 数据库字段: status， VARCHAR(20)，DEFAULT '进行中'
+     * 取值: 进行中 / 已完成 / 作废
      */
     private String status;
 
