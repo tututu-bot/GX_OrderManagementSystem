@@ -42,6 +42,14 @@ public class SaleOrder {
     private String orderNo;
 
     /**
+     * 用户ID，外键
+     * 数据库字段: user_id， INTEGER，NOT NULL
+     * 关联表: sys_user(id)
+     * 用途: 标识该订单由哪个用户创建，实现订单数据隔离
+     */
+    private Long userId;
+
+    /**
      * 客户ID，外键
      * 数据库字段: customer_id， BIGINT，NOT NULL
      * 关联表: customer(id)

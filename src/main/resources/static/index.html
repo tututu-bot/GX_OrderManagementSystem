@@ -614,6 +614,340 @@
             border-bottom: 1px solid #F0F0F0;
             color: #1A1A1A;
         }
+
+        /* ---------- 商品选择弹窗 ---------- */
+        .product-select-modal-card {
+            max-width: 520px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* 商品树形结构 */
+        .product-tree {
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            max-height: 480px;
+            overflow-y: auto;
+        }
+
+        .product-group {
+            border-bottom: 1px solid #F0F0F0;
+        }
+
+        .product-group:last-child {
+            border-bottom: none;
+        }
+
+        .product-group-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1A1A1A;
+            background: #FAFAFA;
+            transition: background 0.15s;
+        }
+
+        .product-group-header:hover {
+            background: #F5F3FF;
+        }
+
+        .product-group-header .arrow {
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s;
+            color: #666666;
+        }
+
+        .product-group-header.expanded .arrow {
+            transform: rotate(90deg);
+        }
+
+        .product-children {
+            background: #FFFFFF;
+        }
+
+        .product-child-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px 10px 40px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #1A1A1A;
+            border-top: 1px solid #F5F5F5;
+            transition: background 0.15s;
+        }
+
+        .product-child-item:hover {
+            background: #F5F3FF;
+        }
+
+        .product-child-item .spec-name {
+            color: #666666;
+        }
+
+        .product-child-item .price-tag {
+            background: #F5F3FF;
+            color: #6B4BFF;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .product-child-item .unit-tag {
+            color: #9CA3AF;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+
+        /* ---------- 多选筛选组件 ---------- */
+        .filter-multi-wrap {
+            position: relative;
+        }
+
+        .filter-multi-trigger {
+            height: 36px;
+            min-width: 120px;
+            padding: 0 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #1A1A1A;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            outline: none;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .filter-multi-trigger:hover {
+            border-color: #6B4BFF;
+        }
+
+        .filter-multi-trigger.active {
+            border-color: #6B4BFF;
+            background: #F5F3FF;
+        }
+
+        .filter-multi-trigger .arrow {
+            width: 14px;
+            height: 14px;
+            color: #9CA3AF;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .filter-multi-trigger.active .arrow {
+            transform: rotate(180deg);
+        }
+
+        .filter-multi-panel {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            z-index: 200;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            min-width: 160px;
+            max-height: 240px;
+            overflow-y: auto;
+            padding: 6px 0;
+        }
+
+        .filter-multi-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: #1A1A1A;
+            cursor: pointer;
+            transition: background 0.15s;
+            white-space: nowrap;
+        }
+
+        .filter-multi-option:hover {
+            background: #F5F3FF;
+        }
+
+        .filter-multi-option input[type="checkbox"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #6B4BFF;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        /* 横向 checkbox 标签组 */
+        .filter-tag-group {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            font-size: 13px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            border: 1px solid #E5E5E5;
+            background: #FFFFFF;
+            color: #666666;
+            user-select: none;
+        }
+
+        .filter-tag-option:hover {
+            border-color: #6B4BFF;
+            color: #6B4BFF;
+        }
+
+        .filter-tag-option.checked {
+            background: #6B4BFF;
+            border-color: #6B4BFF;
+            color: #FFFFFF;
+        }
+
+        .filter-tag-option input[type="checkbox"] {
+            display: none;
+        }
+
+        /* ========== 打印小票样式 ========== */
+        .print-ticket {
+            width: 210mm;
+            min-height: 297mm;
+            padding: 20mm 15mm;
+            margin: 0 auto;
+            background: #FFFFFF;
+            font-family: 'SimSun', 'Songti SC', serif;
+            color: #000000;
+            box-sizing: border-box;
+        }
+
+        .print-title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 16px;
+            letter-spacing: 2px;
+        }
+
+        .print-header {
+            margin-bottom: 12px;
+        }
+
+        .print-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 24px;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .print-row span {
+            white-space: nowrap;
+        }
+
+        .print-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .print-table th,
+        .print-table td {
+            border: 1px solid #000000;
+            padding: 6px 8px;
+            text-align: center;
+        }
+
+        .print-table th {
+            font-weight: bold;
+            background: #FFFFFF;
+        }
+
+        .print-table td {
+            height: 28px;
+        }
+
+        .print-amount-words {
+            border: 1px solid #000000;
+            border-top: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .print-summary {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 32px;
+            padding: 8px 0;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .print-remark {
+            font-size: 14px;
+            margin-bottom: 24px;
+            min-height: 40px;
+        }
+
+        .print-sign {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            padding-top: 16px;
+        }
+
+        .print-sign span {
+            min-width: 180px;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #print-area,
+            #print-area * {
+                visibility: visible;
+            }
+            #print-area {
+                display: block !important;
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .print-ticket {
+                width: 100%;
+                padding: 10mm;
+                min-height: auto;
+            }
+            .modal-overlay,
+            .sidebar,
+            .topbar,
+            .content,
+            .app-layout {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -644,6 +978,13 @@
                     </svg>
                     订单列表
                 </a>
+                <a href="#/debt" class="nav-item" :class="{ active: currentRoute === 'debt' }">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="12" y1="1" x2="12" y2="23"></line>
+                        <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+                    </svg>
+                    欠款列表
+                </a>
             </ul>
         </aside>
 
@@ -651,7 +992,7 @@
         <div class="main-area">
             <!-- ---------- 顶部 Header ---------- -->
             <header class="topbar">
-                <div class="topbar-title">{{ currentRoute === 'customer' ? '客户管理' : '订单列表' }}</div>
+                <div class="topbar-title">{{ topbarTitle }}</div>
                 <div class="user-dropdown-wrap">
                     <div class="user-trigger" @click="showDropdown = !showDropdown">
                         <div class="user-avatar">{{ (currentUser.realName || currentUser.account || '?').charAt(0) }}</div>
@@ -780,33 +1121,47 @@
 
                     <!-- 订单筛选区域 -->
                     <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
+                        <!-- 客户多选 -->
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">客户</label>
-                            <select v-model="orderFilter.customerId" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;min-width:140px;">
-                                <option value="">全部</option>
-                                <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.customerName }}</option>
-                            </select>
+                            <div id="order-filter-wrap" class="filter-multi-wrap">
+                                <div class="filter-multi-trigger" :class="{ active: showCustomerFilterPanel }" @click="showCustomerFilterPanel = !showCustomerFilterPanel">
+                                    <span>{{ orderFilter.customerIds.length ? '已选 ' + orderFilter.customerIds.length + ' 个' : '全部客户' }}</span>
+                                    <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div v-if="showCustomerFilterPanel" class="filter-multi-panel">
+                                    <div class="filter-multi-option" v-for="c in customerList" :key="c.id" @click.stop="toggleCustomerFilter(c.id)">
+                                        <input type="checkbox" :checked="orderFilter.customerIds.includes(c.id)" @click.stop="toggleCustomerFilter(c.id)">
+                                        <span>{{ c.customerName }}</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- 收款方式多选 -->
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">收款方式</label>
-                            <select v-model="orderFilter.paymentMethod" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;min-width:120px;">
-                                <option value="">全部</option>
-                                <option value="现金">现金</option>
-                                <option value="微信">微信</option>
-                                <option value="支付宝">支付宝</option>
-                                <option value="银行转账">银行转账</option>
-                                <option value="赊账">赊账</option>
-                            </select>
+                            <div class="filter-tag-group">
+                                <label class="filter-tag-option" :class="{ checked: orderFilter.paymentMethods.includes(opt) }" v-for="opt in paymentMethodOptions" :key="opt">
+                                    <input type="checkbox" :value="opt" v-model="orderFilter.paymentMethods">
+                                    <span>{{ opt }}</span>
+                                </label>
+                            </div>
                         </div>
+
+                        <!-- 状态多选 -->
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">状态</label>
-                            <select v-model="orderFilter.status" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;background:#FFFFFF;min-width:120px;">
-                                <option value="">全部</option>
-                                <option value="进行中">进行中</option>
-                                <option value="已完成">已完成</option>
-                                <option value="已作废">已作废</option>
-                            </select>
+                            <div class="filter-tag-group">
+                                <label class="filter-tag-option" :class="{ checked: orderFilter.statusList.includes(opt) }" v-for="opt in statusOptions" :key="opt">
+                                    <input type="checkbox" :value="opt" v-model="orderFilter.statusList">
+                                    <span>{{ opt }}</span>
+                                </label>
+                            </div>
                         </div>
+
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">开始日期</label>
                             <input type="date" v-model="orderFilter.orderDateStart" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
@@ -876,6 +1231,102 @@
                         <button class="btn btn-sm btn-secondary" @click="nextOrderPage" :disabled="orderPageNum >= orderTotalPages">下一页</button>
                     </div>
                 </div>
+
+                <!-- ===== 欠款列表 ===== -->
+                <div v-if="currentRoute === 'debt'" class="page-card">
+                    <div class="page-header-row">
+                        <h2 class="page-title">欠款记录</h2>
+                    </div>
+
+                    <!-- 欠款筛选区域 -->
+                    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
+                        <!-- 客户多选 -->
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">客户</label>
+                            <div id="debt-filter-wrap" class="filter-multi-wrap">
+                                <div class="filter-multi-trigger" :class="{ active: showDebtCustomerPanel }" @click="showDebtCustomerPanel = !showDebtCustomerPanel">
+                                    <span>{{ debtFilter.customerIds.length ? '已选 ' + debtFilter.customerIds.length + ' 个' : '全部客户' }}</span>
+                                    <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div v-if="showDebtCustomerPanel" class="filter-multi-panel">
+                                    <div class="filter-multi-option" v-for="c in customerList" :key="c.id" @click.stop="toggleDebtCustomerFilter(c.id)">
+                                        <input type="checkbox" :checked="debtFilter.customerIds.includes(c.id)" @click.stop="toggleDebtCustomerFilter(c.id)">
+                                        <span>{{ c.customerName }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">开始日期</label>
+                            <input type="date" v-model="debtFilter.dateStart" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">结束日期</label>
+                            <input type="date" v-model="debtFilter.dateEnd" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        </div>
+                        <button class="btn btn-primary" @click="loadDebts();" style="height:36px;">查询</button>
+                        <button class="btn btn-secondary" @click="resetDebtFilter" style="height:36px;">重置</button>
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>客户名称</th>
+                                <th>单据编号</th>
+                                <th>欠款金额</th>
+                                <th>剩余欠款</th>
+                                <th>状态</th>
+                                <th>备注</th>
+                                <th>创建时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="debtLoading">
+                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                            </tr>
+                            <tr v-else-if="debtList.length === 0">
+                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">暂无欠款记录</td>
+                            </tr>
+                            <tr v-for="item in debtList" :key="item.id">
+                                <td>{{ item.customerName || '-' }}</td>
+                                <td>{{ item.orderNo || '-' }}</td>
+                                <td>{{ item.amount }} 元</td>
+                                <td>
+                                    <span class="tag" :class="item.remainingAmount > 0 ? 'tag-danger' : 'tag-success'">
+                                        {{ item.remainingAmount }} 元
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="tag" :class="item.remainingAmount > 0 ? 'tag-danger' : 'tag-default'">
+                                        {{ item.remainingAmount > 0 ? '有效' : '已结清' }}
+                                    </span>
+                                </td>
+                                <td>{{ item.remark || '-' }}</td>
+                                <td>{{ formatDateTime(item.createTime) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- 欠款统计 -->
+                    <div v-if="debtList.length > 0" style="margin-top:20px;padding:16px 20px;background:#FAFAFA;border-radius:10px;border:1px solid #E5E5E5;">
+                        <div style="display:flex;gap:32px;flex-wrap:wrap;">
+                            <div>
+                                <span style="font-size:12px;color:#666;">总欠款笔数</span>
+                                <div style="font-size:20px;font-weight:600;color:#1A1A1A;">{{ debtList.length }} 笔</div>
+                            </div>
+                            <div>
+                                <span style="font-size:12px;color:#666;">有效欠款总额</span>
+                                <div style="font-size:20px;font-weight:600;color:#DC2626;">{{ totalValidDebt }} 元</div>
+                            </div>
+                            <div>
+                                <span style="font-size:12px;color:#666;">已结清金额</span>
+                                <div style="font-size:20px;font-weight:600;color:#16A34A;">{{ totalClearedDebt }} 元</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
     </div>
@@ -942,8 +1393,9 @@
                     <input type="text" v-model="customerForm.contactName" placeholder="请输入联系人">
                 </div>
                 <div class="form-row">
-                    <label>联系电话</label>
-                    <input type="text" v-model="customerForm.phone" placeholder="请输入联系电话">
+                    <label>联系电话 <span style="color:#DC2626;">*</span></label>
+                    <input type="text" v-model="customerForm.phone" placeholder="请输入联系电话（必填）">
+                    <div v-if="customerPhoneError" style="font-size:13px;color:#DC2626;margin-top:4px;">{{ customerPhoneError }}</div>
                 </div>
                 <div class="form-row">
                     <label>地址</label>
@@ -1034,13 +1486,22 @@
                     <div v-for="(item, idx) in orderItems" :key="idx" class="item-card">
                         <div class="item-card-header">
                             <span class="item-card-title">商品 {{ idx + 1 }}</span>
-                            <button class="btn btn-xs btn-danger" @click="removeOrderItem(idx)">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="18" y1="6" x2="6" y2="18"></line>
-                                    <line x1="6" y1="6" x2="18" y2="18"></line>
-                                </svg>
-                                删除
-                            </button>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-xs btn-primary" @click="openProductSelect(idx)">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                                    </svg>
+                                    选择商品
+                                </button>
+                                <button class="btn btn-xs btn-danger" @click="removeOrderItem(idx)">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                                    </svg>
+                                    删除
+                                </button>
+                            </div>
                         </div>
                         <div class="item-card-grid">
                             <div class="form-row">
@@ -1061,11 +1522,11 @@
                             </div>
                             <div class="form-row">
                                 <label>数量</label>
-                                <input type="number" v-model.number="item.quantity" @input="calcItemAmount(item)" placeholder="0" step="0.001">
+                                <input type="number" v-model.number="item.quantity" @input="calcItemAmount(item)" placeholder="0" step="0.001" min="0">
                             </div>
                             <div class="form-row">
                                 <label>单价（元）</label>
-                                <input type="number" v-model.number="item.unitPrice" @input="calcItemAmount(item)" placeholder="0.00" step="0.01">
+                                <input type="number" v-model.number="item.unitPrice" @input="calcItemAmount(item)" placeholder="0.00" step="0.01" min="0">
                             </div>
                             <div class="form-row">
                                 <label>金额（元）</label>
@@ -1097,7 +1558,7 @@
                 <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;">
                     <div class="form-row" style="flex:1;min-width:150px;">
                         <label>收款方式 <span style="color:#DC2626;">*</span></label>
-                        <select v-model="orderForm.paymentMethod">
+                        <select v-model="orderForm.paymentMethod" @change="onPaymentMethodChange">
                             <option value="">请选择</option>
                             <option value="现金">现金</option>
                             <option value="微信">微信</option>
@@ -1108,11 +1569,11 @@
                     </div>
                     <div class="form-row" style="flex:1;min-width:120px;">
                         <label>其他费用（元）</label>
-                        <input type="number" v-model.number="orderForm.otherFee" @input="calcOrderTotal" placeholder="0.00" step="0.01" style="text-align:right;">
+                        <input type="number" v-model.number="orderForm.otherFee" @input="calcOrderTotal" placeholder="0.00" step="0.01" min="0" style="text-align:right;">
                     </div>
                     <div class="form-row" style="flex:1;min-width:120px;">
                         <label>本次收款（元）</label>
-                        <input type="number" v-model.number="orderForm.receivedAmount" @input="calcOrderTotal" placeholder="0.00" step="0.01" style="text-align:right;">
+                        <input type="number" v-model.number="orderForm.receivedAmount" @input="calcOrderTotal" placeholder="0.00" step="0.01" min="0" style="text-align:right;">
                     </div>
                 </div>
 
@@ -1140,14 +1601,14 @@
                     </div>
                 </div>
 
-                <!-- 欠款提示：只有收款方式为"赊账"时才产生欠款记录 -->
-                <div v-if="orderForm.paymentMethod === '赊账' && orderCurrentDebt > 0" style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:13px;color:#991B1B;">
+                <!-- 欠款提示：当本次欠款大于0时显示 -->
+                <div v-if="orderCurrentDebt > 0" style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:13px;color:#991B1B;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
                         <line x1="12" y1="16" x2="12.01" y2="16"></line>
                     </svg>
-                    本次交易为<strong>赊账</strong>，将产生 <strong>{{ orderCurrentDebt.toFixed(2) }} 元</strong> 欠款。保存后会在欠款记录中自动生成一条记录，并更新该客户的累计欠款。
+                    本次交易将产生 <strong>{{ orderCurrentDebt.toFixed(2) }} 元</strong> 欠款。保存后会在欠款记录中自动生成一条记录，并更新该客户的累计欠款。
                 </div>
 
                 <div class="form-row" style="margin-top:16px;">
@@ -1160,6 +1621,49 @@
                 <button class="btn btn-primary" :disabled="orderSaving" @click="submitOrder">
                     {{ orderSaving ? '保存中...' : (orderDialogMode === 'edit' ? '保存修改' : '生成订单') }}
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 商品选择弹窗 ========== -->
+    <div v-if="showProductSelectDialog" class="modal-overlay" @click.self="showProductSelectDialog = false">
+        <div class="modal-card product-select-modal-card">
+            <div class="modal-header">
+                <h3>选择商品</h3>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px;color:#666;margin-bottom:12px;">点击商品名称展开规格列表，点击规格即可选中该商品</p>
+                <div class="product-tree">
+                    <div v-for="group in productTree" :key="group.productName" class="product-group">
+                        <div class="product-group-header"
+                             :class="{ expanded: expandedProductNames.includes(group.productName) }"
+                             @click="toggleProductGroup(group.productName)">
+                            <svg class="arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="9 18 15 12 9 6"></polyline>
+                            </svg>
+                            <span>{{ group.productName }}</span>
+                            <span style="margin-left:auto;font-size:12px;color:#9CA3AF;font-weight:400;">共 {{ group.children.length }} 种规格</span>
+                        </div>
+                        <div v-if="expandedProductNames.includes(group.productName)" class="product-children">
+                            <div v-for="product in group.children"
+                                 :key="product.id"
+                                 class="product-child-item"
+                                 @click="selectProduct(product)">
+                                <span>
+                                    <span class="spec-name">{{ product.specification }}</span>
+                                    <span class="unit-tag">{{ product.unit }}</span>
+                                </span>
+                                <span class="price-tag">{{ product.unitPrice }} 元</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="productTree.length === 0" class="empty-state" style="padding:32px;">
+                        <p>暂无商品数据</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showProductSelectDialog = false">取消</button>
             </div>
         </div>
     </div>
@@ -1277,7 +1781,87 @@
                 </div>
             </div>
             <div class="modal-footer">
+                <button class="btn btn-primary" @click="printOrder" style="margin-right:auto;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;">
+                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                    打印
+                </button>
                 <button class="btn btn-secondary" @click="showOrderDetailDialog = false">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 打印小票区域（隐藏，仅用于打印） ========== -->
+    <div v-show="showOrderDetailDialog" id="print-area" style="display:none;">
+        <div class="print-ticket">
+            <div class="print-title">管兴松紧带 销售订单</div>
+            <div class="print-header">
+                <div class="print-row">
+                    <span>客户：{{ orderDetail.customerName || '-' }}</span>
+                    <span>销售人员：{{ orderDetail.order?.salesPerson || '-' }}</span>
+                    <span>单据日期：{{ orderDetail.order?.orderDate || '-' }}</span>
+                    <span>单据编号：{{ orderDetail.order?.orderNo || '-' }}</span>
+                </div>
+                <div class="print-row">
+                    <span>地址：{{ orderDetail.customerAddress || '-' }}</span>
+                    <span>联系人：{{ orderDetail.customerContact || '-' }}</span>
+                    <span>电话：{{ orderDetail.customerPhone || '-' }}</span>
+                    <span>交货日期：{{ orderDetail.order?.deliveryDate || '-' }}</span>
+                </div>
+            </div>
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;">序号</th>
+                        <th style="width:100px;">商品编号</th>
+                        <th>商品名称</th>
+                        <th style="width:80px;">规格型号</th>
+                        <th style="width:40px;">单位</th>
+                        <th style="width:60px;">数量</th>
+                        <th style="width:60px;">单价</th>
+                        <th style="width:70px;">金额</th>
+                        <th style="width:60px;">备注</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="(item, idx) in orderDetail.items" :key="item.id">
+                        <td>{{ idx + 1 }}</td>
+                        <td>{{ item.productCode || '' }}</td>
+                        <td>{{ item.productName || '' }}</td>
+                        <td>{{ item.specification || '' }}</td>
+                        <td>{{ item.unit || '' }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.unitPrice?.toFixed ? item.unitPrice.toFixed(2) : item.unitPrice }}</td>
+                        <td>{{ item.amount?.toFixed ? item.amount.toFixed(2) : item.amount }}</td>
+                        <td>{{ item.remark || '' }}</td>
+                    </tr>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="5" style="text-align:right;font-weight:bold;">合计：</td>
+                        <td>{{ printTotalQty }}</td>
+                        <td></td>
+                        <td style="font-weight:bold;">{{ printTotalAmount }}</td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="print-amount-words">合计金额大写：{{ amountToChinese(orderDetail.order?.totalAmount || 0) }}</div>
+            <div class="print-summary">
+                <span>本单金额：{{ orderDetail.order?.totalAmount?.toFixed ? orderDetail.order.totalAmount.toFixed(2) : (orderDetail.order?.totalAmount || 0) }}</span>
+                <span>其他费用：{{ orderDetail.order?.otherFee?.toFixed ? orderDetail.order.otherFee.toFixed(2) : (orderDetail.order?.otherFee || 0) }}</span>
+                <span>本次收款：{{ orderDetail.order?.receivedAmount?.toFixed ? orderDetail.order.receivedAmount.toFixed(2) : (orderDetail.order?.receivedAmount || 0) }}</span>
+                <span>本次欠款：{{ orderDetail.order?.currentDebt?.toFixed ? orderDetail.order.currentDebt.toFixed(2) : (orderDetail.order?.currentDebt || 0) }}</span>
+                <span>累计欠款：{{ orderDetail.order?.totalDebt?.toFixed ? orderDetail.order.totalDebt.toFixed(2) : (orderDetail.order?.totalDebt || 0) }}</span>
+            </div>
+            <div class="print-remark">备注：{{ orderDetail.order?.remark || '' }}</div>
+            <div class="print-sign">
+                <span>制单人：{{ orderDetail.order?.salesPerson || currentUser.realName || currentUser.account || '-' }}</span>
+                <span>发货人签字：</span>
+                <span>客户签字：</span>
             </div>
         </div>
     </div>
@@ -1307,6 +1891,7 @@
             const customerSaving = ref(false);
             const customerForm = reactive({ id: null, customerName: '', category: '零售', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
             const customerNameError = ref('');
+            const customerPhoneError = ref('');
             const searchKeyword = ref('');
             const categoryFilter = ref('');
             const filteredCustomerList = ref([]);
@@ -1329,12 +1914,16 @@
 
             // 订单筛选条件
             const orderFilter = reactive({
-                customerId: '',
-                paymentMethod: '',
-                status: '',
+                customerIds: [],
+                paymentMethods: [],
+                statusList: [],
                 orderDateStart: '',
                 orderDateEnd: ''
             });
+
+            const showCustomerFilterPanel = ref(false);
+            const paymentMethodOptions = ['现金', '微信', '支付宝', '银行转账', '赊账'];
+            const statusOptions = ['进行中', '已完成', '已作废'];
 
             /* ========== 新增/编辑订单数据 ========== */
             const showOrderDialog = ref(false);
@@ -1352,6 +1941,22 @@
             /* ========== 订单详情数据 ========== */
             const showOrderDetailDialog = ref(false);
             const orderDetail = ref({ order: null, items: [], customerName: '' });
+
+            /* ========== 欠款列表数据 ========== */
+            const debtList = ref([]);
+            const debtLoading = ref(false);
+            const debtFilter = reactive({
+                customerIds: [],
+                dateStart: '',
+                dateEnd: ''
+            });
+            const showDebtCustomerPanel = ref(false);
+
+            /* ========== 商品选择数据 ========== */
+            const productTree = ref([]);
+            const showProductSelectDialog = ref(false);
+            const currentProductItemIndex = ref(-1);
+            const expandedProductNames = ref([]);
 
             /* ========== 状态映射 ========== */
             // 订单状态中文映射：后端存储中文，前端直接显示
@@ -1386,10 +1991,40 @@
             };
 
             /* ========== 路由处理 ========== */
+            const topbarTitle = computed(() => {
+                if (currentRoute.value === 'order') return '订单列表';
+                if (currentRoute.value === 'debt') return '欠款列表';
+                return '客户管理';
+            });
+
+            // 欠款统计计算属性
+            const totalValidDebt = computed(() => {
+                return debtList.value
+                    .filter(d => d.remainingAmount > 0)
+                    .reduce((sum, d) => sum + (parseFloat(d.remainingAmount) || 0), 0)
+                    .toFixed(2);
+            });
+            const totalClearedDebt = computed(() => {
+                return debtList.value
+                    .filter(d => d.remainingAmount <= 0)
+                    .reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0)
+                    .toFixed(2);
+            });
+
+            // 打印小票计算属性
+            const printTotalQty = computed(() => {
+                return (orderDetail.value.items || []).reduce((s, i) => s + (parseFloat(i.quantity) || 0), 0).toFixed(3);
+            });
+            const printTotalAmount = computed(() => {
+                return (orderDetail.value.items || []).reduce((s, i) => s + (parseFloat(i.amount) || 0), 0).toFixed(2);
+            });
+
             const updateRoute = () => {
                 const hash = window.location.hash;
                 if (hash === '#/order') {
                     currentRoute.value = 'order';
+                } else if (hash === '#/debt') {
+                    currentRoute.value = 'debt';
                 } else {
                     currentRoute.value = 'customer';
                 }
@@ -1413,6 +2048,22 @@
 
                 loadCustomers();
                 loadOrders();
+                loadProductTree();
+                loadDebts();
+
+                // 点击页面其他区域关闭筛选下拉面板
+                document.addEventListener('click', (e) => {
+                    const orderPanel = document.querySelector('#order-filter-wrap .filter-multi-panel');
+                    const orderTrigger = document.querySelector('#order-filter-wrap .filter-multi-trigger');
+                    if (orderPanel && orderTrigger && !orderPanel.contains(e.target) && !orderTrigger.contains(e.target)) {
+                        showCustomerFilterPanel.value = false;
+                    }
+                    const debtPanel = document.querySelector('#debt-filter-wrap .filter-multi-panel');
+                    const debtTrigger = document.querySelector('#debt-filter-wrap .filter-multi-trigger');
+                    if (debtPanel && debtTrigger && !debtPanel.contains(e.target) && !debtTrigger.contains(e.target)) {
+                        showDebtCustomerPanel.value = false;
+                    }
+                });
             });
 
             /* ========== 用户操作 ========== */
@@ -1490,6 +2141,7 @@
 
             const openCustomerDialog = (row) => {
                 customerNameError.value = '';
+                customerPhoneError.value = '';
                 if (row) {
                     Object.assign(customerForm, row);
                 } else {
@@ -1504,6 +2156,11 @@
                     return;
                 }
                 customerNameError.value = '';
+                if (!customerForm.phone.trim()) {
+                    customerPhoneError.value = '请输入联系电话';
+                    return;
+                }
+                customerPhoneError.value = '';
                 customerSaving.value = true;
                 try {
                     const method = customerForm.id ? 'PUT' : 'POST';
@@ -1514,11 +2171,22 @@
                     });
                     const result = await handleResponse(res);
                     if (result && result.code === 200 && result.data) {
-                        ElMessage.success(customerForm.id ? '修改成功' : '新增成功');
+                        // 根据后端返回的 action 显示不同的成功提示
+                        // action=CREATED: 创建了新客户
+                        // action=LINKED: 关联了已有客户
+                        let msg;
+                        if (customerForm.id) {
+                            msg = '修改成功';
+                        } else if (result.data.action === 'LINKED') {
+                            msg = '已成功关联已有客户';
+                        } else {
+                            msg = result.message !== 'success' ? result.message : '新增成功';
+                        }
+                        ElMessage.success(msg);
                         showCustomerDialog.value = false;
                         loadCustomers();
                     } else if (result) {
-                        ElMessage.error('操作失败');
+                        ElMessage.error(result.message || '操作失败');
                     }
                 } catch (e) {
                     ElMessage.error('网络错误');
@@ -1548,9 +2216,9 @@
                 orderLoading.value = true;
                 try {
                     let url = `/api/order/page?pageNum=${orderPageNum.value}&pageSize=${orderPageSize.value}`;
-                    if (orderFilter.customerId) url += `&customerId=${orderFilter.customerId}`;
-                    if (orderFilter.paymentMethod) url += `&paymentMethod=${orderFilter.paymentMethod}`;
-                    if (orderFilter.status) url += `&status=${orderFilter.status}`;
+                    if (orderFilter.customerIds.length > 0) url += `&customerId=${orderFilter.customerIds.join(',')}`;
+                    if (orderFilter.paymentMethods.length > 0) url += `&paymentMethod=${orderFilter.paymentMethods.join(',')}`;
+                    if (orderFilter.statusList.length > 0) url += `&status=${orderFilter.statusList.join(',')}`;
                     if (orderFilter.orderDateStart) url += `&orderDateStart=${orderFilter.orderDateStart}`;
                     if (orderFilter.orderDateEnd) url += `&orderDateEnd=${orderFilter.orderDateEnd}`;
 
@@ -1571,13 +2239,23 @@
             const prevOrderPage = () => { if (orderPageNum.value > 1) { orderPageNum.value--; loadOrders(); } };
             const nextOrderPage = () => { if (orderPageNum.value < orderTotalPages.value) { orderPageNum.value++; loadOrders(); } };
             const resetOrderFilter = () => {
-                orderFilter.customerId = '';
-                orderFilter.paymentMethod = '';
-                orderFilter.status = '';
+                orderFilter.customerIds = [];
+                orderFilter.paymentMethods = [];
+                orderFilter.statusList = [];
                 orderFilter.orderDateStart = '';
                 orderFilter.orderDateEnd = '';
+                showCustomerFilterPanel.value = false;
                 orderPageNum.value = 1;
                 loadOrders();
+            };
+
+            const toggleCustomerFilter = (id) => {
+                const idx = orderFilter.customerIds.indexOf(id);
+                if (idx > -1) {
+                    orderFilter.customerIds.splice(idx, 1);
+                } else {
+                    orderFilter.customerIds.push(id);
+                }
             };
 
             // 根据客户ID获取客户名称（用于订单列表显示）
@@ -1615,6 +2293,17 @@
             });
 
             const calcOrderTotal = () => {};
+
+            // 收款方式变化时给出默认值，但允许用户手动修改
+            const onPaymentMethodChange = () => {
+                if (orderForm.paymentMethod === '赊账') {
+                    // 赊账：默认收款为0，用户可手动输入
+                    orderForm.receivedAmount = 0;
+                } else if (orderForm.paymentMethod) {
+                    // 其他方式：默认全额收款，但用户可以改为部分金额
+                    orderForm.receivedAmount = orderReceivable.value;
+                }
+            };
 
             // 打开新增订单弹窗
             const openOrderDialog = () => {
@@ -1698,12 +2387,31 @@
                 if (orderItems.value.length === 0) { ElMessage.warning('请添加商品明细'); return; }
                 if (!orderForm.paymentMethod) { ElMessage.warning('请选择收款方式'); return; }
 
-                // 校验商品名称
+                // 校验商品明细：名称、数量、单价均必填且金额不能为负
                 for (let i = 0; i < orderItems.value.length; i++) {
-                    if (!orderItems.value[i].productName.trim()) {
+                    const item = orderItems.value[i];
+                    if (!item.productName.trim()) {
                         ElMessage.warning(`商品 ${i + 1} 的名称不能为空`);
                         return;
                     }
+                    if (item.quantity === null || item.quantity === undefined || item.quantity === '' || item.quantity <= 0) {
+                        ElMessage.warning(`商品 ${i + 1} 的数量必须大于0`);
+                        return;
+                    }
+                    if (item.unitPrice === null || item.unitPrice === undefined || item.unitPrice === '' || item.unitPrice < 0) {
+                        ElMessage.warning(`商品 ${i + 1} 的单价不能为负数`);
+                        return;
+                    }
+                }
+
+                // 校验订单金额不能为负数
+                if ((orderForm.otherFee || 0) < 0) {
+                    ElMessage.warning('其他费用不能为负数');
+                    return;
+                }
+                if ((orderForm.receivedAmount || 0) < 0) {
+                    ElMessage.warning('本次收款不能为负数');
+                    return;
                 }
 
                 orderSaving.value = true;
@@ -1842,7 +2550,7 @@
             // 作废订单
             const cancelOrder = async (orderId) => {
                 try {
-                    await ElMessageBox.confirm('确定作废该订单吗？若为赊账订单将回退欠款并更新客户累计欠款。', '提示', { type: 'warning' });
+                    await ElMessageBox.confirm('确定作废该订单吗？若该订单有欠款将回退欠款并更新客户累计欠款。', '提示', { type: 'warning' });
                     const res = await fetch(`/api/order/cancel/${orderId}`, {
                         method: 'PUT',
                         headers: getAuthHeaders()
@@ -1860,12 +2568,182 @@
                 }
             };
 
+            /* ========== 欠款列表 ========== */
+            const loadDebts = async () => {
+                debtLoading.value = true;
+                try {
+                    let url = '/api/order/debts/all';
+                    const params = [];
+                    if (debtFilter.customerIds.length > 0) {
+                        params.push('customerId=' + debtFilter.customerIds.join(','));
+                    }
+                    if (debtFilter.dateStart) {
+                        params.push('dateStart=' + debtFilter.dateStart);
+                    }
+                    if (debtFilter.dateEnd) {
+                        params.push('dateEnd=' + debtFilter.dateEnd);
+                    }
+                    if (params.length > 0) {
+                        url += '?' + params.join('&');
+                    }
+
+                    const res = await fetch(url, { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        debtList.value = result.data;
+                    }
+                } catch (e) {
+                    ElMessage.error('加载欠款记录失败');
+                } finally {
+                    debtLoading.value = false;
+                }
+            };
+
+            const resetDebtFilter = () => {
+                debtFilter.customerIds = [];
+                debtFilter.dateStart = '';
+                debtFilter.dateEnd = '';
+                showDebtCustomerPanel.value = false;
+                loadDebts();
+            };
+
+            const toggleDebtCustomerFilter = (id) => {
+                const idx = debtFilter.customerIds.indexOf(id);
+                if (idx > -1) {
+                    debtFilter.customerIds.splice(idx, 1);
+                } else {
+                    debtFilter.customerIds.push(id);
+                }
+            };
+
+            const formatDateTime = (dt) => {
+                if (!dt) return '-';
+                const d = new Date(dt);
+                if (isNaN(d.getTime())) return dt;
+                const pad = (n) => String(n).padStart(2, '0');
+                return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+            };
+
+            /* ========== 打印小票 ========== */
+            const printOrder = () => {
+                setTimeout(() => {
+                    window.print();
+                }, 200);
+            };
+
+            const amountToChinese = (n) => {
+                const num = parseFloat(n);
+                if (isNaN(num) || num === 0) return '零元整';
+                const cnNums = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+                const cnUnits = ['', '拾', '佰', '仟'];
+                const cnBigUnits = ['', '万', '亿'];
+                const cnDecUnits = ['角', '分'];
+                const integer = Math.floor(num);
+                const decimal = Math.round((num - integer) * 100);
+
+                let result = '';
+                if (integer > 0) {
+                    let intStr = String(integer);
+                    let zeroFlag = false;
+                    let groupCount = 0;
+                    while (intStr.length > 0) {
+                        const group = intStr.slice(-4);
+                        intStr = intStr.slice(0, -4);
+                        let groupResult = '';
+                        for (let i = 0; i < group.length; i++) {
+                            const digit = parseInt(group[group.length - 1 - i]);
+                            if (digit === 0) {
+                                if (!zeroFlag && groupResult !== '') {
+                                    groupResult = cnNums[0] + groupResult;
+                                    zeroFlag = true;
+                                }
+                            } else {
+                                groupResult = cnNums[digit] + cnUnits[i] + groupResult;
+                                zeroFlag = false;
+                            }
+                        }
+                        if (groupResult !== '') {
+                            groupResult = groupResult + cnBigUnits[groupCount];
+                        }
+                        result = groupResult + result;
+                        groupCount++;
+                    }
+                    result = result.replace(/零+/g, '零').replace(/零$/, '');
+                    result += '元';
+                } else {
+                    result = '零元';
+                }
+
+                if (decimal > 0) {
+                    const jiao = Math.floor(decimal / 10);
+                    const fen = decimal % 10;
+                    if (jiao > 0) result += cnNums[jiao] + cnDecUnits[0];
+                    if (fen > 0) result += cnNums[fen] + cnDecUnits[1];
+                } else {
+                    result += '整';
+                }
+                return result;
+            };
+
+            /* ========== 商品选择 ========== */
+            // 加载商品树形数据
+            const loadProductTree = async () => {
+                try {
+                    const res = await fetch('/api/product/tree', { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        productTree.value = result.data;
+                        // 默认展开第一个分组
+                        if (productTree.value.length > 0) {
+                            expandedProductNames.value = [productTree.value[0].productName];
+                        }
+                    }
+                } catch (e) {
+                    console.error('加载商品数据失败', e);
+                }
+            };
+
+            // 打开商品选择弹窗
+            const openProductSelect = (idx) => {
+                currentProductItemIndex.value = idx;
+                showProductSelectDialog.value = true;
+            };
+
+            // 选择商品，填充到当前商品明细
+            const selectProduct = (product) => {
+                const idx = currentProductItemIndex.value;
+                if (idx < 0 || idx >= orderItems.value.length) return;
+
+                const item = orderItems.value[idx];
+                item.productCode = product.productCode || '';
+                item.productName = product.productName || '';
+                item.specification = product.specification || '';
+                item.unit = product.unit || '';
+                item.unitPrice = product.unitPrice || 0;
+                // 重新计算金额
+                calcItemAmount(item);
+
+                showProductSelectDialog.value = false;
+                currentProductItemIndex.value = -1;
+                ElMessage.success(`已选择：${product.productName} ${product.specification}`);
+            };
+
+            // 展开/收起商品分组
+            const toggleProductGroup = (productName) => {
+                const idx = expandedProductNames.value.indexOf(productName);
+                if (idx > -1) {
+                    expandedProductNames.value.splice(idx, 1);
+                } else {
+                    expandedProductNames.value.push(productName);
+                }
+            };
+
             return {
                 currentRoute, currentUser, token, showDropdown,
                 showUserDialog, userForm, userSaving, openUserEdit, logout, saveUser,
                 customerList, customerLoading, showCustomerDialog, customerForm, customerSaving,
                 openCustomerDialog, saveCustomer, deleteCustomer,
-                searchKeyword, categoryFilter, filteredCustomerList, applyCustomerFilter, customerNameError,
+                searchKeyword, categoryFilter, filteredCustomerList, applyCustomerFilter, customerNameError, customerPhoneError,
                 customerPageNum, customerPageSize, customerTotal, customerTotalPages,
                 prevCustomerPage, nextCustomerPage, loadCustomers,
                 orderList, orderLoading,
@@ -1873,10 +2751,18 @@
                 orderFilter, prevOrderPage, nextOrderPage, resetOrderFilter, loadOrders,
                 showOrderDialog, orderDialogMode, orderSaving, orderForm, orderItems,
                 openOrderDialog, openEditOrderDialog, onOrderCustomerChange, addOrderItem, removeOrderItem,
-                calcOrderTotal, calcItemAmount, formatItemAmount, submitOrder,
+                calcOrderTotal, onPaymentMethodChange, calcItemAmount, formatItemAmount, submitOrder,
                 orderTotalQty, orderTotalAmount, orderReceivable, orderCurrentDebt,
                 getCustomerName, getStatusText, getStatusClass,
-                showOrderDetailDialog, orderDetail, viewOrderDetail, cancelOrder
+                showOrderDetailDialog, orderDetail, viewOrderDetail, cancelOrder,
+                productTree, showProductSelectDialog, expandedProductNames,
+                openProductSelect, selectProduct, toggleProductGroup,
+                showCustomerFilterPanel, toggleCustomerFilter,
+                paymentMethodOptions, statusOptions,
+                topbarTitle,
+                debtList, debtLoading, loadDebts, formatDateTime, totalValidDebt, totalClearedDebt,
+                debtFilter, showDebtCustomerPanel, resetDebtFilter, toggleDebtCustomerFilter,
+                printOrder, printTotalQty, printTotalAmount, amountToChinese
             };
         }
     }).use(ElementPlus).mount('#app');

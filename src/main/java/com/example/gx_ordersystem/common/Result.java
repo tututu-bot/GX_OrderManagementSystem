@@ -45,6 +45,22 @@ public class Result<T> {
     }
 
     /**
+     * 成功响应（携带数据和自定义消息）
+     *
+     * @param data    响应数据对象
+     * @param message 自定义成功消息
+     * @param <T>     数据类型
+     * @return 封装后的成功响应对象
+     */
+    public static <T> Result<T> success(T data, String message) {
+        Result<T> result = new Result<>();
+        result.setCode(200);
+        result.setMessage(message);
+        result.setData(data);
+        return result;
+    }
+
+    /**
      * 成功响应（无数据）
      *
      * @param <T> 数据类型

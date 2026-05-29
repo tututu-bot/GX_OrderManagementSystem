@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
  * 对应数据库表: customer
  * 功能: 存储购买商品的客户档案信息
  *
+ * 注意: 客户数据为全局共享，不直接关联用户。
+ * 用户与客户的关联关系通过 user_customer 表维护（多对多）。
+ *
  * 主要字段说明:
  * - customerName: 客户名称，可为企业名或个人姓名
  * - category: 客户分类（零售/批发/老客户），用于区分客户类型
@@ -25,7 +28,7 @@ public class Customer {
 
     /**
      * 客户ID，主键，自增
-     * 数据库字段: id， BIGINT
+     * 数据库字段: id， INTEGER
      */
     @TableId(type = IdType.AUTO)
     private Long id;
