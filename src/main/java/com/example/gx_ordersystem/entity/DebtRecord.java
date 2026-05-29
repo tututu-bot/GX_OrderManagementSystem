@@ -69,21 +69,20 @@ public class DebtRecord {
     private BigDecimal amount;
 
     /**
-     * 剩余欠款金额
-     * 数据库字段: remaining_amount， DECIMAL(18,2)，DEFAULT 0.00
-     * 用途: 判断该欠款记录是否有效
-     *      > 0  表示该记录仍有效（还有未还清的欠款）
-     *      <= 0 表示该记录已无效（欠款已还清或作废），但不删除记录
+     * 已还金额
+     * 数据库字段: settled_amount， DECIMAL(18,2)，DEFAULT 0.00
+     * 用途: 该笔欠款已经被还款的金额
+     * 说明: settled_amount = amount 时表示已全额还清
      */
-    private BigDecimal remainingAmount;
+    private BigDecimal settledAmount;
 
     /**
-     * 记录类型
-     * 数据库字段: type， VARCHAR(20)，DEFAULT 'NEW'
-     * 取值: NEW(新增欠款) / REPAID(还款)
-     * 用途: 区分是新增欠款还是还款记录
+     * 欠款状态
+     * 数据库字段: status， VARCHAR(20)，DEFAULT 'UNSETTLED'
+     * 取值: UNSETTLED(未结清) / PARTIAL(部分结清) / SETTLED(已结清)
+     * 用途: 标识该欠款记录的结清状态
      */
-    private String type;
+    private String status;
 
     /**
      * 备注

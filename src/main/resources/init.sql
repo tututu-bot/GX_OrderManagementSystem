@@ -43,11 +43,11 @@ CREATE TABLE IF NOT EXISTS sys_user (
 
     -- 创建时间
     -- 作用: 记录用户注册的时间，自动填充
-    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
 
     -- 更新时间
     -- 作用: 记录用户信息最后修改的时间，自动填充
-    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+    update_time     DATETIME DEFAULT (datetime('now', '+8 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_account ON sys_user(account);
 CREATE INDEX IF NOT EXISTS idx_phone ON sys_user(phone);
@@ -102,11 +102,11 @@ CREATE TABLE IF NOT EXISTS customer (
 
     -- 创建时间
     -- 作用: 记录客户档案创建的时间
-    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
 
     -- 更新时间
     -- 作用: 记录客户信息最后修改的时间
-    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+    update_time     DATETIME DEFAULT (datetime('now', '+8 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_name ON customer(customer_name);
 CREATE INDEX IF NOT EXISTS idx_phone ON customer(phone);
@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS user_customer (
 
     -- 创建时间
     -- 作用: 记录关联关系建立的时间
-    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
 
     -- 唯一约束
     -- 作用: 防止同一用户重复关联同一客户
@@ -239,11 +239,11 @@ CREATE TABLE IF NOT EXISTS sale_order (
 
     -- 创建时间
     -- 作用: 记录订单创建的时间
-    create_time         DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time         DATETIME DEFAULT (datetime('now', '+8 hours')),
 
     -- 更新时间
     -- 作用: 记录订单最后修改的时间
-    update_time         DATETIME DEFAULT CURRENT_TIMESTAMP
+    update_time         DATETIME DEFAULT (datetime('now', '+8 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_order_no ON sale_order(order_no);
 CREATE INDEX IF NOT EXISTS idx_user_id ON sale_order(user_id);
@@ -314,7 +314,7 @@ CREATE TABLE IF NOT EXISTS sale_order_item (
 
     -- 创建时间
     -- 作用: 记录该明细添加的时间
-    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
 
     FOREIGN KEY (order_id) REFERENCES sale_order(id) ON DELETE CASCADE
 );
@@ -327,10 +327,11 @@ CREATE INDEX IF NOT EXISTS idx_order_id ON sale_order_item(order_id);
 -- 说明:
 --   - 通过 user_id 实现数据隔离，每个用户只能看到自己的欠款记录
 --   - 通过 order_id 关联到具体订单
---   - remaining_amount > 0 表示该记录仍有效(还有未还清欠款)
---   - remaining_amount <= 0 表示该记录已无效(欠款已还清或作废)，但不删除记录
---   - 修改订单欠款时，更新对应记录的 remaining_amount，而非创建新记录
---   - 只有当订单从无欠款变为有欠款时，才创建新的 debt_record
+--   - status = UNSETTLED 表示该欠款尚未开始还款
+--   - status = PARTIAL  表示已部分还款（0 < settled_amount < amount）
+--   - status = SETTLED  表示已全额还清（settled_amount = amount）
+--   - 还款通过 debt_repayment 关联表实现核销，不直接修改 debt_record 的 amount
+--   - 每笔欠款独立存在，修改订单时：新增欠款则新建记录，减少欠款则通过还款核销
 -- ============================================================
 CREATE TABLE IF NOT EXISTS debt_record (
     -- 记录ID，主键，自增
@@ -360,20 +361,18 @@ CREATE TABLE IF NOT EXISTS debt_record (
     -- 说明: 记录创建时的欠款金额，后续不再变化
     amount          DECIMAL(18,2) NOT NULL,
 
-    -- 剩余欠款金额
-    -- 作用: 判断该欠款记录是否仍有效
+    -- 已还金额
+    -- 作用: 该笔欠款已经被还款的金额
     -- 说明:
-    --   > 0  : 该记录有效，表示还有未还清的欠款
-    --   = 0  : 该记录已无效，表示欠款已还清或订单已作废
-    --   修改订单欠款时，更新此字段，不删除记录
-    --   若订单作废，将此字段设为0
-    remaining_amount DECIMAL(18,2) DEFAULT 0.00,
+    --   初始为 0，每次还款核销后累加
+    --   settled_amount = amount 时表示已全额还清
+    settled_amount  DECIMAL(18,2) DEFAULT 0.00,
 
-    -- 记录类型
-    -- 作用: 标识该记录的类型
-    -- 取值: NEW = 新增欠款(默认), REPAID = 还款
-    -- 说明: 主要用于历史记录的分类展示
-    type            VARCHAR(20) DEFAULT 'NEW',
+    -- 欠款状态
+    -- 作用: 标识该欠款记录的结清状态
+    -- 取值: UNSETTLED = 未结清(默认), PARTIAL = 部分结清, SETTLED = 已结清
+    -- 说明: 用于筛选未结清的欠款记录
+    status          VARCHAR(20) DEFAULT 'UNSETTLED',
 
     -- 备注
     -- 作用: 对该笔欠款记录的说明，如产生原因
@@ -382,13 +381,100 @@ CREATE TABLE IF NOT EXISTS debt_record (
 
     -- 创建时间
     -- 作用: 记录该欠款记录产生的时间
-    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
 
     FOREIGN KEY (customer_id) REFERENCES customer(id)
 );
 CREATE INDEX IF NOT EXISTS idx_debt_user ON debt_record(user_id);
 CREATE INDEX IF NOT EXISTS idx_debt_customer ON debt_record(customer_id);
 CREATE INDEX IF NOT EXISTS idx_debt_order ON debt_record(order_id);
+CREATE INDEX IF NOT EXISTS idx_debt_status ON debt_record(status);
+
+
+-- ============================================================
+-- 表6: repayment_record (还款记录表)
+-- 用途: 记录客户的每一笔独立还款，与订单解耦
+-- 说明:
+--   - 还款是独立的业务事件，客户可以随时还款，不一定跟订单修改挂钩
+--   - 一笔还款可以核销多笔欠款（通过 debt_repayment 关联表）
+--   - 支持现金/微信/支付宝/银行转账等多种还款方式
+-- ============================================================
+CREATE TABLE IF NOT EXISTS repayment_record (
+    -- 记录ID，主键，自增
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- 用户ID
+    -- 作用: 关联 sys_user 表，标识该还款记录属于哪个用户
+    user_id         INTEGER NOT NULL,
+
+    -- 客户ID
+    -- 作用: 关联 customer 表，标识该还款属于哪个客户
+    customer_id     INTEGER NOT NULL,
+
+    -- 还款金额
+    -- 作用: 客户本次实际还款的金额
+    -- 说明: 始终为正数，还款总额应小于等于该客户的未结清欠款总额
+    amount          DECIMAL(18,2) NOT NULL,
+
+    -- 还款方式
+    -- 作用: 标识客户还款时使用的方式
+    -- 取值: 现金 / 微信 / 支付宝 / 银行转账
+    payment_method  VARCHAR(30),
+
+    -- 还款日期
+    -- 作用: 客户实际还款的日期
+    repayment_date  DATE,
+
+    -- 备注
+    -- 作用: 对该笔还款的额外说明
+    -- 示例: "客户到店现金还款"、"订单作废退款"
+    remark          VARCHAR(500),
+
+    -- 创建时间
+    -- 作用: 记录该还款记录产生的时间
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
+
+    FOREIGN KEY (customer_id) REFERENCES customer(id)
+);
+CREATE INDEX IF NOT EXISTS idx_repay_user ON repayment_record(user_id);
+CREATE INDEX IF NOT EXISTS idx_repay_customer ON repayment_record(customer_id);
+CREATE INDEX IF NOT EXISTS idx_repay_date ON repayment_record(repayment_date);
+
+
+-- ============================================================
+-- 表7: debt_repayment (欠款-还款核销关联表)
+-- 用途: 记录每笔还款具体核销了哪几笔欠款的多少金额
+-- 说明:
+--   - 这是一个多对多关联表：一笔还款可以核销多笔欠款，一笔欠款可以被多笔还款核销
+--   - 通过此表可以精确追溯：某笔还款还了哪些订单的欠款、各还了多少
+--   - 每笔核销记录的 amount 表示本次核销的金额
+-- ============================================================
+CREATE TABLE IF NOT EXISTS debt_repayment (
+    -- 记录ID，主键，自增
+    id              INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    -- 欠款记录ID
+    -- 作用: 关联 debt_record 表，标识核销了哪笔欠款
+    debt_id         INTEGER NOT NULL,
+
+    -- 还款记录ID
+    -- 作用: 关联 repayment_record 表，标识由哪笔还款核销
+    repayment_id    INTEGER NOT NULL,
+
+    -- 核销金额
+    -- 作用: 本次核销的具体金额
+    -- 说明: 单笔核销金额不能超过对应欠款的剩余未还金额
+    amount          DECIMAL(18,2) NOT NULL,
+
+    -- 创建时间
+    -- 作用: 记录核销操作的时间
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
+
+    FOREIGN KEY (debt_id) REFERENCES debt_record(id),
+    FOREIGN KEY (repayment_id) REFERENCES repayment_record(id)
+);
+CREATE INDEX IF NOT EXISTS idx_dr_debt ON debt_repayment(debt_id);
+CREATE INDEX IF NOT EXISTS idx_dr_repayment ON debt_repayment(repayment_id);
 
 
 -- ============================================================
@@ -438,11 +524,11 @@ CREATE TABLE IF NOT EXISTS product (
 
     -- 创建时间
     -- 作用: 记录商品信息录入的时间
-    create_time     DATETIME DEFAULT CURRENT_TIMESTAMP,
+    create_time     DATETIME DEFAULT (datetime('now', '+8 hours')),
 
     -- 更新时间
     -- 作用: 记录商品信息最后修改的时间
-    update_time     DATETIME DEFAULT CURRENT_TIMESTAMP
+    update_time     DATETIME DEFAULT (datetime('now', '+8 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_product_code ON product(product_code);
 CREATE INDEX IF NOT EXISTS idx_product_name ON product(product_name);

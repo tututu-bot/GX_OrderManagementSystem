@@ -8,6 +8,9 @@ spring:
     init:
       mode: always
       schema-locations: classpath:init.sql
+  jackson:
+    time-zone: Asia/Shanghai
+    date-format: yyyy-MM-dd HH:mm:ss
 
 mybatis-plus:
   configuration:

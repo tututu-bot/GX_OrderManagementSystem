@@ -29,6 +29,8 @@
 
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        /* Vue 初始化前隐藏 v-cloak 元素，防止弹窗闪烁 */
+        [v-cloak] { display: none !important; }
 
         body {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -985,6 +987,13 @@
                     </svg>
                     欠款列表
                 </a>
+                <a href="#/repayment" class="nav-item" :class="{ active: currentRoute === 'repayment' }">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                        <line x1="1" y1="10" x2="23" y2="10"></line>
+                    </svg>
+                    还款管理
+                </a>
             </ul>
         </aside>
 
@@ -1259,6 +1268,10 @@
                             </div>
                         </div>
                         <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">单据编号</label>
+                            <input type="text" v-model="debtFilter.orderNo" placeholder="输入单据编号" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">开始日期</label>
                             <input type="date" v-model="debtFilter.dateStart" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
                         </div>
@@ -1294,13 +1307,13 @@
                                 <td>{{ item.orderNo || '-' }}</td>
                                 <td>{{ item.amount }} 元</td>
                                 <td>
-                                    <span class="tag" :class="item.remainingAmount > 0 ? 'tag-danger' : 'tag-success'">
-                                        {{ item.remainingAmount }} 元
+                                    <span class="tag" :class="item.unsettledAmount > 0 ? 'tag-danger' : 'tag-success'">
+                                        {{ item.unsettledAmount }} 元
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="tag" :class="item.remainingAmount > 0 ? 'tag-danger' : 'tag-default'">
-                                        {{ item.remainingAmount > 0 ? '有效' : '已结清' }}
+                                    <span class="tag" :class="item.status === 'UNSETTLED' ? 'tag-danger' : (item.status === 'PARTIAL' ? 'tag-warning' : 'tag-success')">
+                                        {{ item.status === 'UNSETTLED' ? '未结清' : (item.status === 'PARTIAL' ? '部分结清' : '已结清') }}
                                     </span>
                                 </td>
                                 <td>{{ item.remark || '-' }}</td>
@@ -1327,12 +1340,80 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- ===== 还款管理 ===== -->
+                <div v-if="currentRoute === 'repayment'" class="page-card">
+                    <div class="page-header-row">
+                        <h2 class="page-title">还款管理</h2>
+                        <button class="btn btn-primary" @click="openRepaymentDialog()">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <line x1="12" y1="5" x2="12" y2="19"></line>
+                                <line x1="5" y1="12" x2="19" y2="12"></line>
+                            </svg>
+                            登记还款
+                        </button>
+                    </div>
+
+                    <!-- 客户欠款概览 -->
+                    <div style="margin-bottom:24px;">
+                        <h3 style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:12px;">客户欠款概览</h3>
+                        <div v-if="customerDebtSummaries.length === 0" style="color:#9CA3AF;padding:24px;text-align:center;background:#FAFAFA;border-radius:10px;">
+                            暂无欠款客户
+                        </div>
+                        <div v-else style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:12px;">
+                            <div v-for="s in customerDebtSummaries" :key="s.customerId"
+                                 style="padding:16px 20px;background:#FAFAFA;border-radius:10px;border:1px solid #E5E5E5;display:flex;justify-content:space-between;align-items:center;">
+                                <div>
+                                    <div style="font-size:15px;font-weight:600;color:#1A1A1A;">{{ s.customerName }}</div>
+                                    <div style="font-size:12px;color:#666;margin-top:4px;">{{ s.debtCount }} 笔未结清欠款</div>
+                                </div>
+                                <div style="text-align:right;">
+                                    <div style="font-size:18px;font-weight:600;color:#DC2626;">{{ s.totalUnsettled }} 元</div>
+                                    <button class="btn btn-sm btn-primary" @click="quickRepay(s)" style="margin-top:6px;">去还款</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 还款记录列表 -->
+                    <h3 style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:12px;">还款记录</h3>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>客户名称</th>
+                                <th>还款金额</th>
+                                <th>还款方式</th>
+                                <th>还款日期</th>
+                                <th>备注</th>
+                                <th>登记时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="repaymentLoading">
+                                <td colspan="6" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                            </tr>
+                            <tr v-else-if="repaymentList.length === 0">
+                                <td colspan="6" style="text-align:center;color:#9CA3AF;padding:40px;">暂无还款记录</td>
+                            </tr>
+                            <tr v-for="item in repaymentList" :key="item.id">
+                                <td>{{ getCustomerName(item.customerId) }}</td>
+                                <td>
+                                    <span style="color:#16A34A;font-weight:600;">{{ item.amount }} 元</span>
+                                </td>
+                                <td>{{ item.paymentMethod || '-' }}</td>
+                                <td>{{ item.repaymentDate || '-' }}</td>
+                                <td>{{ item.remark || '-' }}</td>
+                                <td>{{ formatDateTime(item.createTime) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </main>
         </div>
     </div>
 
     <!-- ========== 用户信息修改弹窗 ========== -->
-    <div v-if="showUserDialog" class="modal-overlay" @click.self="showUserDialog = false">
+    <div v-cloak v-if="showUserDialog" class="modal-overlay" @click.self="showUserDialog = false">
         <div class="modal-card">
             <div class="modal-header">
                 <h3>修改用户信息</h3>
@@ -1369,7 +1450,7 @@
     </div>
 
     <!-- ========== 客户新增/客户详情弹窗 ========== -->
-    <div v-if="showCustomerDialog" class="modal-overlay" @click.self="showCustomerDialog = false">
+    <div v-cloak v-if="showCustomerDialog" class="modal-overlay" @click.self="showCustomerDialog = false">
         <div class="modal-card">
             <div class="modal-header">
                 <h3>{{ customerForm.id ? '编辑客户' : '新增客户' }}</h3>
@@ -1420,7 +1501,7 @@
     </div>
 
     <!-- ========== 新增/编辑订单弹窗 ========== -->
-    <div v-if="showOrderDialog" class="modal-overlay" @click.self="showOrderDialog = false">
+    <div v-cloak v-if="showOrderDialog" class="modal-overlay" @click.self="showOrderDialog = false">
         <div class="modal-card order-modal-card">
             <div class="modal-header">
                 <h3>{{ orderDialogMode === 'edit' ? '编辑订单' : '新增销售订单' }}</h3>
@@ -1573,7 +1654,7 @@
                     </div>
                     <div class="form-row" style="flex:1;min-width:120px;">
                         <label>本次收款（元）</label>
-                        <input type="number" v-model.number="orderForm.receivedAmount" @input="calcOrderTotal" placeholder="0.00" step="0.01" min="0" style="text-align:right;">
+                        <input type="number" v-model.number="orderForm.receivedAmount" placeholder="0.00" step="0.01" min="0" style="text-align:right;">
                     </div>
                 </div>
 
@@ -1626,7 +1707,7 @@
     </div>
 
     <!-- ========== 商品选择弹窗 ========== -->
-    <div v-if="showProductSelectDialog" class="modal-overlay" @click.self="showProductSelectDialog = false">
+    <div v-cloak v-if="showProductSelectDialog" class="modal-overlay" @click.self="showProductSelectDialog = false">
         <div class="modal-card product-select-modal-card">
             <div class="modal-header">
                 <h3>选择商品</h3>
@@ -1669,7 +1750,7 @@
     </div>
 
     <!-- ========== 订单详情弹窗 ========== -->
-    <div v-if="showOrderDetailDialog" class="modal-overlay" @click.self="showOrderDetailDialog = false">
+    <div v-cloak v-if="showOrderDetailDialog" class="modal-overlay" @click.self="showOrderDetailDialog = false">
         <div class="modal-card order-modal-card">
             <div class="modal-header">
                 <h3>订单详情</h3>
@@ -1790,6 +1871,70 @@
                     打印
                 </button>
                 <button class="btn btn-secondary" @click="showOrderDetailDialog = false">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 还款登记弹窗 ========== -->
+    <div v-cloak v-if="showRepaymentDialog" class="modal-overlay" @click.self="showRepaymentDialog = false">
+        <div class="modal-card" style="max-width:480px;">
+            <div class="modal-header">
+                <h3>登记还款</h3>
+            </div>
+            <div class="modal-body">
+                <!-- 选择客户 -->
+                <div class="form-row">
+                    <label>选择客户 <span style="color:#DC2626;">*</span></label>
+                    <select v-model="repaymentForm.customerId" @change="onRepaymentCustomerChange" style="height:40px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        <option value="">请选择客户</option>
+                        <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.customerName }}</option>
+                    </select>
+                </div>
+                <!-- 当前欠款 -->
+                <div v-if="repaymentCustomerDebt > 0" class="form-row">
+                    <label>当前欠款</label>
+                    <div style="padding:10px 14px;background:#FEF2F2;border-radius:8px;color:#DC2626;font-size:16px;font-weight:600;">
+                        {{ repaymentCustomerDebt }} 元
+                    </div>
+                </div>
+                <div v-else-if="repaymentForm.customerId" class="form-row">
+                    <label>当前欠款</label>
+                    <div style="padding:10px 14px;background:#F0FDF4;border-radius:8px;color:#16A34A;font-size:16px;font-weight:600;">
+                        无欠款
+                    </div>
+                </div>
+                <!-- 还款金额 -->
+                <div class="form-row">
+                    <label>还款金额 <span style="color:#DC2626;">*</span></label>
+                    <input type="number" v-model.number="repaymentForm.amount" step="0.01" placeholder="请输入还款金额" style="height:40px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                </div>
+                <!-- 还款方式 -->
+                <div class="form-row">
+                    <label>还款方式 <span style="color:#DC2626;">*</span></label>
+                    <select v-model="repaymentForm.paymentMethod" style="height:40px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        <option value="">请选择</option>
+                        <option value="现金">现金</option>
+                        <option value="微信">微信</option>
+                        <option value="支付宝">支付宝</option>
+                        <option value="银行转账">银行转账</option>
+                    </select>
+                </div>
+                <!-- 还款日期 -->
+                <div class="form-row">
+                    <label>还款日期</label>
+                    <input type="date" v-model="repaymentForm.repaymentDate" style="height:40px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                </div>
+                <!-- 备注 -->
+                <div class="form-row">
+                    <label>备注</label>
+                    <textarea v-model="repaymentForm.remark" rows="2" placeholder="可选填" style="padding:8px 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;resize:none;"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showRepaymentDialog = false">取消</button>
+                <button class="btn btn-primary" @click="submitRepayment" :disabled="repaymentSaving">
+                    {{ repaymentSaving ? '保存中...' : '确认还款' }}
+                </button>
             </div>
         </div>
     </div>
@@ -1947,10 +2092,26 @@
             const debtLoading = ref(false);
             const debtFilter = reactive({
                 customerIds: [],
+                orderNo: '',
                 dateStart: '',
                 dateEnd: ''
             });
             const showDebtCustomerPanel = ref(false);
+
+            /* ========== 还款管理数据 ========== */
+            const repaymentList = ref([]);
+            const repaymentLoading = ref(false);
+            const showRepaymentDialog = ref(false);
+            const repaymentSaving = ref(false);
+            const repaymentCustomerDebt = ref(0);
+            const repaymentForm = reactive({
+                customerId: '',
+                amount: 0,
+                paymentMethod: '',
+                repaymentDate: '',
+                remark: ''
+            });
+            const customerDebtSummaries = ref([]);
 
             /* ========== 商品选择数据 ========== */
             const productTree = ref([]);
@@ -1994,19 +2155,20 @@
             const topbarTitle = computed(() => {
                 if (currentRoute.value === 'order') return '订单列表';
                 if (currentRoute.value === 'debt') return '欠款列表';
+                if (currentRoute.value === 'repayment') return '还款管理';
                 return '客户管理';
             });
 
             // 欠款统计计算属性
             const totalValidDebt = computed(() => {
                 return debtList.value
-                    .filter(d => d.remainingAmount > 0)
-                    .reduce((sum, d) => sum + (parseFloat(d.remainingAmount) || 0), 0)
+                    .filter(d => d.status === 'UNSETTLED' || d.status === 'PARTIAL')
+                    .reduce((sum, d) => sum + (parseFloat(d.unsettledAmount) || 0), 0)
                     .toFixed(2);
             });
             const totalClearedDebt = computed(() => {
                 return debtList.value
-                    .filter(d => d.remainingAmount <= 0)
+                    .filter(d => d.status === 'SETTLED')
                     .reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0)
                     .toFixed(2);
             });
@@ -2020,13 +2182,29 @@
             });
 
             const updateRoute = () => {
+                // 切换路由时关闭所有弹窗
+                showUserDialog.value = false;
+                showCustomerDialog.value = false;
+                showOrderDialog.value = false;
+                showOrderDetailDialog.value = false;
+                showProductSelectDialog.value = false;
+                showRepaymentDialog.value = false;
+                showDropdown.value = false;
+
                 const hash = window.location.hash;
                 if (hash === '#/order') {
                     currentRoute.value = 'order';
+                    loadOrders();
                 } else if (hash === '#/debt') {
                     currentRoute.value = 'debt';
+                    loadDebts();
+                } else if (hash === '#/repayment') {
+                    currentRoute.value = 'repayment';
+                    loadRepayments();
+                    loadCustomerDebtSummaries();
                 } else {
                     currentRoute.value = 'customer';
+                    loadCustomers();
                 }
             };
 
@@ -2050,6 +2228,8 @@
                 loadOrders();
                 loadProductTree();
                 loadDebts();
+                loadRepayments();
+                loadCustomerDebtSummaries();
 
                 // 点击页面其他区域关闭筛选下拉面板
                 document.addEventListener('click', (e) => {
@@ -2278,6 +2458,7 @@
             // 计算单个商品金额
             const calcItemAmount = (item) => {
                 item.amount = ((item.quantity || 0) * (item.unitPrice || 0));
+                calcOrderTotal();
             };
 
             const formatItemAmount = (item) => {
@@ -2292,15 +2473,21 @@
                 return debt > 0 ? debt : 0;
             });
 
-            const calcOrderTotal = () => {};
+            const calcOrderTotal = () => {
+                // 当商品金额或费用变化时，根据支付方式自动分配收款/欠款
+                orderForm.receivableAmount = orderReceivable.value;
+                if (orderForm.paymentMethod && orderForm.paymentMethod !== '赊账') {
+                    // 非赊账：默认全额收款（用户可手动改）
+                    orderForm.receivedAmount = orderReceivable.value;
+                }
+                // 赊账或未选方式：保留 receivedAmount 不变
+            };
 
             // 收款方式变化时给出默认值，但允许用户手动修改
             const onPaymentMethodChange = () => {
                 if (orderForm.paymentMethod === '赊账') {
-                    // 赊账：默认收款为0，用户可手动输入
                     orderForm.receivedAmount = 0;
                 } else if (orderForm.paymentMethod) {
-                    // 其他方式：默认全额收款，但用户可以改为部分金额
                     orderForm.receivedAmount = orderReceivable.value;
                 }
             };
@@ -2374,11 +2561,13 @@
                     productCode: '', productName: '', specification: '',
                     unit: '', quantity: 0, unitPrice: 0, amount: 0, remark: ''
                 });
+                calcOrderTotal();
             };
 
             // 删除商品明细行
             const removeOrderItem = (idx) => {
                 orderItems.value.splice(idx, 1);
+                calcOrderTotal();
             };
 
             // 提交订单
@@ -2577,6 +2766,9 @@
                     if (debtFilter.customerIds.length > 0) {
                         params.push('customerId=' + debtFilter.customerIds.join(','));
                     }
+                    if (debtFilter.orderNo) {
+                        params.push('orderNo=' + encodeURIComponent(debtFilter.orderNo));
+                    }
                     if (debtFilter.dateStart) {
                         params.push('dateStart=' + debtFilter.dateStart);
                     }
@@ -2601,6 +2793,7 @@
 
             const resetDebtFilter = () => {
                 debtFilter.customerIds = [];
+                debtFilter.orderNo = '';
                 debtFilter.dateStart = '';
                 debtFilter.dateEnd = '';
                 showDebtCustomerPanel.value = false;
@@ -2614,6 +2807,119 @@
                 } else {
                     debtFilter.customerIds.push(id);
                 }
+            };
+
+            /* ========== 还款管理 ========== */
+            const loadRepayments = async () => {
+                repaymentLoading.value = true;
+                try {
+                    const res = await fetch('/api/repayment', { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        repaymentList.value = result.data;
+                    }
+                } catch (e) {
+                    ElMessage.error('加载还款记录失败');
+                } finally {
+                    repaymentLoading.value = false;
+                }
+            };
+
+            const loadCustomerDebtSummaries = async () => {
+                try {
+                    const summaries = [];
+                    for (const c of customerList.value) {
+                        const res = await fetch(`/api/repayment/summary/${c.id}`, { headers: getAuthHeaders() });
+                        const result = await handleResponse(res);
+                        if (result && result.code === 200 && result.data && parseFloat(result.data.totalUnsettled) > 0) {
+                            summaries.push({
+                                customerId: c.id,
+                                customerName: c.customerName,
+                                totalUnsettled: parseFloat(result.data.totalUnsettled).toFixed(2),
+                                debtCount: result.data.debtCount
+                            });
+                        }
+                    }
+                    customerDebtSummaries.value = summaries;
+                } catch (e) {
+                    console.error('加载客户欠款概览失败', e);
+                }
+            };
+
+            const openRepaymentDialog = () => {
+                resetRepaymentForm();
+                showRepaymentDialog.value = true;
+            };
+
+            const quickRepay = (summary) => {
+                resetRepaymentForm();
+                repaymentForm.customerId = summary.customerId;
+                repaymentCustomerDebt.value = parseFloat(summary.totalUnsettled);
+                showRepaymentDialog.value = true;
+            };
+
+            const onRepaymentCustomerChange = async () => {
+                if (!repaymentForm.customerId) {
+                    repaymentCustomerDebt.value = 0;
+                    return;
+                }
+                try {
+                    const res = await fetch(`/api/repayment/summary/${repaymentForm.customerId}`, { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        repaymentCustomerDebt.value = parseFloat(result.data.totalUnsettled || 0);
+                    }
+                } catch (e) {
+                    repaymentCustomerDebt.value = 0;
+                }
+            };
+
+            const submitRepayment = async () => {
+                if (!repaymentForm.customerId) {
+                    ElMessage.warning('请选择客户'); return;
+                }
+                if (!repaymentForm.amount || repaymentForm.amount <= 0) {
+                    ElMessage.warning('请输入有效的还款金额'); return;
+                }
+                if (!repaymentForm.paymentMethod) {
+                    ElMessage.warning('请选择还款方式'); return;
+                }
+                if (repaymentForm.amount > repaymentCustomerDebt.value) {
+                    ElMessage.warning('还款金额不能大于当前欠款'); return;
+                }
+
+                repaymentSaving.value = true;
+                try {
+                    const res = await fetch('/api/repayment', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(repaymentForm)
+                    });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        ElMessage.success('还款登记成功');
+                        showRepaymentDialog.value = false;
+                        loadRepayments();
+                        loadCustomerDebtSummaries();
+                        loadDebts();
+                        loadCustomers();
+                    } else if (result) {
+                        ElMessage.error(result.msg || '还款登记失败');
+                    }
+                } catch (e) {
+                    ElMessage.error('还款登记失败');
+                } finally {
+                    repaymentSaving.value = false;
+                }
+            };
+
+            const resetRepaymentForm = () => {
+                repaymentForm.customerId = '';
+                repaymentForm.amount = 0;
+                repaymentForm.paymentMethod = '';
+                repaymentForm.repaymentDate = new Date().toISOString().split('T')[0];
+                repaymentForm.remark = '';
+                repaymentCustomerDebt.value = 0;
             };
 
             const formatDateTime = (dt) => {
@@ -2762,7 +3068,11 @@
                 topbarTitle,
                 debtList, debtLoading, loadDebts, formatDateTime, totalValidDebt, totalClearedDebt,
                 debtFilter, showDebtCustomerPanel, resetDebtFilter, toggleDebtCustomerFilter,
-                printOrder, printTotalQty, printTotalAmount, amountToChinese
+                printOrder, printTotalQty, printTotalAmount, amountToChinese,
+                repaymentList, repaymentLoading, showRepaymentDialog, repaymentSaving, repaymentForm,
+                repaymentCustomerDebt, customerDebtSummaries,
+                loadRepayments, loadCustomerDebtSummaries, openRepaymentDialog, quickRepay,
+                onRepaymentCustomerChange, submitRepayment
             };
         }
     }).use(ElementPlus).mount('#app');
