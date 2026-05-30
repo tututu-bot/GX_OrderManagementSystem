@@ -1,12 +1,15 @@
 package com.example.gx_ordersystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.gx_ordersystem.common.Result;
+import com.example.gx_ordersystem.entity.Customer;
 import com.example.gx_ordersystem.entity.DebtRecord;
 import com.example.gx_ordersystem.entity.DebtRepayment;
 import com.example.gx_ordersystem.entity.RepaymentRecord;
-import com.example.gx_ordersystem.entity.UserCustomer;
 import com.example.gx_ordersystem.entity.SaleOrder;
+import com.example.gx_ordersystem.entity.UserCustomer;
+import com.example.gx_ordersystem.service.CustomerService;
 import com.example.gx_ordersystem.service.DebtRecordService;
 import com.example.gx_ordersystem.service.DebtRepaymentService;
 import com.example.gx_ordersystem.service.RepaymentRecordService;
@@ -45,6 +48,8 @@ public class RepaymentController {
     private UserCustomerService userCustomerService;
     @Autowired
     private SaleOrderService saleOrderService;
+    @Autowired
+    private CustomerService customerService;
 
     private Long getCurrentUserId(HttpServletRequest request) {
         return (Long) request.getAttribute("userId");
@@ -94,16 +99,55 @@ public class RepaymentController {
     }
 
     /**
-     * 查询当前用户的还款记录列表
+     * 分页查询当前用户的还款记录列表（带客户名称）
      */
     @GetMapping
-    public Result<List<RepaymentRecord>> listRepayments(HttpServletRequest request) {
+    public Result<Map<String, Object>> listRepayments(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
+            HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
-        List<RepaymentRecord> list = repaymentRecordService.lambdaQuery()
-                .eq(RepaymentRecord::getUserId, userId)
-                .orderByDesc(RepaymentRecord::getCreateTime)
-                .list();
-        return Result.success(list);
+
+        Page<RepaymentRecord> page = new Page<>(pageNum, pageSize);
+        LambdaQueryWrapper<RepaymentRecord> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(RepaymentRecord::getUserId, userId)
+                .orderByDesc(RepaymentRecord::getCreateTime);
+        repaymentRecordService.page(page, wrapper);
+
+        // 查询客户名称
+        List<Long> customerIds = page.getRecords().stream()
+                .map(RepaymentRecord::getCustomerId)
+                .distinct()
+                .toList();
+        Map<Long, String> customerNameMap = new HashMap<>();
+        if (!customerIds.isEmpty()) {
+            customerNameMap.putAll(customerService.lambdaQuery()
+                    .in(Customer::getId, customerIds)
+                    .list()
+                    .stream()
+                    .collect(Collectors.toMap(Customer::getId, Customer::getCustomerName, (a, b) -> a)));
+        }
+
+        List<Map<String, Object>> list = page.getRecords().stream().map(r -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("id", r.getId());
+            map.put("customerId", r.getCustomerId());
+            map.put("customerName", customerNameMap.getOrDefault(r.getCustomerId(), ""));
+            map.put("amount", r.getAmount());
+            map.put("paymentMethod", r.getPaymentMethod());
+            map.put("repaymentDate", r.getRepaymentDate());
+            map.put("remark", r.getRemark());
+            map.put("createTime", r.getCreateTime());
+            return map;
+        }).toList();
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", page.getTotal());
+        result.put("pages", page.getPages());
+        result.put("current", page.getCurrent());
+        result.put("size", page.getSize());
+        return Result.success(result);
     }
 
     /**
@@ -200,7 +244,16 @@ public class RepaymentController {
                 .eq(DebtRecord::getCustomerId, customerId)
                 .in(DebtRecord::getStatus, Arrays.asList("UNSETTLED", "PARTIAL"))
                 .orderByAsc(DebtRecord::getCreateTime)
+                .orderByAsc(DebtRecord::getId)
                 .list();
+
+        System.out.println("[核销顺序] 共" + unsettledDebts.size() + "笔未结清欠款，核销顺序：");
+        for (int i = 0; i < unsettledDebts.size(); i++) {
+            DebtRecord d = unsettledDebts.get(i);
+            System.out.println("  " + (i + 1) + ". id=" + d.getId() + " orderNo=" + d.getOrderNo()
+                    + " amount=" + d.getAmount() + " settled=" + d.getSettledAmount()
+                    + " createTime=" + d.getCreateTime());
+        }
 
         // 记录被完全结清的订单ID
         Set<Long> completedOrderIds = new HashSet<>();

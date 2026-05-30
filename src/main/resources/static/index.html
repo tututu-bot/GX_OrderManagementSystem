@@ -868,7 +868,7 @@
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
-            margin-bottom: 8px;
+            margin-bottom: 0;
         }
 
         .print-table th,
@@ -876,6 +876,16 @@
             border: 1px solid #000000;
             padding: 6px 8px;
             text-align: center;
+        }
+
+        @media print {
+            .print-table th,
+            .print-table td {
+                border-width: 0.5pt;
+            }
+            .print-amount-words {
+                border-width: 0.5pt;
+            }
         }
 
         .print-table th {
@@ -893,7 +903,8 @@
             padding: 8px 12px;
             font-size: 14px;
             font-weight: bold;
-            margin-bottom: 8px;
+            margin-bottom: 0;
+            margin-top: 0;
         }
 
         .print-summary {
@@ -1225,8 +1236,8 @@
                                 </td>
                                 <td>
                                     <button class="btn btn-xs btn-primary" @click="viewOrderDetail(item.id)" style="margin-right:4px;">查看</button>
-                                    <button v-if="item.status !== '已作废'" class="btn btn-xs btn-warning" @click="openEditOrderDialog(item)" style="margin-right:4px;">修改</button>
-                                    <button v-if="item.status !== '已作废'" class="btn btn-xs btn-danger" @click="cancelOrder(item.id)">作废</button>
+                                    <button v-if="item.status !== '已作废' && item.status !== '已完成'" class="btn btn-xs btn-warning" @click="openEditOrderDialog(item)" style="margin-right:4px;">修改</button>
+                                    <button v-if="item.status !== '已作废' && item.status !== '已完成'" class="btn btn-xs btn-danger" @click="cancelOrder(item.id)">作废</button>
                                 </td>
                             </tr>
                         </tbody>
@@ -1339,6 +1350,14 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- 欠款分页 -->
+                    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;">
+                        <span style="font-size:13px;color:#666;">共 {{ debtTotal }} 条</span>
+                        <button class="btn btn-sm btn-secondary" @click="prevDebtPage" :disabled="debtPageNum <= 1">上一页</button>
+                        <span style="font-size:14px;">{{ debtPageNum }} / {{ debtTotalPages }}</span>
+                        <button class="btn btn-sm btn-secondary" @click="nextDebtPage" :disabled="debtPageNum >= debtTotalPages">下一页</button>
+                    </div>
                 </div>
 
                 <!-- ===== 还款管理 ===== -->
@@ -1407,6 +1426,14 @@
                             </tr>
                         </tbody>
                     </table>
+
+                    <!-- 还款分页 -->
+                    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;">
+                        <span style="font-size:13px;color:#666;">共 {{ repaymentTotal }} 条</span>
+                        <button class="btn btn-sm btn-secondary" @click="prevRepaymentPage" :disabled="repaymentPageNum <= 1">上一页</button>
+                        <span style="font-size:14px;">{{ repaymentPageNum }} / {{ repaymentTotalPages }}</span>
+                        <button class="btn btn-sm btn-secondary" @click="nextRepaymentPage" :disabled="repaymentPageNum >= repaymentTotalPages">下一页</button>
+                    </div>
                 </div>
             </main>
         </div>
@@ -1862,7 +1889,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button class="btn btn-primary" @click="printOrder" style="margin-right:auto;">
+                <button v-if="orderDetail.order?.status !== '已作废'" class="btn btn-primary" @click="printOrder" style="margin-right:auto;">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;">
                         <polyline points="6 9 6 2 18 2 18 9"></polyline>
                         <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
@@ -2097,6 +2124,10 @@
                 dateEnd: ''
             });
             const showDebtCustomerPanel = ref(false);
+            const debtPageNum = ref(1);
+            const debtPageSize = ref(10);
+            const debtTotal = ref(0);
+            const debtTotalPages = ref(0);
 
             /* ========== 还款管理数据 ========== */
             const repaymentList = ref([]);
@@ -2112,6 +2143,10 @@
                 remark: ''
             });
             const customerDebtSummaries = ref([]);
+            const repaymentPageNum = ref(1);
+            const repaymentPageSize = ref(10);
+            const repaymentTotal = ref(0);
+            const repaymentTotalPages = ref(0);
 
             /* ========== 商品选择数据 ========== */
             const productTree = ref([]);
@@ -2763,6 +2798,8 @@
                 try {
                     let url = '/api/order/debts/all';
                     const params = [];
+                    params.push('pageNum=' + debtPageNum.value);
+                    params.push('pageSize=' + debtPageSize.value);
                     if (debtFilter.customerIds.length > 0) {
                         params.push('customerId=' + debtFilter.customerIds.join(','));
                     }
@@ -2775,20 +2812,30 @@
                     if (debtFilter.dateEnd) {
                         params.push('dateEnd=' + debtFilter.dateEnd);
                     }
-                    if (params.length > 0) {
-                        url += '?' + params.join('&');
-                    }
+                    url += '?' + params.join('&');
 
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
-                    if (result && result.code === 200) {
-                        debtList.value = result.data;
+                    if (result && result.code === 200 && result.data) {
+                        debtList.value = result.data.list || [];
+                        debtTotal.value = result.data.total || 0;
+                        debtTotalPages.value = result.data.pages || 0;
+                    } else {
+                        debtList.value = [];
                     }
                 } catch (e) {
+                    debtList.value = [];
                     ElMessage.error('加载欠款记录失败');
                 } finally {
                     debtLoading.value = false;
                 }
+            };
+
+            const prevDebtPage = () => {
+                if (debtPageNum.value > 1) { debtPageNum.value--; loadDebts(); }
+            };
+            const nextDebtPage = () => {
+                if (debtPageNum.value < debtTotalPages.value) { debtPageNum.value++; loadDebts(); }
             };
 
             const resetDebtFilter = () => {
@@ -2797,6 +2844,7 @@
                 debtFilter.dateStart = '';
                 debtFilter.dateEnd = '';
                 showDebtCustomerPanel.value = false;
+                debtPageNum.value = 1;
                 loadDebts();
             };
 
@@ -2813,16 +2861,29 @@
             const loadRepayments = async () => {
                 repaymentLoading.value = true;
                 try {
-                    const res = await fetch('/api/repayment', { headers: getAuthHeaders() });
+                    const url = '/api/repayment?pageNum=' + repaymentPageNum.value + '&pageSize=' + repaymentPageSize.value;
+                    const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
-                    if (result && result.code === 200) {
-                        repaymentList.value = result.data;
+                    if (result && result.code === 200 && result.data) {
+                        repaymentList.value = result.data.list || [];
+                        repaymentTotal.value = result.data.total || 0;
+                        repaymentTotalPages.value = result.data.pages || 0;
+                    } else {
+                        repaymentList.value = [];
                     }
                 } catch (e) {
+                    repaymentList.value = [];
                     ElMessage.error('加载还款记录失败');
                 } finally {
                     repaymentLoading.value = false;
                 }
+            };
+
+            const prevRepaymentPage = () => {
+                if (repaymentPageNum.value > 1) { repaymentPageNum.value--; loadRepayments(); }
+            };
+            const nextRepaymentPage = () => {
+                if (repaymentPageNum.value < repaymentTotalPages.value) { repaymentPageNum.value++; loadRepayments(); }
             };
 
             const loadCustomerDebtSummaries = async () => {
@@ -2899,6 +2960,7 @@
                     if (result && result.code === 200) {
                         ElMessage.success('还款登记成功');
                         showRepaymentDialog.value = false;
+                        repaymentPageNum.value = 1;
                         loadRepayments();
                         loadCustomerDebtSummaries();
                         loadDebts();
@@ -3068,11 +3130,14 @@
                 topbarTitle,
                 debtList, debtLoading, loadDebts, formatDateTime, totalValidDebt, totalClearedDebt,
                 debtFilter, showDebtCustomerPanel, resetDebtFilter, toggleDebtCustomerFilter,
+                debtPageNum, debtPageSize, debtTotal, debtTotalPages, prevDebtPage, nextDebtPage,
                 printOrder, printTotalQty, printTotalAmount, amountToChinese,
                 repaymentList, repaymentLoading, showRepaymentDialog, repaymentSaving, repaymentForm,
                 repaymentCustomerDebt, customerDebtSummaries,
                 loadRepayments, loadCustomerDebtSummaries, openRepaymentDialog, quickRepay,
-                onRepaymentCustomerChange, submitRepayment
+                onRepaymentCustomerChange, submitRepayment,
+                repaymentPageNum, repaymentPageSize, repaymentTotal, repaymentTotalPages,
+                prevRepaymentPage, nextRepaymentPage
             };
         }
     }).use(ElementPlus).mount('#app');

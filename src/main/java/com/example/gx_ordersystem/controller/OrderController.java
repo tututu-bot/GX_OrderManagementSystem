@@ -145,7 +145,16 @@ public class OrderController {
                 .eq(DebtRecord::getCustomerId, customerId)
                 .in(DebtRecord::getStatus, Arrays.asList("UNSETTLED", "PARTIAL"))
                 .orderByAsc(DebtRecord::getCreateTime)
+                .orderByAsc(DebtRecord::getId)
                 .list();
+
+        System.out.println("[核销顺序] 共" + unsettledDebts.size() + "笔未结清欠款，核销顺序：");
+        for (int i = 0; i < unsettledDebts.size(); i++) {
+            DebtRecord d = unsettledDebts.get(i);
+            System.out.println("  " + (i + 1) + ". id=" + d.getId() + " orderNo=" + d.getOrderNo()
+                    + " amount=" + d.getAmount() + " settled=" + d.getSettledAmount()
+                    + " createTime=" + d.getCreateTime());
+        }
 
         // 3. 逐笔核销，记录被完全结清的订单ID
         Set<Long> completedOrderIds = new HashSet<>();
@@ -260,13 +269,18 @@ public class OrderController {
         // 设置订单创建者
         order.setUserId(getCurrentUserId(request));
 
+        // 本次欠款为0（全额付款），状态直接为"已完成"
+        BigDecimal currentDebt = order.getCurrentDebt() != null ? order.getCurrentDebt() : BigDecimal.ZERO;
+        if (currentDebt.compareTo(BigDecimal.ZERO) <= 0) {
+            order.setStatus("已完成");
+        }
+
         boolean saved = saleOrderService.save(order);
         if (!saved) {
             return Result.error("保存订单失败");
         }
 
         Long userId = getCurrentUserId(request);
-        BigDecimal currentDebt = order.getCurrentDebt() != null ? order.getCurrentDebt() : BigDecimal.ZERO;
 
         // 有欠款时创建欠款记录，并从 debt_record 实时同步用户-客户欠款
         if (currentDebt.compareTo(BigDecimal.ZERO) > 0) {
@@ -546,12 +560,14 @@ public class OrderController {
     }
 
     /**
-     * 查询当前用户的所有欠款记录（带客户名称）
+     * 分页条件查询当前用户的所有欠款记录（带客户名称）
      * 用于欠款列表页面展示
-     * 支持筛选：客户多选、创建时间范围
+     * 支持筛选：客户多选、单据编号、创建时间范围
      */
     @GetMapping("/debts/all")
-    public Result<List<Map<String, Object>>> listAllDebts(
+    public Result<Map<String, Object>> listAllDebts(
+            @RequestParam(defaultValue = "1") Integer pageNum,
+            @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) String customerId,
             @RequestParam(required = false) String orderNo,
             @RequestParam(required = false) String dateStart,
@@ -559,8 +575,6 @@ public class OrderController {
             HttpServletRequest request) {
 
         Long userId = getCurrentUserId(request);
-
-        System.out.println("[listAllDebts] orderNo参数=" + orderNo);
 
         // 构建查询条件
         LambdaQueryWrapper<DebtRecord> wrapper = new LambdaQueryWrapper<>();
@@ -581,7 +595,6 @@ public class OrderController {
         // 单据编号模糊查询
         if (orderNo != null && !orderNo.isEmpty()) {
             wrapper.like(DebtRecord::getOrderNo, orderNo);
-            System.out.println("[listAllDebts] 应用orderNo模糊查询: " + orderNo);
         }
 
         // 创建时间范围筛选
@@ -594,10 +607,11 @@ public class OrderController {
 
         wrapper.orderByDesc(DebtRecord::getCreateTime);
 
-        List<DebtRecord> debts = debtRecordService.list(wrapper);
+        Page<DebtRecord> page = new Page<>(pageNum, pageSize);
+        debtRecordService.page(page, wrapper);
 
         // 查询客户信息用于关联
-        List<Long> customerIds = debts.stream()
+        List<Long> customerIds = page.getRecords().stream()
                 .map(DebtRecord::getCustomerId)
                 .distinct()
                 .toList();
@@ -612,7 +626,7 @@ public class OrderController {
         }
 
         // 组装返回数据
-        List<Map<String, Object>> result = debts.stream().map(debt -> {
+        List<Map<String, Object>> list = page.getRecords().stream().map(debt -> {
             Map<String, Object> map = new HashMap<>();
             map.put("id", debt.getId());
             map.put("customerId", debt.getCustomerId());
@@ -629,6 +643,12 @@ public class OrderController {
             return map;
         }).toList();
 
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", page.getTotal());
+        result.put("pages", page.getPages());
+        result.put("current", page.getCurrent());
+        result.put("size", page.getSize());
         return Result.success(result);
     }
 }
