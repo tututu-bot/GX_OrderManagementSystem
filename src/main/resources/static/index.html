@@ -791,6 +791,37 @@
             flex-shrink: 0;
         }
 
+        /* 客户搜索建议下拉 */
+        .suggestion-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            z-index: 300;
+            background: #FFFFFF;
+            border: 1px solid #E5E5E5;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 4px 0;
+        }
+        .suggestion-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 14px;
+            font-size: 13px;
+            color: #1A1A1A;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .suggestion-item:hover,
+        .suggestion-item.selected {
+            background: #F5F3FF;
+            color: #6B4BFF;
+        }
+
         /* 横向 checkbox 标签组 */
         .filter-tag-group {
             display: flex;
@@ -973,15 +1004,6 @@
                 <p>销售订单管理平台</p>
             </div>
             <ul class="nav-menu">
-                <a href="#/customer" class="nav-item" :class="{ active: currentRoute === 'customer' }">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                        <circle cx="9" cy="7" r="4"></circle>
-                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                    </svg>
-                    客户管理
-                </a>
                 <a href="#/order" class="nav-item" :class="{ active: currentRoute === 'order' }">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
@@ -997,6 +1019,23 @@
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                     </svg>
                     欠款列表
+                </a>
+                <a href="#/customer" class="nav-item" :class="{ active: currentRoute === 'customer' }">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="9" cy="7" r="4"></circle>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                    </svg>
+                    客户管理
+                </a>
+                <a href="#/product" class="nav-item" :class="{ active: currentRoute === 'product' }">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <path d="M16 10a4 4 0 0 1-8 0"></path>
+                    </svg>
+                    商品管理
                 </a>
                 <a href="#/repayment" class="nav-item" :class="{ active: currentRoute === 'repayment' }">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1084,6 +1123,7 @@
                             <tr>
                                 <th>客户名称</th>
                                 <th>分类</th>
+                                <th>主营产品</th>
                                 <th>联系人</th>
                                 <th>电话</th>
                                 <th>地址</th>
@@ -1093,10 +1133,10 @@
                         </thead>
                         <tbody>
                             <tr v-if="customerLoading">
-                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                                <td colspan="8" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
                             </tr>
                             <tr v-else-if="filteredCustomerList.length === 0">
-                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">暂无客户数据</td>
+                                <td colspan="8" style="text-align:center;color:#9CA3AF;padding:40px;">暂无客户数据</td>
                             </tr>
                             <tr v-for="item in filteredCustomerList" :key="item.id">
                                 <td>{{ item.customerName }}</td>
@@ -1105,12 +1145,14 @@
                                         {{ item.category }}
                                     </span>
                                 </td>
+                                <td>{{ item.coreProduct || '-' }}</td>
                                 <td>{{ item.contactName || '-' }}</td>
                                 <td>{{ item.phone || '-' }}</td>
                                 <td>{{ item.address || '-' }}</td>
                                 <td>{{ item.totalDebt }} 元</td>
                                 <td>
                                     <button class="btn btn-sm btn-primary" @click="openCustomerDialog(item)" style="margin-right:8px;">查看详情</button>
+                                    <button v-if="item.totalDebt > 0" class="btn btn-sm btn-warning" @click="goDebt(item.id)" style="margin-right:8px;">还款</button>
                                     <button class="btn btn-sm btn-danger" @click="deleteCustomer(item.id)">删除</button>
                                 </td>
                             </tr>
@@ -1123,6 +1165,93 @@
                         <button class="btn btn-sm btn-secondary" @click="prevCustomerPage" :disabled="customerPageNum <= 1">上一页</button>
                         <span style="font-size:14px;">{{ customerPageNum }} / {{ customerTotalPages }}</span>
                         <button class="btn btn-sm btn-secondary" @click="nextCustomerPage" :disabled="customerPageNum >= customerTotalPages">下一页</button>
+                    </div>
+                </div>
+
+                <!-- ===== 商品管理 ===== -->
+                <div v-if="currentRoute === 'product'" class="page-card">
+                    <div class="page-header-row">
+                        <h2 class="page-title">商品列表</h2>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn btn-secondary" @click="downloadProductTemplate">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                下载模板
+                            </button>
+                            <button class="btn btn-secondary" @click="showImportDialog = true">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="17 8 12 3 7 8"></polyline>
+                                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                                </svg>
+                                批量导入
+                            </button>
+                            <button class="btn btn-primary" @click="openProductDialog()">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                                </svg>
+                                新增商品
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display:flex;gap:12px;margin-bottom:20px;">
+                        <input
+                            type="text"
+                            v-model="productSearchKeyword"
+                            placeholder="搜索商品名称或编码..."
+                            style="flex:1;max-width:320px;height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;"
+                            @input="productPageNum = 1; loadProducts()"
+                        >
+                    </div>
+
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>商品编码</th>
+                                <th>商品名称</th>
+                                <th>颜色</th>
+                                <th>尺码</th>
+                                <th>码数</th>
+                                <th>单位</th>
+                                <th>单价</th>
+                                <th>备注</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-if="productLoading">
+                                <td colspan="9" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                            </tr>
+                            <tr v-else-if="filteredProductList.length === 0">
+                                <td colspan="9" style="text-align:center;color:#9CA3AF;padding:40px;">暂无商品数据</td>
+                            </tr>
+                            <tr v-for="item in filteredProductList" :key="item.id">
+                                <td>{{ item.productCode }}</td>
+                                <td>{{ item.productName }}</td>
+                                <td>{{ getSpecPart(item.specification, 0) }}</td>
+                                <td>{{ getSpecPart(item.specification, 1) }}</td>
+                                <td>{{ getSpecPart(item.specification, 2) }}</td>
+                                <td>{{ item.unit }}</td>
+                                <td>{{ item.unitPrice }} 元</td>
+                                <td>{{ item.remark || '-' }}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" @click="openProductDialog(item)" style="margin-right:8px;">编辑</button>
+                                    <button class="btn btn-sm btn-danger" @click="deleteProduct(item.id)">删除</button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
+                        <span style="font-size:13px;color:#666;">共 {{ productTotal }} 条</span>
+                        <button class="btn btn-sm btn-secondary" @click="prevProductPage" :disabled="productPageNum <= 1">上一页</button>
+                        <span style="font-size:14px;">{{ productPageNum }} / {{ productTotalPages }}</span>
+                        <button class="btn btn-sm btn-secondary" @click="nextProductPage" :disabled="productPageNum >= productTotalPages">下一页</button>
                     </div>
                 </div>
 
@@ -1141,23 +1270,11 @@
 
                     <!-- 订单筛选区域 -->
                     <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
-                        <!-- 客户多选 -->
+                        <!-- 客户名称模糊搜索 -->
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">客户</label>
-                            <div id="order-filter-wrap" class="filter-multi-wrap">
-                                <div class="filter-multi-trigger" :class="{ active: showCustomerFilterPanel }" @click="showCustomerFilterPanel = !showCustomerFilterPanel">
-                                    <span>{{ orderFilter.customerIds.length ? '已选 ' + orderFilter.customerIds.length + ' 个' : '全部客户' }}</span>
-                                    <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <polyline points="6 9 12 15 18 9"></polyline>
-                                    </svg>
-                                </div>
-                                <div v-if="showCustomerFilterPanel" class="filter-multi-panel">
-                                    <div class="filter-multi-option" v-for="c in customerList" :key="c.id" @click.stop="toggleCustomerFilter(c.id)">
-                                        <input type="checkbox" :checked="orderFilter.customerIds.includes(c.id)" @click.stop="toggleCustomerFilter(c.id)">
-                                        <span>{{ c.customerName }}</span>
-                                    </div>
-                                </div>
-                            </div>
+                            <input type="text" v-model="orderFilter.customerName" placeholder="输入客户名称搜索..."
+                                style="width:200px;height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
                         </div>
 
                         <!-- 收款方式多选 -->
@@ -1497,13 +1614,16 @@
                     </select>
                 </div>
                 <div class="form-row">
+                    <label>主营产品</label>
+                    <input type="text" v-model="customerForm.coreProduct" placeholder="如：松紧带">
+                </div>
+                <div class="form-row">
                     <label>联系人</label>
                     <input type="text" v-model="customerForm.contactName" placeholder="请输入联系人">
                 </div>
                 <div class="form-row">
-                    <label>联系电话 <span style="color:#DC2626;">*</span></label>
-                    <input type="text" v-model="customerForm.phone" placeholder="请输入联系电话（必填）">
-                    <div v-if="customerPhoneError" style="font-size:13px;color:#DC2626;margin-top:4px;">{{ customerPhoneError }}</div>
+                    <label>联系电话</label>
+                    <input type="text" v-model="customerForm.phone" placeholder="请输入联系电话">
                 </div>
                 <div class="form-row">
                     <label>地址</label>
@@ -1527,6 +1647,95 @@
         </div>
     </div>
 
+    <!-- ========== 商品新增/编辑弹窗 ========== -->
+    <div v-cloak v-if="showProductDialog" class="modal-overlay" @click.self="showProductDialog = false">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>{{ productForm.id ? '编辑商品' : '新增商品' }}</h3>
+            </div>
+            <div class="modal-body">
+                <div class="form-row">
+                    <label>商品名称 <span style="color:#DC2626;">*</span></label>
+                    <input type="text" v-model="productForm.productName" placeholder="如：针织42#" @input="onProductNameChange">
+                </div>
+                <div class="form-row">
+                    <label>商品编码</label>
+                    <input type="text" v-model="productForm.productCode" disabled placeholder="自动生成" style="background:#F5F5F5;color:#666;">
+                </div>
+                <div class="form-row">
+                    <label>颜色 <span style="color:#DC2626;">*</span></label>
+                    <input type="text" v-model="productFormColor" placeholder="如：白" @input="onProductFieldChange">
+                </div>
+                <div class="form-row">
+                    <label>尺码 <span style="color:#DC2626;">*</span></label>
+                    <input type="text" v-model="productFormSize" placeholder="如：1.9cm/6分" @input="onProductFieldChange">
+                </div>
+                <div class="form-row">
+                    <label>码数</label>
+                    <input type="text" v-model="productFormYardCode" placeholder="如：码数45y">
+                </div>
+                <div style="display:flex;gap:16px;">
+                    <div class="form-row" style="flex:1;">
+                        <label>单位</label>
+                        <input type="text" v-model="productForm.unit" placeholder="公斤">
+                    </div>
+                    <div class="form-row" style="flex:1;">
+                        <label>单价（元）</label>
+                        <input type="number" step="0.01" v-model="productForm.unitPrice" placeholder="0.00">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <label>备注</label>
+                    <input type="text" v-model="productForm.remark" placeholder="备注信息">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showProductDialog = false">取消</button>
+                <button class="btn btn-primary" :disabled="productSaving" @click="saveProduct">
+                    {{ productSaving ? '保存中...' : '保存' }}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 商品批量导入弹窗 ========== -->
+    <div v-cloak v-if="showImportDialog" class="modal-overlay" @click.self="showImportDialog = false">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>批量导入商品</h3>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:13px;color:#666;margin-bottom:16px;">
+                    请先下载 CSV 模板，按模板格式填写商品数据后上传。编码留空将自动生成。
+                </p>
+                <div style="margin-bottom:16px;">
+                    <button class="btn btn-secondary" @click="downloadProductTemplate" style="margin-bottom:12px;">下载 CSV 模板</button>
+                </div>
+                <div style="border:2px dashed #E5E5E5;border-radius:12px;padding:32px;text-align:center;">
+                    <input type="file" ref="importFileInput" accept=".csv" @change="handleImportFile" style="display:none;">
+                    <div v-if="!importFileName" style="color:#9CA3AF;">
+                        <p style="margin-bottom:8px;">将 CSV 文件拖拽到此处，或点击选择文件</p>
+                        <button class="btn btn-primary" @click="$refs.importFileInput.click()">选择文件</button>
+                    </div>
+                    <div v-else style="color:#1A1A1A;">
+                        <p style="margin-bottom:8px;">已选择：<strong>{{ importFileName }}</strong></p>
+                        <button class="btn btn-sm btn-secondary" @click="clearImportFile" style="margin-right:8px;">重新选择</button>
+                        <button class="btn btn-sm btn-primary" :disabled="importing" @click="submitImport">
+                            {{ importing ? '导入中...' : '开始导入' }}
+                        </button>
+                    </div>
+                </div>
+                <div v-if="importResult" style="margin-top:16px;padding:12px 16px;border-radius:8px;" :style="{ background: importResult.errors > 0 ? '#FEF2F2' : '#F0FDF4', border: '1px solid ' + (importResult.errors > 0 ? '#FECACA' : '#BBF7D0') }">
+                    <p style="font-size:14px;font-weight:600;">导入完成：成功 {{ importResult.success }} 条，失败 {{ importResult.errors }} 条</p>
+                    <p v-if="importResult.errors > 0" style="font-size:13px;color:#DC2626;margin-top:4px;white-space:pre-wrap;">{{ importResult.errorMsg }}</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @click="showImportDialog = false; importResult = null; clearImportFile()">关闭</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== 新增/编辑订单弹窗 ========== -->
     <div v-cloak v-if="showOrderDialog" class="modal-overlay" @click.self="showOrderDialog = false">
         <div class="modal-card order-modal-card">
@@ -1534,10 +1743,36 @@
                 <h3>{{ orderDialogMode === 'edit' ? '编辑订单' : '新增销售订单' }}</h3>
             </div>
             <div class="modal-body">
-                <!-- 客户选择 -->
+                <!-- 客户选择：搜索输入 + 下拉匹配 -->
                 <div class="form-row">
                     <label>客户 <span style="color:#DC2626;">*</span></label>
-                    <select v-model="orderForm.customerId" @change="onOrderCustomerChange" :disabled="orderDialogMode === 'edit'">
+                    <div style="position:relative;" v-if="orderDialogMode !== 'edit'">
+                        <input type="text"
+                               v-model="customerSearchText"
+                               placeholder="输入客户名称搜索，或点击下拉选择..."
+                               @focus="showCustomerSuggestions = true"
+                               @input="showCustomerSuggestions = true; orderForm.customerId = ''"
+                               @blur="handleCustomerBlur"
+                               style="width:100%;height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
+                        <div v-if="showCustomerSuggestions && customerSuggestions.length > 0"
+                             class="suggestion-dropdown">
+                            <div v-for="c in customerSuggestions" :key="c.id"
+                                 class="suggestion-item"
+                                 :class="{ selected: orderForm.customerId === c.id }"
+                                 @mousedown.prevent="selectOrderCustomer(c)">
+                                <span>{{ c.customerName }}</span>
+                                <span style="font-size:12px;color:#9CA3AF;">{{ c.phone || '无电话' }}</span>
+                            </div>
+                        </div>
+                        <div v-if="showCustomerSuggestions && customerSearchText && customerSuggestions.length === 0"
+                             class="suggestion-dropdown">
+                            <div class="suggestion-item" style="color:#9CA3AF;cursor:default;">
+                                未找到匹配的客户
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 编辑模式：下拉选择 -->
+                    <select v-if="orderDialogMode === 'edit'" v-model="orderForm.customerId" @change="onOrderCustomerChange" disabled>
                         <option value="">请选择客户</option>
                         <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.customerName }}（{{ c.phone || '无电话' }}）</option>
                     </select>
@@ -1564,16 +1799,8 @@
                 <!-- 基本信息 -->
                 <div style="display:flex;gap:16px;flex-wrap:wrap;">
                     <div class="form-row" style="flex:1;min-width:180px;">
-                        <label>销售人员</label>
-                        <input type="text" v-model="orderForm.salesPerson">
-                    </div>
-                    <div class="form-row" style="flex:1;min-width:180px;">
                         <label>单据日期</label>
                         <input type="date" v-model="orderForm.orderDate">
-                    </div>
-                    <div class="form-row" style="flex:1;min-width:180px;">
-                        <label>交货日期</label>
-                        <input type="date" v-model="orderForm.deliveryDate">
                     </div>
                 </div>
 
@@ -1614,15 +1841,19 @@
                         <div class="item-card-grid">
                             <div class="form-row">
                                 <label>商品名称 <span style="color:#DC2626;">*</span></label>
-                                <input type="text" v-model="item.productName" placeholder="如：加厚白针织37#预缩">
+                                <input type="text" v-model="item.productName" placeholder="如：针织42#">
                             </div>
                             <div class="form-row">
-                                <label>商品编号</label>
-                                <input type="text" v-model="item.productCode" placeholder="商品编号">
+                                <label>颜色</label>
+                                <input type="text" v-model="item.itemColor" placeholder="如：白">
                             </div>
                             <div class="form-row">
-                                <label>规格型号</label>
-                                <input type="text" v-model="item.specification" placeholder="规格">
+                                <label>尺寸</label>
+                                <input type="text" v-model="item.itemSize" placeholder="如：1.9cm/6分">
+                            </div>
+                            <div class="form-row">
+                                <label>码数</label>
+                                <input type="text" v-model="item.itemYardCode" placeholder="如：码数45y">
                             </div>
                             <div class="form-row">
                                 <label>单位</label>
@@ -1733,14 +1964,14 @@
         </div>
     </div>
 
-    <!-- ========== 商品选择弹窗 ========== -->
+    <!-- ========== 商品选择弹窗（三级树：名称 → 颜色 → 规格） ========== -->
     <div v-cloak v-if="showProductSelectDialog" class="modal-overlay" @click.self="showProductSelectDialog = false">
         <div class="modal-card product-select-modal-card">
             <div class="modal-header">
                 <h3>选择商品</h3>
             </div>
             <div class="modal-body">
-                <p style="font-size:13px;color:#666;margin-bottom:12px;">点击商品名称展开规格列表，点击规格即可选中该商品</p>
+                <p style="font-size:13px;color:#666;margin-bottom:12px;">名称 → 颜色 → 规格，逐级展开后点击规格即可选中</p>
                 <div class="product-tree">
                     <div v-for="group in productTree" :key="group.productName" class="product-group">
                         <div class="product-group-header"
@@ -1750,18 +1981,32 @@
                                 <polyline points="9 18 15 12 9 6"></polyline>
                             </svg>
                             <span>{{ group.productName }}</span>
-                            <span style="margin-left:auto;font-size:12px;color:#9CA3AF;font-weight:400;">共 {{ group.children.length }} 种规格</span>
+                            <span style="margin-left:auto;font-size:12px;color:#9CA3AF;font-weight:400;">{{ countProductsInGroup(group) }} 种规格</span>
                         </div>
-                        <div v-if="expandedProductNames.includes(group.productName)" class="product-children">
-                            <div v-for="product in group.children"
-                                 :key="product.id"
-                                 class="product-child-item"
-                                 @click="selectProduct(product)">
-                                <span>
-                                    <span class="spec-name">{{ product.specification }}</span>
-                                    <span class="unit-tag">{{ product.unit }}</span>
-                                </span>
-                                <span class="price-tag">{{ product.unitPrice }} 元</span>
+                        <div v-if="expandedProductNames.includes(group.productName)" class="product-children" style="padding-left:16px;">
+                            <div v-for="colorGroup in group.colors" :key="group.productName + '|' + colorGroup.color" class="product-group">
+                                <div class="product-group-header"
+                                     :class="{ expanded: expandedColorKeys.includes(group.productName + '|' + colorGroup.color) }"
+                                     @click="toggleColorGroup(group.productName, colorGroup.color)"
+                                     style="background:#F8F8F8;">
+                                    <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="9 18 15 12 9 6"></polyline>
+                                    </svg>
+                                    <span style="font-size:13px;">{{ colorGroup.color }}</span>
+                                    <span style="margin-left:auto;font-size:11px;color:#9CA3AF;font-weight:400;">{{ colorGroup.children.length }} 个</span>
+                                </div>
+                                <div v-if="expandedColorKeys.includes(group.productName + '|' + colorGroup.color)" class="product-children" style="padding-left:12px;">
+                                    <div v-for="product in colorGroup.children"
+                                         :key="product.id"
+                                         class="product-child-item"
+                                         @click="selectProduct(product)">
+                                        <span>
+                                            <span class="spec-name">{{ getSizeFromSpec(product.specification) }}</span>
+                                            <span class="unit-tag">{{ product.unit }}</span>
+                                        </span>
+                                        <span class="price-tag">{{ product.unitPrice }} 元</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1973,37 +2218,37 @@
             <div class="print-header">
                 <div class="print-row">
                     <span>客户：{{ orderDetail.customerName || '-' }}</span>
-                    <span>销售人员：{{ orderDetail.order?.salesPerson || '-' }}</span>
+                    <span>主营产品：{{ orderDetail.customerCoreProduct || '-' }}</span>
                     <span>单据日期：{{ orderDetail.order?.orderDate || '-' }}</span>
-                    <span>单据编号：{{ orderDetail.order?.orderNo || '-' }}</span>
                 </div>
                 <div class="print-row">
                     <span>地址：{{ orderDetail.customerAddress || '-' }}</span>
                     <span>联系人：{{ orderDetail.customerContact || '-' }}</span>
                     <span>电话：{{ orderDetail.customerPhone || '-' }}</span>
-                    <span>交货日期：{{ orderDetail.order?.deliveryDate || '-' }}</span>
                 </div>
             </div>
             <table class="print-table">
                 <thead>
                     <tr>
-                        <th style="width:40px;">序号</th>
-                        <th style="width:100px;">商品编号</th>
+                        <th style="width:36px;">序号</th>
                         <th>商品名称</th>
-                        <th style="width:80px;">规格型号</th>
-                        <th style="width:40px;">单位</th>
-                        <th style="width:60px;">数量</th>
-                        <th style="width:60px;">单价</th>
-                        <th style="width:70px;">金额</th>
-                        <th style="width:60px;">备注</th>
+                        <th style="width:48px;">颜色</th>
+                        <th style="width:72px;">尺寸</th>
+                        <th style="width:72px;">码数</th>
+                        <th style="width:36px;">单位</th>
+                        <th style="width:54px;">数量</th>
+                        <th style="width:54px;">单价</th>
+                        <th style="width:64px;">金额</th>
+                        <th style="width:54px;">备注</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="(item, idx) in orderDetail.items" :key="item.id">
                         <td>{{ idx + 1 }}</td>
-                        <td>{{ item.productCode || '' }}</td>
                         <td>{{ item.productName || '' }}</td>
-                        <td>{{ item.specification || '' }}</td>
+                        <td>{{ getSpecPart(item.specification, 0) }}</td>
+                        <td>{{ getSpecPart(item.specification, 1) }}</td>
+                        <td>{{ getSpecPart(item.specification, 2) }}</td>
                         <td>{{ item.unit || '' }}</td>
                         <td>{{ item.quantity }}</td>
                         <td>{{ item.unitPrice?.toFixed ? item.unitPrice.toFixed(2) : item.unitPrice }}</td>
@@ -2013,15 +2258,19 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="5" style="text-align:right;font-weight:bold;">合计：</td>
+                        <td colspan="6" style="text-align:right;font-weight:bold;">合计：</td>
                         <td>{{ printTotalQty }}</td>
                         <td></td>
                         <td style="font-weight:bold;">{{ printTotalAmount }}</td>
                         <td></td>
                     </tr>
+                    <tr>
+                        <td colspan="10" style="text-align:right;font-weight:bold;border-top:none;">
+                            合计金额大写：{{ amountToChinese(orderDetail.order?.totalAmount || 0) }}
+                        </td>
+                    </tr>
                 </tfoot>
             </table>
-            <div class="print-amount-words">合计金额大写：{{ amountToChinese(orderDetail.order?.totalAmount || 0) }}</div>
             <div class="print-summary">
                 <span>本单金额：{{ orderDetail.order?.totalAmount?.toFixed ? orderDetail.order.totalAmount.toFixed(2) : (orderDetail.order?.totalAmount || 0) }}</span>
                 <span>其他费用：{{ orderDetail.order?.otherFee?.toFixed ? orderDetail.order.otherFee.toFixed(2) : (orderDetail.order?.otherFee || 0) }}</span>
@@ -2031,7 +2280,6 @@
             </div>
             <div class="print-remark">备注：{{ orderDetail.order?.remark || '' }}</div>
             <div class="print-sign">
-                <span>制单人：{{ orderDetail.order?.salesPerson || currentUser.realName || currentUser.account || '-' }}</span>
                 <span>发货人签字：</span>
                 <span>客户签字：</span>
             </div>
@@ -2061,9 +2309,8 @@
             const customerLoading = ref(false);
             const showCustomerDialog = ref(false);
             const customerSaving = ref(false);
-            const customerForm = reactive({ id: null, customerName: '', category: '零售', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
+            const customerForm = reactive({ id: null, customerName: '', category: '零售', coreProduct: '', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
             const customerNameError = ref('');
-            const customerPhoneError = ref('');
             const searchKeyword = ref('');
             const categoryFilter = ref('');
             const filteredCustomerList = ref([]);
@@ -2073,6 +2320,44 @@
             const customerPageSize = ref(10);
             const customerTotal = ref(0);
             const customerTotalPages = ref(0);
+
+            /* ========== 商品管理数据 ========== */
+            const productList = ref([]);
+            const productLoading = ref(false);
+            const showProductDialog = ref(false);
+            const productSaving = ref(false);
+            const productSearchKeyword = ref('');
+            const productForm = reactive({ id: null, productCode: '', productName: '', specification: '', unit: '公斤', unitPrice: 0, remark: '' });
+            const productFormColor = ref('');
+            const productFormSize = ref('');
+            const productFormYardCode = ref('');
+
+            // 商品分页
+            const productPageNum = ref(1);
+            const productPageSize = ref(15);
+            const productTotal = ref(0);
+            const productTotalPages = ref(0);
+
+            // 批量导入
+            const showImportDialog = ref(false);
+            const importFileName = ref('');
+            const importFileData = ref(null);
+            const importing = ref(false);
+            const importFileInput = ref(null);
+            const importResult = ref(null);
+
+            const filteredProductList = computed(() => {
+                let list = productList.value;
+                if (productSearchKeyword.value.trim()) {
+                    const kw = productSearchKeyword.value.trim().toLowerCase();
+                    list = list.filter(p =>
+                        (p.productName || '').toLowerCase().includes(kw) ||
+                        (p.productCode || '').toLowerCase().includes(kw) ||
+                        (p.specification || '').toLowerCase().includes(kw)
+                    );
+                }
+                return list;
+            });
 
             /* ========== 订单列表数据 ========== */
             const orderList = ref([]);
@@ -2086,14 +2371,13 @@
 
             // 订单筛选条件
             const orderFilter = reactive({
-                customerIds: [],
+                customerName: '',
                 paymentMethods: [],
                 statusList: [],
                 orderDateStart: '',
                 orderDateEnd: ''
             });
 
-            const showCustomerFilterPanel = ref(false);
             const paymentMethodOptions = ['现金', '微信', '支付宝', '银行转账', '赊账'];
             const statusOptions = ['进行中', '已完成', '已作废'];
 
@@ -2109,6 +2393,20 @@
                 paymentMethod: '', remark: '', status: '进行中'
             });
             const orderItems = ref([]);
+
+            // 客户搜索（全量客户列表，打开弹窗时加载）
+            const allCustomerList = ref([]);
+            const customerSearchText = ref('');
+            const showCustomerSuggestions = ref(false);
+            const customerSuggestions = computed(() => {
+                const text = customerSearchText.value.trim().toLowerCase();
+                const list = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
+                if (!text) return list;
+                return list.filter(c =>
+                    (c.customerName || '').toLowerCase().includes(text) ||
+                    (c.phone || '').toLowerCase().includes(text)
+                );
+            });
 
             /* ========== 订单详情数据 ========== */
             const showOrderDetailDialog = ref(false);
@@ -2147,12 +2445,14 @@
             const repaymentPageSize = ref(10);
             const repaymentTotal = ref(0);
             const repaymentTotalPages = ref(0);
+            const repaymentFilterCustomerId = ref(null);
 
             /* ========== 商品选择数据 ========== */
             const productTree = ref([]);
             const showProductSelectDialog = ref(false);
             const currentProductItemIndex = ref(-1);
             const expandedProductNames = ref([]);
+            const expandedColorKeys = ref([]);
 
             /* ========== 状态映射 ========== */
             // 订单状态中文映射：后端存储中文，前端直接显示
@@ -2188,6 +2488,7 @@
 
             /* ========== 路由处理 ========== */
             const topbarTitle = computed(() => {
+                if (currentRoute.value === 'product') return '商品管理';
                 if (currentRoute.value === 'order') return '订单列表';
                 if (currentRoute.value === 'debt') return '欠款列表';
                 if (currentRoute.value === 'repayment') return '还款管理';
@@ -2223,18 +2524,29 @@
                 showOrderDialog.value = false;
                 showOrderDetailDialog.value = false;
                 showProductSelectDialog.value = false;
+                showProductDialog.value = false;
+                showImportDialog.value = false;
                 showRepaymentDialog.value = false;
                 showDropdown.value = false;
 
                 const hash = window.location.hash;
-                if (hash === '#/order') {
+                if (hash === '#/product') {
+                    currentRoute.value = 'product';
+                    loadProducts();
+                } else if (hash === '#/order') {
                     currentRoute.value = 'order';
                     loadOrders();
-                } else if (hash === '#/debt') {
+                } else if (hash.startsWith('#/debt')) {
                     currentRoute.value = 'debt';
+                    const dParams = new URLSearchParams(hash.split('?')[1] || '');
+                    const cid = dParams.get('customerId');
+                    debtFilter.customerIds = cid ? [Number(cid)] : [];
                     loadDebts();
-                } else if (hash === '#/repayment') {
+                } else if (hash.startsWith('#/repayment')) {
                     currentRoute.value = 'repayment';
+                    // 解析 customerId 参数
+                    const params = new URLSearchParams(hash.split('?')[1] || '');
+                    repaymentFilterCustomerId.value = params.get('customerId') ? Number(params.get('customerId')) : null;
                     loadRepayments();
                     loadCustomerDebtSummaries();
                 } else {
@@ -2268,11 +2580,6 @@
 
                 // 点击页面其他区域关闭筛选下拉面板
                 document.addEventListener('click', (e) => {
-                    const orderPanel = document.querySelector('#order-filter-wrap .filter-multi-panel');
-                    const orderTrigger = document.querySelector('#order-filter-wrap .filter-multi-trigger');
-                    if (orderPanel && orderTrigger && !orderPanel.contains(e.target) && !orderTrigger.contains(e.target)) {
-                        showCustomerFilterPanel.value = false;
-                    }
                     const debtPanel = document.querySelector('#debt-filter-wrap .filter-multi-panel');
                     const debtTrigger = document.querySelector('#debt-filter-wrap .filter-multi-trigger');
                     if (debtPanel && debtTrigger && !debtPanel.contains(e.target) && !debtTrigger.contains(e.target)) {
@@ -2356,11 +2663,10 @@
 
             const openCustomerDialog = (row) => {
                 customerNameError.value = '';
-                customerPhoneError.value = '';
                 if (row) {
                     Object.assign(customerForm, row);
                 } else {
-                    Object.assign(customerForm, { id: null, customerName: '', category: '零售', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
+                    Object.assign(customerForm, { id: null, customerName: '', category: '零售', coreProduct: '', contactName: '', phone: '', address: '', remark: '', totalDebt: 0 });
                 }
                 showCustomerDialog.value = true;
             };
@@ -2371,11 +2677,6 @@
                     return;
                 }
                 customerNameError.value = '';
-                if (!customerForm.phone.trim()) {
-                    customerPhoneError.value = '请输入联系电话';
-                    return;
-                }
-                customerPhoneError.value = '';
                 customerSaving.value = true;
                 try {
                     const method = customerForm.id ? 'PUT' : 'POST';
@@ -2410,6 +2711,10 @@
                 }
             };
 
+            const goDebt = (customerId) => {
+                window.location.hash = '#/debt?customerId=' + customerId;
+            };
+
             const deleteCustomer = async (id) => {
                 try {
                     await ElMessageBox.confirm('确定删除该客户吗？', '提示', { type: 'warning' });
@@ -2426,12 +2731,218 @@
                 }
             };
 
+            /* ========== 商品管理 ========== */
+            const loadProducts = async () => {
+                productLoading.value = true;
+                try {
+                    const url = `/api/product/page?pageNum=${productPageNum.value}&pageSize=${productPageSize.value}&keyword=${encodeURIComponent(productSearchKeyword.value || '')}`;
+                    const res = await fetch(url, { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        productList.value = result.data.list || [];
+                        productTotal.value = result.data.total || 0;
+                        productTotalPages.value = result.data.pages || 0;
+                    }
+                } catch (e) {
+                    ElMessage.error('加载商品列表失败');
+                } finally {
+                    productLoading.value = false;
+                }
+            };
+
+            const prevProductPage = () => { if (productPageNum.value > 1) { productPageNum.value--; loadProducts(); } };
+            const nextProductPage = () => { if (productPageNum.value < productTotalPages.value) { productPageNum.value++; loadProducts(); } };
+
+            // 下载 CSV 模板
+            const downloadProductTemplate = () => {
+                const bom = '﻿';
+                const header = '商品名称,颜色,尺码,码数,单位,单价,备注';
+                const examples = [
+                    '针织42#,白,1.9cm/6分,码数45y,公斤,5.5,',
+                    '针织37#,黑,2.2cm/7分,码数41y,公斤,8.0,',
+                ].join('\n');
+                const csv = bom + header + '\n' + examples;
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = '商品导入模板.csv';
+                a.click();
+                URL.revokeObjectURL(url);
+            };
+
+            // 处理文件选择
+            const handleImportFile = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                importFileName.value = file.name;
+                importFileData.value = file;
+                importResult.value = null;
+            };
+
+            const clearImportFile = () => {
+                importFileName.value = '';
+                importFileData.value = null;
+                importResult.value = null;
+                if (importFileInput.value) importFileInput.value.value = '';
+            };
+
+            // 提交导入
+            const submitImport = async () => {
+                if (!importFileData.value) {
+                    ElMessage.error('请选择文件');
+                    return;
+                }
+                importing.value = true;
+                importResult.value = null;
+                try {
+                    const formData = new FormData();
+                    formData.append('file', importFileData.value);
+                    const res = await fetch('/api/product/import', {
+                        method: 'POST',
+                        headers: { 'Authorization': 'Bearer ' + token.value },
+                        body: formData
+                    });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        importResult.value = result.data;
+                        ElMessage.success(`导入完成：成功 ${result.data.success} 条`);
+                        clearImportFile();
+                        loadProducts();
+                        loadProductTree();
+                    } else if (result) {
+                        importResult.value = result.data || { success: 0, errors: 1, errorMsg: result.message };
+                    }
+                } catch (e) {
+                    ElMessage.error('导入失败');
+                } finally {
+                    importing.value = false;
+                }
+            };
+
+            // 解析 specification 的某一分段
+            const getSpecPart = (spec, index) => {
+                if (!spec) return '-';
+                const parts = spec.split(';');
+                return parts[index] || '-';
+            };
+
+            const openProductDialog = (row) => {
+                if (row) {
+                    Object.assign(productForm, row);
+                    const spec = row.specification || '';
+                    const parts = spec.split(';');
+                    productFormColor.value = parts[0] || '';
+                    productFormSize.value = parts[1] || '';
+                    productFormYardCode.value = parts[2] || '';
+                } else {
+                    Object.assign(productForm, { id: null, productCode: '', productName: '', specification: '', unit: '公斤', unitPrice: 0, remark: '' });
+                    productFormColor.value = '';
+                    productFormSize.value = '';
+                    productFormYardCode.value = '';
+                }
+                showProductDialog.value = true;
+            };
+
+            // 颜色/商品名称变更时尝试生成编码
+            const onProductNameChange = () => {
+                if (!productForm.id) tryGenerateCode();
+            };
+            const onProductFieldChange = () => {
+                if (!productForm.id) tryGenerateCode();
+            };
+            const tryGenerateCode = () => {
+                const name = productForm.productName.trim();
+                const color = productFormColor.value.trim();
+                const size = productFormSize.value.trim();
+                if (!name || !color || !size) {
+                    productForm.productCode = '';
+                    return;
+                }
+                // 颜色首字母：白→B，黑→H
+                const colorMap = { '白': 'B', '黑': 'H' };
+                const colorInit = colorMap[color] || color.charAt(0).toUpperCase();
+                // 从名称提取品类和型号：如 "针织42#" → ZZ, 42
+                let typeCode = '';
+                let modelNum = '';
+                const typeMatch = name.match(/针织/);
+                if (typeMatch) typeCode = 'ZZ';
+                const modelMatch = name.match(/(\d+)#/);
+                if (modelMatch) modelNum = modelMatch[1];
+                // 从尺码提取规格数字：如 "1.9cm/6分" → 19
+                let specNum = '';
+                const specMatch = size.match(/^(\d+\.?\d*)cm/);
+                if (specMatch) specNum = specMatch[1].replace('.', '');
+                if (colorInit && typeCode && modelNum && specNum) {
+                    productForm.productCode = colorInit + typeCode + '-' + modelNum + '-' + specNum + '-' + (currentUser.id || '');
+                }
+            };
+
+            const saveProduct = async () => {
+                const color = productFormColor.value.trim();
+                const size = productFormSize.value.trim();
+                const yardCode = productFormYardCode.value.trim();
+                if (!productForm.productName.trim()) { ElMessage.error('请输入商品名称'); return; }
+                if (!color) { ElMessage.error('请输入颜色'); return; }
+                if (!size) { ElMessage.error('请输入尺码'); return; }
+
+                // specification: 颜色;尺码;码数
+                const parts = [color, size];
+                if (yardCode) parts.push(yardCode);
+                productForm.specification = parts.join(';');
+
+                productSaving.value = true;
+                try {
+                    const method = productForm.id ? 'PUT' : 'POST';
+                    // 新增时如果编码为空，让后端自动生成
+                    const body = { ...productForm };
+                    if (!productForm.id && !body.productCode) {
+                        delete body.productCode;
+                    }
+                    const res = await fetch('/api/product', {
+                        method,
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(body)
+                    });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        ElMessage.success(productForm.id ? '修改成功' : '新增成功');
+                        showProductDialog.value = false;
+                        loadProducts();
+                        loadProductTree();
+                    } else if (result) {
+                        ElMessage.error(result.message || '操作失败');
+                    }
+                } catch (e) {
+                    ElMessage.error('网络错误');
+                } finally {
+                    productSaving.value = false;
+                }
+            };
+
+            const deleteProduct = async (id) => {
+                try {
+                    await ElMessageBox.confirm('确定删除该商品吗？', '提示', { type: 'warning' });
+                    const res = await fetch(`/api/product/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        ElMessage.success('删除成功');
+                        loadProducts();
+                        loadProductTree();
+                    } else if (result) {
+                        ElMessage.error(result.message || '删除失败');
+                    }
+                } catch (e) {
+                    if (e !== 'cancel') ElMessage.error('删除失败');
+                }
+            };
+
             /* ========== 订单列表 ========== */
             const loadOrders = async () => {
                 orderLoading.value = true;
                 try {
                     let url = `/api/order/page?pageNum=${orderPageNum.value}&pageSize=${orderPageSize.value}`;
-                    if (orderFilter.customerIds.length > 0) url += `&customerId=${orderFilter.customerIds.join(',')}`;
+                    if (orderFilter.customerName) url += `&customerName=${encodeURIComponent(orderFilter.customerName)}`;
                     if (orderFilter.paymentMethods.length > 0) url += `&paymentMethod=${orderFilter.paymentMethods.join(',')}`;
                     if (orderFilter.statusList.length > 0) url += `&status=${orderFilter.statusList.join(',')}`;
                     if (orderFilter.orderDateStart) url += `&orderDateStart=${orderFilter.orderDateStart}`;
@@ -2454,23 +2965,13 @@
             const prevOrderPage = () => { if (orderPageNum.value > 1) { orderPageNum.value--; loadOrders(); } };
             const nextOrderPage = () => { if (orderPageNum.value < orderTotalPages.value) { orderPageNum.value++; loadOrders(); } };
             const resetOrderFilter = () => {
-                orderFilter.customerIds = [];
+                orderFilter.customerName = '';
                 orderFilter.paymentMethods = [];
                 orderFilter.statusList = [];
                 orderFilter.orderDateStart = '';
                 orderFilter.orderDateEnd = '';
-                showCustomerFilterPanel.value = false;
                 orderPageNum.value = 1;
                 loadOrders();
-            };
-
-            const toggleCustomerFilter = (id) => {
-                const idx = orderFilter.customerIds.indexOf(id);
-                if (idx > -1) {
-                    orderFilter.customerIds.splice(idx, 1);
-                } else {
-                    orderFilter.customerIds.push(id);
-                }
             };
 
             // 根据客户ID获取客户名称（用于订单列表显示）
@@ -2528,7 +3029,7 @@
             };
 
             // 打开新增订单弹窗
-            const openOrderDialog = () => {
+            const openOrderDialog = async () => {
                 orderDialogMode.value = 'add';
                 const today = new Date().toISOString().split('T')[0];
                 Object.assign(orderForm, {
@@ -2540,7 +3041,23 @@
                     paymentMethod: '', remark: '', status: '进行中'
                 });
                 orderItems.value = [];
+                customerSearchText.value = '';
+                // 加载全部客户用于搜索匹配
+                loadAllCustomers();
                 showOrderDialog.value = true;
+            };
+
+            // 加载全部客户（不分页），用于订单弹窗搜索
+            const loadAllCustomers = async () => {
+                try {
+                    const res = await fetch('/api/customer', { headers: getAuthHeaders() });
+                    const result = await handleResponse(res);
+                    if (result && result.code === 200) {
+                        allCustomerList.value = result.data || [];
+                    }
+                } catch (e) {
+                    console.error('加载全部客户失败', e);
+                }
             };
 
             // 打开编辑订单弹窗
@@ -2564,17 +3081,24 @@
                     orderForm.phone = c.phone || '';
                 }
                 // 填充明细
-                orderItems.value = detail.items.map(item => ({
-                    id: item.id,
-                    productCode: item.productCode || '',
-                    productName: item.productName || '',
-                    specification: item.specification || '',
-                    unit: item.unit || '',
-                    quantity: item.quantity || 0,
-                    unitPrice: item.unitPrice || 0,
-                    amount: item.amount || 0,
-                    remark: item.remark || ''
-                }));
+                orderItems.value = detail.items.map(item => {
+                    const spec = item.specification || '';
+                    const parts = spec.split(';');
+                    return {
+                        id: item.id,
+                        productCode: item.productCode || '',
+                        productName: item.productName || '',
+                        specification: spec,
+                        itemColor: parts[0] || '',
+                        itemSize: parts[1] || '',
+                        itemYardCode: parts[2] || '',
+                        unit: item.unit || '',
+                        quantity: item.quantity || 0,
+                        unitPrice: item.unitPrice || 0,
+                        amount: item.amount || 0,
+                        remark: item.remark || ''
+                    };
+                });
                 showOrderDialog.value = true;
             };
 
@@ -2590,10 +3114,37 @@
                 }
             };
 
+            // 选择搜索到的客户
+            const selectOrderCustomer = (c) => {
+                orderForm.customerId = c.id;
+                orderForm.address = c.address || '';
+                orderForm.contactName = c.contactName || '';
+                orderForm.phone = c.phone || '';
+                orderForm.totalDebt = c.totalDebt || 0;
+                customerSearchText.value = c.customerName;
+                showCustomerSuggestions.value = false;
+            };
+
+            // 清除已选客户
+            const clearOrderCustomer = () => {
+                orderForm.customerId = '';
+                orderForm.address = '';
+                orderForm.contactName = '';
+                orderForm.phone = '';
+                orderForm.totalDebt = 0;
+                customerSearchText.value = '';
+            };
+
+            // 失焦时延迟关闭下拉，给点击事件时间
+            const handleCustomerBlur = () => {
+                setTimeout(() => { showCustomerSuggestions.value = false; }, 200);
+            };
+
             // 添加商品明细行
             const addOrderItem = () => {
                 orderItems.value.push({
                     productCode: '', productName: '', specification: '',
+                    itemColor: '', itemSize: '', itemYardCode: '',
                     unit: '', quantity: 0, unitPrice: 0, amount: 0, remark: ''
                 });
                 calcOrderTotal();
@@ -2608,8 +3159,15 @@
             // 提交订单
             const submitOrder = async () => {
                 if (!orderForm.customerId) { ElMessage.warning('请选择客户'); return; }
+                // 确认选择的客户属于当前用户（从全量列表校验）
+                const checkList = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
+                const customerExists = checkList.some(c => c.id === Number(orderForm.customerId));
+                if (!customerExists) { ElMessage.warning('所选客户不存在，请重新选择'); return; }
                 if (orderItems.value.length === 0) { ElMessage.warning('请添加商品明细'); return; }
                 if (!orderForm.paymentMethod) { ElMessage.warning('请选择收款方式'); return; }
+
+                // 销售人员默认取当前用户姓名
+                orderForm.salesPerson = currentUser.value.realName || currentUser.value.account;
 
                 // 校验商品明细：名称、数量、单价均必填且金额不能为负
                 for (let i = 0; i < orderItems.value.length; i++) {
@@ -2673,12 +3231,15 @@
                         // 保存新明细
                         for (let i = 0; i < orderItems.value.length; i++) {
                             const item = orderItems.value[i];
+                            // 组装 specification：颜色;尺寸;码数
+                            const specParts = [item.itemColor || '', item.itemSize || ''];
+                            if (item.itemYardCode) specParts.push(item.itemYardCode);
                             const itemData = {
                                 orderId: orderForm.id,
                                 seqNo: i + 1,
                                 productCode: item.productCode,
                                 productName: item.productName,
-                                specification: item.specification,
+                                specification: specParts.join(';'),
                                 unit: item.unit,
                                 quantity: item.quantity,
                                 unitPrice: item.unitPrice,
@@ -2723,12 +3284,15 @@
                         // 保存商品明细
                         for (let i = 0; i < orderItems.value.length; i++) {
                             const item = orderItems.value[i];
+                            // 组装 specification：颜色;尺寸;码数
+                            const specParts = [item.itemColor || '', item.itemSize || ''];
+                            if (item.itemYardCode) specParts.push(item.itemYardCode);
                             const itemData = {
                                 orderId: savedOrderId,
                                 seqNo: i + 1,
                                 productCode: item.productCode,
                                 productName: item.productName,
-                                specification: item.specification,
+                                specification: specParts.join(';'),
                                 unit: item.unit,
                                 quantity: item.quantity,
                                 unitPrice: item.unitPrice,
@@ -2861,7 +3425,8 @@
             const loadRepayments = async () => {
                 repaymentLoading.value = true;
                 try {
-                    const url = '/api/repayment?pageNum=' + repaymentPageNum.value + '&pageSize=' + repaymentPageSize.value;
+                    let url = '/api/repayment?pageNum=' + repaymentPageNum.value + '&pageSize=' + repaymentPageSize.value;
+                    if (repaymentFilterCustomerId.value) url += '&customerId=' + repaymentFilterCustomerId.value;
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200 && result.data) {
@@ -3054,30 +3619,38 @@
             };
 
             /* ========== 商品选择 ========== */
-            // 加载商品树形数据
             const loadProductTree = async () => {
                 try {
                     const res = await fetch('/api/product/tree', { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200) {
                         productTree.value = result.data;
-                        // 默认展开第一个分组
                         if (productTree.value.length > 0) {
                             expandedProductNames.value = [productTree.value[0].productName];
                         }
+                        expandedColorKeys.value = [];
                     }
                 } catch (e) {
                     console.error('加载商品数据失败', e);
                 }
             };
 
-            // 打开商品选择弹窗
+            const countProductsInGroup = (group) => {
+                if (!group.colors) return 0;
+                return group.colors.reduce((sum, c) => sum + (c.children ? c.children.length : 0), 0);
+            };
+
+            const getSizeFromSpec = (spec) => {
+                if (!spec) return '';
+                const parts = spec.split(';');
+                return parts.length > 1 ? parts[1] : spec;
+            };
+
             const openProductSelect = (idx) => {
                 currentProductItemIndex.value = idx;
                 showProductSelectDialog.value = true;
             };
 
-            // 选择商品，填充到当前商品明细
             const selectProduct = (product) => {
                 const idx = currentProductItemIndex.value;
                 if (idx < 0 || idx >= orderItems.value.length) return;
@@ -3086,23 +3659,38 @@
                 item.productCode = product.productCode || '';
                 item.productName = product.productName || '';
                 item.specification = product.specification || '';
+                // 拆分规格到独立字段
+                const spec = product.specification || '';
+                const parts = spec.split(';');
+                item.itemColor = parts[0] || '';
+                item.itemSize = parts[1] || '';
+                item.itemYardCode = parts[2] || '';
                 item.unit = product.unit || '';
                 item.unitPrice = product.unitPrice || 0;
-                // 重新计算金额
                 calcItemAmount(item);
 
                 showProductSelectDialog.value = false;
                 currentProductItemIndex.value = -1;
-                ElMessage.success(`已选择：${product.productName} ${product.specification}`);
             };
 
-            // 展开/收起商品分组
             const toggleProductGroup = (productName) => {
                 const idx = expandedProductNames.value.indexOf(productName);
                 if (idx > -1) {
                     expandedProductNames.value.splice(idx, 1);
+                    // 收起时清除该组下的颜色展开状态
+                    expandedColorKeys.value = expandedColorKeys.value.filter(k => !k.startsWith(productName + '|'));
                 } else {
                     expandedProductNames.value.push(productName);
+                }
+            };
+
+            const toggleColorGroup = (productName, color) => {
+                const key = productName + '|' + color;
+                const idx = expandedColorKeys.value.indexOf(key);
+                if (idx > -1) {
+                    expandedColorKeys.value.splice(idx, 1);
+                } else {
+                    expandedColorKeys.value.push(key);
                 }
             };
 
@@ -3110,8 +3698,18 @@
                 currentRoute, currentUser, token, showDropdown,
                 showUserDialog, userForm, userSaving, openUserEdit, logout, saveUser,
                 customerList, customerLoading, showCustomerDialog, customerForm, customerSaving,
-                openCustomerDialog, saveCustomer, deleteCustomer,
-                searchKeyword, categoryFilter, filteredCustomerList, applyCustomerFilter, customerNameError, customerPhoneError,
+                openCustomerDialog, saveCustomer, deleteCustomer, goDebt,
+                searchKeyword, categoryFilter, filteredCustomerList, applyCustomerFilter, customerNameError,
+                productList, productLoading, showProductDialog, productForm, productSaving,
+                productSearchKeyword, filteredProductList,
+                productFormColor, productFormSize, productFormYardCode,
+                productPageNum, productPageSize, productTotal, productTotalPages,
+                prevProductPage, nextProductPage,
+                getSpecPart, loadProducts, openProductDialog, saveProduct, deleteProduct,
+                onProductNameChange, onProductFieldChange,
+                showImportDialog, importFileName, importFileData, importFileInput,
+                importing, importResult,
+                downloadProductTemplate, handleImportFile, clearImportFile, submitImport,
                 customerPageNum, customerPageSize, customerTotal, customerTotalPages,
                 prevCustomerPage, nextCustomerPage, loadCustomers,
                 orderList, orderLoading,
@@ -3119,13 +3717,15 @@
                 orderFilter, prevOrderPage, nextOrderPage, resetOrderFilter, loadOrders,
                 showOrderDialog, orderDialogMode, orderSaving, orderForm, orderItems,
                 openOrderDialog, openEditOrderDialog, onOrderCustomerChange, addOrderItem, removeOrderItem,
+                customerSearchText, showCustomerSuggestions, customerSuggestions,
+                selectOrderCustomer, clearOrderCustomer, handleCustomerBlur, loadAllCustomers,
                 calcOrderTotal, onPaymentMethodChange, calcItemAmount, formatItemAmount, submitOrder,
                 orderTotalQty, orderTotalAmount, orderReceivable, orderCurrentDebt,
                 getCustomerName, getStatusText, getStatusClass,
                 showOrderDetailDialog, orderDetail, viewOrderDetail, cancelOrder,
-                productTree, showProductSelectDialog, expandedProductNames,
-                openProductSelect, selectProduct, toggleProductGroup,
-                showCustomerFilterPanel, toggleCustomerFilter,
+                productTree, showProductSelectDialog, expandedProductNames, expandedColorKeys,
+                openProductSelect, selectProduct, toggleProductGroup, toggleColorGroup,
+                countProductsInGroup, getSizeFromSpec,
                 paymentMethodOptions, statusOptions,
                 topbarTitle,
                 debtList, debtLoading, loadDebts, formatDateTime, totalValidDebt, totalClearedDebt,

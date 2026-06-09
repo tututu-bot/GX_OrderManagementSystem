@@ -69,11 +69,10 @@ public class Customer {
      */
     private String address;
 
-    /**
-     * 备注标签
-     * 数据库字段: remark， VARCHAR(500)
-     * 用途: 客户的备注信息、标签等
-     */
+    /** 主营产品 */
+    private String coreProduct;
+
+    /** 备注 */
     private String remark;
 
     /**

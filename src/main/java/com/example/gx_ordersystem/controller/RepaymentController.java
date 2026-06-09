@@ -105,13 +105,17 @@ public class RepaymentController {
     public Result<Map<String, Object>> listRepayments(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
+            @RequestParam(required = false) Long customerId,
             HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
 
         Page<RepaymentRecord> page = new Page<>(pageNum, pageSize);
         LambdaQueryWrapper<RepaymentRecord> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(RepaymentRecord::getUserId, userId)
-                .orderByDesc(RepaymentRecord::getCreateTime);
+        wrapper.eq(RepaymentRecord::getUserId, userId);
+        if (customerId != null) {
+            wrapper.eq(RepaymentRecord::getCustomerId, customerId);
+        }
+        wrapper.orderByDesc(RepaymentRecord::getCreateTime);
         repaymentRecordService.page(page, wrapper);
 
         // 查询客户名称

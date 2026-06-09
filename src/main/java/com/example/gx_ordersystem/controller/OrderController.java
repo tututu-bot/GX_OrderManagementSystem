@@ -392,6 +392,7 @@ public class OrderController {
         result.put("customerAddress", customer != null ? customer.getAddress() : "");
         result.put("customerContact", customer != null ? customer.getContactName() : "");
         result.put("customerPhone", customer != null ? customer.getPhone() : "");
+        result.put("customerCoreProduct", customer != null ? customer.getCoreProduct() : "");
         return Result.success(result);
     }
 
@@ -413,7 +414,7 @@ public class OrderController {
     public Result<Map<String, Object>> pageOrders(
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
-            @RequestParam(required = false) String customerId,
+            @RequestParam(required = false) String customerName,
             @RequestParam(required = false) String paymentMethod,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String orderDateStart,
@@ -427,15 +428,23 @@ public class OrderController {
         // 用户隔离：只能查询自己创建的订单
         wrapper.eq(SaleOrder::getUserId, userId);
 
-        // 客户多选：传入逗号分隔的客户ID列表
-        if (customerId != null && !customerId.isEmpty()) {
-            List<Long> customerIdList = Arrays.stream(customerId.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(Long::parseLong)
+        // 客户名称模糊搜索：先查匹配的客户ID，再过滤订单
+        if (customerName != null && !customerName.isBlank()) {
+            List<Long> matchedCustomerIds = customerService.lambdaQuery()
+                    .like(Customer::getCustomerName, customerName)
+                    .list()
+                    .stream()
+                    .map(Customer::getId)
                     .collect(Collectors.toList());
-            if (!customerIdList.isEmpty()) {
-                wrapper.in(SaleOrder::getCustomerId, customerIdList);
+            if (!matchedCustomerIds.isEmpty()) {
+                wrapper.in(SaleOrder::getCustomerId, matchedCustomerIds);
+            } else {
+                // 没有匹配的客户，返回空结果
+                Map<String, Object> empty = new HashMap<>();
+                empty.put("list", List.of());
+                empty.put("total", 0L);
+                empty.put("pages", 0L);
+                return Result.success(empty);
             }
         }
 

@@ -102,12 +102,9 @@ public class CustomerController {
         Long userId = getCurrentUserId(request);
         Map<String, Object> resultMap = new HashMap<>();
 
-        // 必填校验：客户名称和联系电话不能为空
+        // 必填校验：客户名称不能为空
         if (customer.getCustomerName() == null || customer.getCustomerName().trim().isEmpty()) {
             return Result.error("客户名称不能为空");
-        }
-        if (customer.getPhone() == null || customer.getPhone().trim().isEmpty()) {
-            return Result.error("联系电话不能为空");
         }
 
         // 根据客户名称查找是否已存在（名称唯一标识客户）
