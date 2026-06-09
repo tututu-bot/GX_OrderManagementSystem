@@ -267,6 +267,14 @@
             font-size: 13px;
         }
 
+        .sort-header {
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.15s;
+        }
+        .sort-header:hover { color: #6B4BFF; }
+        .sort-arrow { font-size: 11px; margin-left: 4px; }
+
         .data-table td {
             padding: 14px 16px;
             border-bottom: 1px solid #F0F0F0;
@@ -1317,7 +1325,9 @@
                                 <th>单据编号</th>
                                 <th>客户</th>
                                 <th>销售人员</th>
-                                <th>单据日期</th>
+                                <th class="sort-header" @click="toggleSort(orderSort, 'orderDate', loadOrders)">
+                                    单据日期<span class="sort-arrow" v-if="orderSort.field === 'orderDate'">{{ orderSort.order === 'desc' ? '▼' : '▲' }}</span>
+                                </th>
                                 <th>应收金额</th>
                                 <th>已收款</th>
                                 <th>本次欠款</th>
@@ -1420,15 +1430,18 @@
                                 <th>剩余欠款</th>
                                 <th>状态</th>
                                 <th>备注</th>
-                                <th>创建时间</th>
+                                <th class="sort-header" @click="toggleSort(debtSort, 'createTime', loadDebts)">
+                                    创建时间<span class="sort-arrow" v-if="debtSort.field === 'createTime'">{{ debtSort.order === 'desc' ? '▼' : '▲' }}</span>
+                                </th>
+                                <th>操作</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-if="debtLoading">
-                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
+                                <td colspan="8" style="text-align:center;color:#9CA3AF;padding:40px;">加载中...</td>
                             </tr>
                             <tr v-else-if="debtList.length === 0">
-                                <td colspan="7" style="text-align:center;color:#9CA3AF;padding:40px;">暂无欠款记录</td>
+                                <td colspan="8" style="text-align:center;color:#9CA3AF;padding:40px;">暂无欠款记录</td>
                             </tr>
                             <tr v-for="item in debtList" :key="item.id">
                                 <td>{{ item.customerName || '-' }}</td>
@@ -1446,6 +1459,13 @@
                                 </td>
                                 <td>{{ item.remark || '-' }}</td>
                                 <td>{{ formatDateTime(item.createTime) }}</td>
+                                <td>
+                                    <button v-if="item.status === 'UNSETTLED' || item.status === 'PARTIAL'"
+                                            class="btn btn-sm btn-primary" @click="openDebtRepay(item)" style="margin-right:8px;">还款</button>
+                                    <button v-if="item.status === 'UNSETTLED' || item.status === 'PARTIAL'"
+                                            class="btn btn-sm" style="background:#16A34A;color:#fff;border-color:#16A34A;" @click="clearDebt(item)">结清</button>
+                                    <span v-else style="color:#9CA3AF;">-</span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -1481,12 +1501,8 @@
                 <div v-if="currentRoute === 'repayment'" class="page-card">
                     <div class="page-header-row">
                         <h2 class="page-title">还款管理</h2>
-                        <button class="btn btn-primary" @click="openRepaymentDialog()">
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <line x1="12" y1="5" x2="12" y2="19"></line>
-                                <line x1="5" y1="12" x2="19" y2="12"></line>
-                            </svg>
-                            登记还款
+                        <button class="btn btn-primary" @click="window.location.hash = '#/debt'">
+                            前往欠款列表还款
                         </button>
                     </div>
 
@@ -1505,7 +1521,7 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <div style="font-size:18px;font-weight:600;color:#DC2626;">{{ s.totalUnsettled }} 元</div>
-                                    <button class="btn btn-sm btn-primary" @click="quickRepay(s)" style="margin-top:6px;">去还款</button>
+                                    <button class="btn btn-sm btn-primary" @click="window.location.hash = '#/debt?customerId=' + s.customerId" style="margin-top:6px;">去还款</button>
                                 </div>
                             </div>
                         </div>
@@ -1519,9 +1535,13 @@
                                 <th>客户名称</th>
                                 <th>还款金额</th>
                                 <th>还款方式</th>
-                                <th>还款日期</th>
+                                <th class="sort-header" @click="toggleSort(repaymentSort, 'repaymentDate', loadRepayments)">
+                                    还款日期<span class="sort-arrow" v-if="repaymentSort.field === 'repaymentDate'">{{ repaymentSort.order === 'desc' ? '▼' : '▲' }}</span>
+                                </th>
                                 <th>备注</th>
-                                <th>登记时间</th>
+                                <th class="sort-header" @click="toggleSort(repaymentSort, 'createTime', loadRepayments)">
+                                    登记时间<span class="sort-arrow" v-if="repaymentSort.field === 'createTime'">{{ repaymentSort.order === 'desc' ? '▼' : '▲' }}</span>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1893,8 +1913,8 @@
                     </div>
                 </div>
 
-                <!-- 收款信息 -->
-                <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;">
+                <!-- 收款信息（仅新增时显示） -->
+                <div v-if="orderDialogMode !== 'edit'" style="display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;">
                     <div class="form-row" style="flex:1;min-width:150px;">
                         <label>收款方式 <span style="color:#DC2626;">*</span></label>
                         <select v-model="orderForm.paymentMethod" @change="onPaymentMethodChange">
@@ -1902,13 +1922,8 @@
                             <option value="现金">现金</option>
                             <option value="微信">微信</option>
                             <option value="支付宝">支付宝</option>
-                            <option value="银行转账">银行转账</option>
                             <option value="赊账">赊账</option>
                         </select>
-                    </div>
-                    <div class="form-row" style="flex:1;min-width:120px;">
-                        <label>其他费用（元）</label>
-                        <input type="number" v-model.number="orderForm.otherFee" @input="calcOrderTotal" placeholder="0.00" step="0.01" min="0" style="text-align:right;">
                     </div>
                     <div class="form-row" style="flex:1;min-width:120px;">
                         <label>本次收款（元）</label>
@@ -1923,25 +1938,21 @@
                         <span class="amount-bar-value">{{ orderTotalAmount.toFixed(2) }} 元</span>
                     </div>
                     <div class="amount-bar-item">
-                        <span class="amount-bar-label">其他费用</span>
-                        <span class="amount-bar-value">{{ (orderForm.otherFee || 0).toFixed(2) }} 元</span>
-                    </div>
-                    <div class="amount-bar-item">
                         <span class="amount-bar-label">应收金额</span>
                         <span class="amount-bar-value">{{ orderReceivable.toFixed(2) }} 元</span>
                     </div>
                     <div class="amount-bar-item">
-                        <span class="amount-bar-label">本次收款</span>
+                        <span class="amount-bar-label">{{ orderDialogMode === 'edit' ? '已付款' : '本次收款' }}</span>
                         <span class="amount-bar-value">{{ (orderForm.receivedAmount || 0).toFixed(2) }} 元</span>
                     </div>
                     <div class="amount-bar-item">
-                        <span class="amount-bar-label">本次欠款</span>
+                        <span class="amount-bar-label">{{ orderDialogMode === 'edit' ? '欠款金额' : '本次欠款' }}</span>
                         <span class="amount-bar-value" :class="orderCurrentDebt > 0 ? 'debt' : ''">{{ orderCurrentDebt.toFixed(2) }} 元</span>
                     </div>
                 </div>
 
                 <!-- 欠款提示：当本次欠款大于0时显示 -->
-                <div v-if="orderCurrentDebt > 0" style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:13px;color:#991B1B;">
+                <div v-if="orderCurrentDebt > 0 && orderDialogMode !== 'edit'" style="background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;margin-top:12px;font-size:13px;color:#991B1B;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:6px;">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="8" x2="12" y2="12"></line>
@@ -2154,42 +2165,33 @@
                 <h3>登记还款</h3>
             </div>
             <div class="modal-body">
-                <!-- 选择客户 -->
-                <div class="form-row">
-                    <label>选择客户 <span style="color:#DC2626;">*</span></label>
-                    <select v-model="repaymentForm.customerId" @change="onRepaymentCustomerChange" style="height:40px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
-                        <option value="">请选择客户</option>
-                        <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.customerName }}</option>
-                    </select>
-                </div>
-                <!-- 当前欠款 -->
-                <div v-if="repaymentCustomerDebt > 0" class="form-row">
-                    <label>当前欠款</label>
-                    <div style="padding:10px 14px;background:#FEF2F2;border-radius:8px;color:#DC2626;font-size:16px;font-weight:600;">
-                        {{ repaymentCustomerDebt }} 元
+                <!-- 欠款信息（只读） -->
+                <div v-if="currentRepayDebt" style="background:#FAFAFA;border:1px solid #E5E5E5;border-radius:10px;padding:14px 16px;margin-bottom:16px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="color:#666;font-size:13px;">客户</span>
+                        <span style="font-weight:600;">{{ currentRepayDebt.customerName }}</span>
                     </div>
-                </div>
-                <div v-else-if="repaymentForm.customerId" class="form-row">
-                    <label>当前欠款</label>
-                    <div style="padding:10px 14px;background:#F0FDF4;border-radius:8px;color:#16A34A;font-size:16px;font-weight:600;">
-                        无欠款
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="color:#666;font-size:13px;">单据编号</span>
+                        <span>{{ currentRepayDebt.orderNo }}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="color:#666;font-size:13px;">欠款总额</span>
+                        <span>{{ currentRepayDebt.amount }} 元</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-bottom:8px;">
+                        <span style="color:#666;font-size:13px;">已还金额</span>
+                        <span style="color:#16A34A;">{{ currentRepayDebt.settledAmount }} 元</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid #E5E5E5;">
+                        <span style="color:#666;font-size:13px;">剩余欠款</span>
+                        <span style="color:#DC2626;font-weight:600;font-size:16px;">{{ currentRepayDebt.unsettledAmount }} 元</span>
                     </div>
                 </div>
                 <!-- 还款金额 -->
                 <div class="form-row">
                     <label>还款金额 <span style="color:#DC2626;">*</span></label>
                     <input type="number" v-model.number="repaymentForm.amount" step="0.01" placeholder="请输入还款金额" style="height:40px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
-                </div>
-                <!-- 还款方式 -->
-                <div class="form-row">
-                    <label>还款方式 <span style="color:#DC2626;">*</span></label>
-                    <select v-model="repaymentForm.paymentMethod" style="height:40px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
-                        <option value="">请选择</option>
-                        <option value="现金">现金</option>
-                        <option value="微信">微信</option>
-                        <option value="支付宝">支付宝</option>
-                        <option value="银行转账">银行转账</option>
-                    </select>
                 </div>
                 <!-- 还款日期 -->
                 <div class="form-row">
@@ -2207,6 +2209,29 @@
                 <button class="btn btn-primary" @click="submitRepayment" :disabled="repaymentSaving">
                     {{ repaymentSaving ? '保存中...' : '确认还款' }}
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== 扫码支付弹窗 ========== -->
+    <div v-cloak v-if="showQrDialog" class="modal-overlay" @click.self="showQrDialog = false">
+        <div class="modal-card" style="max-width:420px;">
+            <div class="modal-header">
+                <h3>扫码支付 — {{ qrPaymentMethod }}</h3>
+            </div>
+            <div class="modal-body" style="text-align:center;">
+                <p style="font-size:13px;color:#666;margin-bottom:16px;">
+                    请使用{{ qrPaymentMethod }}扫描下方二维码完成支付
+                </p>
+                <div style="display:inline-block;padding:16px;background:#FFF;border:1px solid #E5E5E5;border-radius:10px;margin-bottom:16px;">
+                    <img :src="qrCodeImageUrl" style="display:block;width:220px;height:220px;" alt="支付二维码">
+                </div>
+                <p style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:12px;">
+                    支付金额：¥{{ orderReceivable.toFixed(2) }}
+                </p>
+                <p :style="{fontSize:'14px',color:qrStatusColor,fontWeight:'500'}">
+                    {{ qrStatusText }}
+                </p>
             </div>
         </div>
     </div>
@@ -2296,7 +2321,7 @@
     createApp({
         setup() {
             /* ========== 导航 & 用户数据 ========== */
-            const currentRoute = ref('customer');
+            const currentRoute = ref('order');
             const currentUser = ref({});
             const token = ref('');
             const showDropdown = ref(false);
@@ -2378,7 +2403,7 @@
                 orderDateEnd: ''
             });
 
-            const paymentMethodOptions = ['现金', '微信', '支付宝', '银行转账', '赊账'];
+            const paymentMethodOptions = ['现金', '微信', '支付宝', '赊账'];
             const statusOptions = ['进行中', '已完成', '已作废'];
 
             /* ========== 新增/编辑订单数据 ========== */
@@ -2432,7 +2457,6 @@
             const repaymentLoading = ref(false);
             const showRepaymentDialog = ref(false);
             const repaymentSaving = ref(false);
-            const repaymentCustomerDebt = ref(0);
             const repaymentForm = reactive({
                 customerId: '',
                 amount: 0,
@@ -2440,12 +2464,38 @@
                 repaymentDate: '',
                 remark: ''
             });
+            // 逐笔还款的欠款记录上下文
+            const currentRepayDebt = ref(null);
             const customerDebtSummaries = ref([]);
             const repaymentPageNum = ref(1);
             const repaymentPageSize = ref(10);
             const repaymentTotal = ref(0);
             const repaymentTotalPages = ref(0);
             const repaymentFilterCustomerId = ref(null);
+
+            /* ========== 扫码支付数据 ========== */
+            const showQrDialog = ref(false);
+            const qrPaymentMethod = ref('');
+            const qrPendingOrderData = ref(null); // 暂存待提交的订单数据
+            const qrPollTimer = ref(null);        // 轮询定时器
+            const qrCodeImageUrl = ref('');      // 二维码图片URL
+            const qrStatusText = ref('');      // 状态文字
+            const qrStatusColor = ref('#666'); // 状态颜色
+
+            /* ========== 排序状态 ========== */
+            const orderSort = reactive({ field: 'createTime', order: 'desc' });
+            const debtSort = reactive({ field: 'createTime', order: 'desc' });
+            const repaymentSort = reactive({ field: 'createTime', order: 'desc' });
+
+            const toggleSort = (sortObj, field, loadFn) => {
+                if (sortObj.field === field) {
+                    sortObj.order = sortObj.order === 'desc' ? 'asc' : 'desc';
+                } else {
+                    sortObj.field = field;
+                    sortObj.order = 'desc';
+                }
+                loadFn();
+            };
 
             /* ========== 商品选择数据 ========== */
             const productTree = ref([]);
@@ -2947,6 +2997,7 @@
                     if (orderFilter.statusList.length > 0) url += `&status=${orderFilter.statusList.join(',')}`;
                     if (orderFilter.orderDateStart) url += `&orderDateStart=${orderFilter.orderDateStart}`;
                     if (orderFilter.orderDateEnd) url += `&orderDateEnd=${orderFilter.orderDateEnd}`;
+                    url += `&sortField=${orderSort.field}&sortOrder=${orderSort.order}`;
 
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
@@ -3003,24 +3054,24 @@
 
             const orderTotalQty = computed(() => orderItems.value.reduce((s, i) => s + (i.quantity || 0), 0));
             const orderTotalAmount = computed(() => orderItems.value.reduce((s, i) => s + (i.amount || 0), 0));
-            const orderReceivable = computed(() => orderTotalAmount.value + (orderForm.otherFee || 0));
+            const orderReceivable = computed(() => orderTotalAmount.value);
             const orderCurrentDebt = computed(() => {
                 const debt = orderReceivable.value - (orderForm.receivedAmount || 0);
                 return debt > 0 ? debt : 0;
             });
 
             const calcOrderTotal = () => {
-                // 当商品金额或费用变化时，根据支付方式自动分配收款/欠款
                 orderForm.receivableAmount = orderReceivable.value;
-                if (orderForm.paymentMethod && orderForm.paymentMethod !== '赊账') {
-                    // 非赊账：默认全额收款（用户可手动改）
-                    orderForm.receivedAmount = orderReceivable.value;
+                if (orderDialogMode.value !== 'edit') {
+                    if (orderForm.paymentMethod && orderForm.paymentMethod !== '赊账') {
+                        orderForm.receivedAmount = orderReceivable.value;
+                    }
                 }
-                // 赊账或未选方式：保留 receivedAmount 不变
             };
 
-            // 收款方式变化时给出默认值，但允许用户手动修改
+            // 收款方式变化时给出默认值，但允许用户手动修改（编辑模式不改）
             const onPaymentMethodChange = () => {
+                if (orderDialogMode.value === 'edit') return;
                 if (orderForm.paymentMethod === '赊账') {
                     orderForm.receivedAmount = 0;
                 } else if (orderForm.paymentMethod) {
@@ -3158,13 +3209,14 @@
 
             // 提交订单
             const submitOrder = async () => {
+                const isEdit = orderDialogMode.value === 'edit';
                 if (!orderForm.customerId) { ElMessage.warning('请选择客户'); return; }
                 // 确认选择的客户属于当前用户（从全量列表校验）
                 const checkList = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
                 const customerExists = checkList.some(c => c.id === Number(orderForm.customerId));
                 if (!customerExists) { ElMessage.warning('所选客户不存在，请重新选择'); return; }
                 if (orderItems.value.length === 0) { ElMessage.warning('请添加商品明细'); return; }
-                if (!orderForm.paymentMethod) { ElMessage.warning('请选择收款方式'); return; }
+                if (!isEdit && !orderForm.paymentMethod) { ElMessage.warning('请选择收款方式'); return; }
 
                 // 销售人员默认取当前用户姓名
                 orderForm.salesPerson = currentUser.value.realName || currentUser.value.account;
@@ -3187,18 +3239,58 @@
                 }
 
                 // 校验订单金额不能为负数
-                if ((orderForm.otherFee || 0) < 0) {
-                    ElMessage.warning('其他费用不能为负数');
-                    return;
-                }
                 if ((orderForm.receivedAmount || 0) < 0) {
                     ElMessage.warning('本次收款不能为负数');
                     return;
                 }
 
+                // 新增模式下，微信/支付宝需要先扫码支付
+                if (!isEdit && (orderForm.paymentMethod === '微信' || orderForm.paymentMethod === '支付宝')) {
+                    // 1. 向服务端创建支付会话
+                    const payRes = await fetch('/api/payment/create', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify({
+                            paymentMethod: orderForm.paymentMethod,
+                            amount: orderReceivable.value
+                        })
+                    });
+                    const payResult = await handleResponse(payRes);
+                    if (!payResult || payResult.code !== 200) {
+                        ElMessage.error('创建支付会话失败');
+                        return;
+                    }
+                    const token = payResult.data.token;
+
+                    // 2. 准备订单数据
+                    const now = new Date();
+                    const pad = (n, len) => String(n).padStart(len, '0');
+                    const orderNo = 'XSDD' + now.getFullYear() + pad(now.getMonth() + 1, 2) + pad(now.getDate(), 2)
+                        + pad(now.getHours(), 2) + pad(now.getMinutes(), 2) + pad(now.getSeconds(), 2) + pad(now.getMilliseconds(), 3);
+
+                    const orderData = {
+                        ...orderForm,
+                        orderNo,
+                        totalAmount: orderTotalAmount.value,
+                        receivableAmount: orderReceivable.value,
+                        currentDebt: orderCurrentDebt.value
+                    };
+                    qrPendingOrderData.value = { orderData, orderNo, token };
+                    qrPaymentMethod.value = orderForm.paymentMethod;
+
+                    // 3. 显示二维码图片（后端自动检测局域网 IP 生成）
+                    qrCodeImageUrl.value = '/api/payment/qrcode/' + token;
+                    qrStatusText.value = '等待扫码支付...';
+                    qrStatusColor.value = '#666';
+
+                    // 4. 显示二维码弹窗并开始轮询
+                    showQrDialog.value = true;
+                    pollPaymentStatus(token);
+                    return;
+                }
+
                 orderSaving.value = true;
                 try {
-                    const isEdit = orderDialogMode.value === 'edit';
 
                     if (isEdit) {
                         // 编辑模式：更新订单主表 + 删除旧明细 + 保存新明细
@@ -3319,6 +3411,85 @@
                 }
             };
 
+            // 轮询支付状态，确认后自动提交订单
+            const pollPaymentStatus = (token) => {
+                const poll = async () => {
+                    try {
+                        const res = await fetch(`/api/payment/status/${token}`, { headers: getAuthHeaders() });
+                        const result = await handleResponse(res);
+                        if (result && result.code === 200 && result.data.status === 'CONFIRMED') {
+                            stopPolling();
+                            qrStatusText.value = '支付成功！正在生成订单...';
+                            qrStatusColor.value = '#16A34A';
+                            await submitPendingOrder();
+                        }
+                    } catch (e) { /* 轮询失败继续 */ }
+                };
+                qrPollTimer.value = setInterval(poll, 2000);
+            };
+
+            const stopPolling = () => {
+                if (qrPollTimer.value) {
+                    clearInterval(qrPollTimer.value);
+                    qrPollTimer.value = null;
+                }
+            };
+
+            // 提交暂存的订单
+            const submitPendingOrder = async () => {
+                const pending = qrPendingOrderData.value;
+                if (!pending) return;
+
+                stopPolling();
+                showQrDialog.value = false;
+                orderSaving.value = true;
+                try {
+                    const orderRes = await fetch('/api/order', {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(pending.orderData)
+                    });
+                    const orderResult = await handleResponse(orderRes);
+                    if (!orderResult || orderResult.code !== 200) {
+                        ElMessage.error('提交订单失败'); return;
+                    }
+
+                    const savedOrderId = orderResult.data.orderId;
+                    for (let i = 0; i < orderItems.value.length; i++) {
+                        const item = orderItems.value[i];
+                        const specParts = [item.itemColor || '', item.itemSize || ''];
+                        if (item.itemYardCode) specParts.push(item.itemYardCode);
+                        const itemData = {
+                            orderId: savedOrderId,
+                            seqNo: i + 1,
+                            productCode: item.productCode,
+                            productName: item.productName,
+                            specification: specParts.join(';'),
+                            unit: item.unit,
+                            quantity: item.quantity,
+                            unitPrice: item.unitPrice,
+                            amount: item.amount,
+                            remark: item.remark
+                        };
+                        await fetch('/api/order/item', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify(itemData)
+                        });
+                    }
+
+                    ElMessage.success('支付成功，订单已创建');
+                    showOrderDialog.value = false;
+                    qrPendingOrderData.value = null;
+                    loadOrders();
+                    loadCustomers();
+                } catch (e) {
+                    ElMessage.error('订单生成失败');
+                } finally {
+                    orderSaving.value = false;
+                }
+            };
+
             // 查看订单详情
             const viewOrderDetail = async (orderId) => {
                 try {
@@ -3376,6 +3547,8 @@
                     if (debtFilter.dateEnd) {
                         params.push('dateEnd=' + debtFilter.dateEnd);
                     }
+                    params.push('sortField=' + debtSort.field);
+                    params.push('sortOrder=' + debtSort.order);
                     url += '?' + params.join('&');
 
                     const res = await fetch(url, { headers: getAuthHeaders() });
@@ -3427,6 +3600,7 @@
                 try {
                     let url = '/api/repayment?pageNum=' + repaymentPageNum.value + '&pageSize=' + repaymentPageSize.value;
                     if (repaymentFilterCustomerId.value) url += '&customerId=' + repaymentFilterCustomerId.value;
+                    url += '&sortField=' + repaymentSort.field + '&sortOrder=' + repaymentSort.order;
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200 && result.data) {
@@ -3474,13 +3648,55 @@
 
             const openRepaymentDialog = () => {
                 resetRepaymentForm();
+                currentRepayDebt.value = null;
                 showRepaymentDialog.value = true;
+            };
+
+            // 欠款列表逐笔还款
+            const openDebtRepay = (item) => {
+                resetRepaymentForm();
+                currentRepayDebt.value = item;
+                repaymentForm.amount = parseFloat(item.unsettledAmount);
+                showRepaymentDialog.value = true;
+            };
+
+            // 一键结清
+            const clearDebt = (item) => {
+                ElMessageBox.confirm(
+                    `确认结清该欠款？剩余欠款 ${item.unsettledAmount} 元将全部还清。`,
+                    '确认结清',
+                    { confirmButtonText: '是', cancelButtonText: '否', type: 'warning' }
+                ).then(async () => {
+                    try {
+                        const res = await fetch('/api/repayment', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({
+                                debtId: item.id,
+                                amount: parseFloat(item.unsettledAmount),
+                                paymentMethod: null,
+                                remark: '一键结清'
+                            })
+                        });
+                        const result = await handleResponse(res);
+                        if (result && result.code === 200) {
+                            ElMessage.success('结清成功');
+                            loadRepayments();
+                            loadDebts();
+                            loadCustomers();
+                        } else {
+                            ElMessage.error(result.msg || '结清失败');
+                        }
+                    } catch (e) {
+                        ElMessage.error('结清失败');
+                    }
+                }).catch(() => {});
             };
 
             const quickRepay = (summary) => {
                 resetRepaymentForm();
+                currentRepayDebt.value = null;
                 repaymentForm.customerId = summary.customerId;
-                repaymentCustomerDebt.value = parseFloat(summary.totalUnsettled);
                 showRepaymentDialog.value = true;
             };
 
@@ -3501,42 +3717,79 @@
             };
 
             const submitRepayment = async () => {
-                if (!repaymentForm.customerId) {
-                    ElMessage.warning('请选择客户'); return;
-                }
-                if (!repaymentForm.amount || repaymentForm.amount <= 0) {
-                    ElMessage.warning('请输入有效的还款金额'); return;
-                }
-                if (!repaymentForm.paymentMethod) {
-                    ElMessage.warning('请选择还款方式'); return;
-                }
-                if (repaymentForm.amount > repaymentCustomerDebt.value) {
-                    ElMessage.warning('还款金额不能大于当前欠款'); return;
-                }
-
-                repaymentSaving.value = true;
-                try {
-                    const res = await fetch('/api/repayment', {
-                        method: 'POST',
-                        headers: getAuthHeaders(),
-                        body: JSON.stringify(repaymentForm)
-                    });
-                    const result = await handleResponse(res);
-                    if (result && result.code === 200) {
-                        ElMessage.success('还款登记成功');
-                        showRepaymentDialog.value = false;
-                        repaymentPageNum.value = 1;
-                        loadRepayments();
-                        loadCustomerDebtSummaries();
-                        loadDebts();
-                        loadCustomers();
-                    } else if (result) {
-                        ElMessage.error(result.msg || '还款登记失败');
+                if (currentRepayDebt.value) {
+                    // 逐笔还款模式
+                    if (!repaymentForm.amount || repaymentForm.amount <= 0) {
+                        ElMessage.warning('请输入有效的还款金额'); return;
                     }
-                } catch (e) {
-                    ElMessage.error('还款登记失败');
-                } finally {
-                    repaymentSaving.value = false;
+                    if (repaymentForm.amount > parseFloat(currentRepayDebt.value.unsettledAmount)) {
+                        ElMessage.warning('还款金额不能大于剩余欠款'); return;
+                    }
+                    repaymentSaving.value = true;
+                    try {
+                        const res = await fetch('/api/repayment', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({
+                                debtId: currentRepayDebt.value.id,
+                                amount: repaymentForm.amount,
+                                paymentMethod: null,
+                                remark: repaymentForm.remark,
+                                repaymentDate: repaymentForm.repaymentDate
+                            })
+                        });
+                        const result = await handleResponse(res);
+                        if (result && result.code === 200) {
+                            ElMessage.success('还款登记成功');
+                            showRepaymentDialog.value = false;
+                            currentRepayDebt.value = null;
+                            loadRepayments();
+                            loadDebts();
+                            loadCustomers();
+                        } else if (result) {
+                            ElMessage.error(result.msg || '还款登记失败');
+                        }
+                    } catch (e) {
+                        ElMessage.error('还款登记失败');
+                    } finally {
+                        repaymentSaving.value = false;
+                    }
+                } else {
+                    // 旧客户维度还款（保留兼容）
+                    if (!repaymentForm.customerId) {
+                        ElMessage.warning('请选择客户'); return;
+                    }
+                    if (!repaymentForm.amount || repaymentForm.amount <= 0) {
+                        ElMessage.warning('请输入有效的还款金额'); return;
+                    }
+                    if (!repaymentForm.paymentMethod) {
+                        ElMessage.warning('请选择还款方式'); return;
+                    }
+
+                    repaymentSaving.value = true;
+                    try {
+                        const res = await fetch('/api/repayment', {
+                            method: 'POST',
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify(repaymentForm)
+                        });
+                        const result = await handleResponse(res);
+                        if (result && result.code === 200) {
+                            ElMessage.success('还款登记成功');
+                            showRepaymentDialog.value = false;
+                            repaymentPageNum.value = 1;
+                            loadRepayments();
+                            loadCustomerDebtSummaries();
+                            loadDebts();
+                            loadCustomers();
+                        } else if (result) {
+                            ElMessage.error(result.msg || '还款登记失败');
+                        }
+                    } catch (e) {
+                        ElMessage.error('还款登记失败');
+                    } finally {
+                        repaymentSaving.value = false;
+                    }
                 }
             };
 
@@ -3546,7 +3799,6 @@
                 repaymentForm.paymentMethod = '';
                 repaymentForm.repaymentDate = new Date().toISOString().split('T')[0];
                 repaymentForm.remark = '';
-                repaymentCustomerDebt.value = 0;
             };
 
             const formatDateTime = (dt) => {
@@ -3723,6 +3975,8 @@
                 orderTotalQty, orderTotalAmount, orderReceivable, orderCurrentDebt,
                 getCustomerName, getStatusText, getStatusClass,
                 showOrderDetailDialog, orderDetail, viewOrderDetail, cancelOrder,
+                showQrDialog, qrPaymentMethod, qrCodeImageUrl, qrStatusText, qrStatusColor, stopPolling,
+                orderSort, debtSort, repaymentSort, toggleSort,
                 productTree, showProductSelectDialog, expandedProductNames, expandedColorKeys,
                 openProductSelect, selectProduct, toggleProductGroup, toggleColorGroup,
                 countProductsInGroup, getSizeFromSpec,
@@ -3733,9 +3987,9 @@
                 debtPageNum, debtPageSize, debtTotal, debtTotalPages, prevDebtPage, nextDebtPage,
                 printOrder, printTotalQty, printTotalAmount, amountToChinese,
                 repaymentList, repaymentLoading, showRepaymentDialog, repaymentSaving, repaymentForm,
-                repaymentCustomerDebt, customerDebtSummaries,
+                currentRepayDebt, customerDebtSummaries,
                 loadRepayments, loadCustomerDebtSummaries, openRepaymentDialog, quickRepay,
-                onRepaymentCustomerChange, submitRepayment,
+                openDebtRepay, clearDebt, submitRepayment,
                 repaymentPageNum, repaymentPageSize, repaymentTotal, repaymentTotalPages,
                 prevRepaymentPage, nextRepaymentPage
             };

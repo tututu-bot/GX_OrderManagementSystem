@@ -37,7 +37,10 @@ public class WebConfig implements WebMvcConfigurer {
                 .excludePathPatterns(                                 // 排除以下路径（不需要Token）
                         "/api/user/login",
                         "/api/user/register",
-                        "/api/user/list"
+                        "/api/user/list",
+                        "/api/payment/page/**",                     // 手机扫码支付确认页
+                        "/api/payment/confirm/**",                  // 手机确认支付
+                        "/api/payment/qrcode/**"                    // 二维码图片
                 );
     }
 }

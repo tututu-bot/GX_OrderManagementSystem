@@ -56,44 +56,84 @@ public class RepaymentController {
     }
 
     /**
-     * 客户还款（核心接口）
-     *
-     * 流程：
-     * 1. 创建 repayment_record 记录本次还款
-     * 2. 按时间先后顺序遍历该客户的未结清欠款，逐笔核销
-     * 3. 每笔核销创建 debt_repayment 关联记录
-     * 4. 更新对应 debt_record 的 settled_amount 和 status
-     * 5. 从 debt_record 实时计算并同步 user_customer.debt_amount
+     * 逐笔还款：针对指定欠款记录进行还款
+     * 还完后同步更新对应订单的 receivedAmount 和 currentDebt
      */
     @PostMapping
-    public Result<Boolean> saveRepayment(@RequestBody RepaymentRecord repayment, HttpServletRequest request) {
+    public Result<Boolean> saveRepayment(@RequestBody Map<String, Object> body, HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
 
-        if (repayment.getCustomerId() == null) {
-            return Result.error("请选择客户");
-        }
-        if (repayment.getAmount() == null || repayment.getAmount().compareTo(BigDecimal.ZERO) <= 0) {
+        Long debtId = Long.valueOf(body.get("debtId").toString());
+        BigDecimal amount = new BigDecimal(body.get("amount").toString());
+        String paymentMethod = body.get("paymentMethod") != null ? body.get("paymentMethod").toString() : null;
+        String remark = body.get("remark") != null ? body.get("remark").toString() : null;
+        String repaymentDateStr = body.get("repaymentDate") != null ? body.get("repaymentDate").toString() : null;
+
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
             return Result.error("还款金额必须大于 0");
         }
 
-        // 计算该客户当前未结清欠款总额
-        BigDecimal totalUnsettled = calcUnsettledDebt(userId, repayment.getCustomerId());
-        if (repayment.getAmount().compareTo(totalUnsettled) > 0) {
-            return Result.error("还款金额不能大于未结清欠款总额（当前欠款：" + totalUnsettled + " 元）");
+        DebtRecord debt = debtRecordService.getById(debtId);
+        if (debt == null) {
+            return Result.error("欠款记录不存在");
+        }
+        if (!userId.equals(debt.getUserId())) {
+            return Result.error("无权操作该欠款记录");
         }
 
-        // 创建还款记录
+        BigDecimal unsettled = debt.getAmount().subtract(
+                debt.getSettledAmount() != null ? debt.getSettledAmount() : BigDecimal.ZERO);
+        if (amount.compareTo(unsettled) > 0) {
+            return Result.error("还款金额不能大于剩余欠款（剩余：" + unsettled + " 元）");
+        }
+
+        // 1. 创建还款记录
+        RepaymentRecord repayment = new RepaymentRecord();
         repayment.setUserId(userId);
-        if (repayment.getRepaymentDate() == null) {
+        repayment.setCustomerId(debt.getCustomerId());
+        repayment.setAmount(amount);
+        repayment.setPaymentMethod(paymentMethod);
+        repayment.setRemark(remark);
+        if (repaymentDateStr != null && !repaymentDateStr.isBlank()) {
+            repayment.setRepaymentDate(LocalDate.parse(repaymentDateStr));
+        } else {
             repayment.setRepaymentDate(LocalDate.now());
         }
+        repayment.setCreateTime(LocalDateTime.now());
         repaymentRecordService.save(repayment);
 
-        // 按时间顺序核销未结清欠款
-        settleDebts(userId, repayment.getCustomerId(), repayment.getAmount(), repayment.getId());
+        // 2. 创建核销关联
+        DebtRepayment dr = new DebtRepayment();
+        dr.setDebtId(debtId);
+        dr.setRepaymentId(repayment.getId());
+        dr.setAmount(amount);
+        debtRepaymentService.save(dr);
 
-        // 同步用户-客户欠款
-        syncUserCustomerDebt(userId, repayment.getCustomerId());
+        // 3. 更新欠款记录
+        BigDecimal oldSettled = debt.getSettledAmount() != null ? debt.getSettledAmount() : BigDecimal.ZERO;
+        BigDecimal newSettled = oldSettled.add(amount);
+        debt.setSettledAmount(newSettled);
+        debt.setStatus(newSettled.compareTo(debt.getAmount()) >= 0 ? "SETTLED" : "PARTIAL");
+        debtRecordService.updateById(debt);
+
+        // 4. 同步订单：receivedAmount += amount，currentDebt -= amount
+        if (debt.getOrderId() != null) {
+            SaleOrder order = saleOrderService.getById(debt.getOrderId());
+            if (order != null) {
+                BigDecimal orderReceived = order.getReceivedAmount() != null ? order.getReceivedAmount() : BigDecimal.ZERO;
+                BigDecimal orderReceivable = order.getReceivableAmount() != null ? order.getReceivableAmount() : BigDecimal.ZERO;
+                order.setReceivedAmount(orderReceived.add(amount));
+                order.setCurrentDebt(orderReceivable.subtract(order.getReceivedAmount()));
+                if ("SETTLED".equals(debt.getStatus()) && "进行中".equals(order.getStatus())) {
+                    order.setStatus("已完成");
+                }
+                order.setUpdateTime(LocalDateTime.now());
+                saleOrderService.updateById(order);
+            }
+        }
+
+        // 5. 同步用户-客户欠款
+        syncUserCustomerDebt(userId, debt.getCustomerId());
 
         return Result.success(true);
     }
@@ -106,6 +146,8 @@ public class RepaymentController {
             @RequestParam(defaultValue = "1") Integer pageNum,
             @RequestParam(defaultValue = "10") Integer pageSize,
             @RequestParam(required = false) Long customerId,
+            @RequestParam(defaultValue = "createTime") String sortField,
+            @RequestParam(defaultValue = "desc") String sortOrder,
             HttpServletRequest request) {
         Long userId = getCurrentUserId(request);
 
@@ -115,7 +157,14 @@ public class RepaymentController {
         if (customerId != null) {
             wrapper.eq(RepaymentRecord::getCustomerId, customerId);
         }
-        wrapper.orderByDesc(RepaymentRecord::getCreateTime);
+        boolean asc = "asc".equalsIgnoreCase(sortOrder);
+        if ("repaymentDate".equals(sortField)) {
+            if (asc) wrapper.orderByAsc(RepaymentRecord::getRepaymentDate);
+            else wrapper.orderByDesc(RepaymentRecord::getRepaymentDate);
+        } else {
+            if (asc) wrapper.orderByAsc(RepaymentRecord::getCreateTime);
+            else wrapper.orderByDesc(RepaymentRecord::getCreateTime);
+        }
         repaymentRecordService.page(page, wrapper);
 
         // 查询客户名称
@@ -219,115 +268,6 @@ public class RepaymentController {
     }
 
     // ==================== 私有辅助方法 ====================
-
-    /**
-     * 计算某客户未结清欠款总额
-     */
-    private BigDecimal calcUnsettledDebt(Long userId, Long customerId) {
-        List<DebtRecord> debts = debtRecordService.lambdaQuery()
-                .eq(DebtRecord::getUserId, userId)
-                .eq(DebtRecord::getCustomerId, customerId)
-                .in(DebtRecord::getStatus, Arrays.asList("UNSETTLED", "PARTIAL"))
-                .list();
-
-        return debts.stream()
-                .map(d -> d.getAmount().subtract(
-                        d.getSettledAmount() != null ? d.getSettledAmount() : BigDecimal.ZERO))
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
-    }
-
-    /**
-     * 按时间顺序核销该客户的未结清欠款
-     *
-     * @param remainingAmount 待核销金额
-     * @param repaymentId     关联的还款记录ID
-     */
-    private void settleDebts(Long userId, Long customerId, BigDecimal remainingAmount, Long repaymentId) {
-        List<DebtRecord> unsettledDebts = debtRecordService.lambdaQuery()
-                .eq(DebtRecord::getUserId, userId)
-                .eq(DebtRecord::getCustomerId, customerId)
-                .in(DebtRecord::getStatus, Arrays.asList("UNSETTLED", "PARTIAL"))
-                .orderByAsc(DebtRecord::getCreateTime)
-                .orderByAsc(DebtRecord::getId)
-                .list();
-
-        System.out.println("[核销顺序] 共" + unsettledDebts.size() + "笔未结清欠款，核销顺序：");
-        for (int i = 0; i < unsettledDebts.size(); i++) {
-            DebtRecord d = unsettledDebts.get(i);
-            System.out.println("  " + (i + 1) + ". id=" + d.getId() + " orderNo=" + d.getOrderNo()
-                    + " amount=" + d.getAmount() + " settled=" + d.getSettledAmount()
-                    + " createTime=" + d.getCreateTime());
-        }
-
-        // 记录被完全结清的订单ID
-        Set<Long> completedOrderIds = new HashSet<>();
-        BigDecimal remaining = remainingAmount;
-        for (DebtRecord debt : unsettledDebts) {
-            if (remaining.compareTo(BigDecimal.ZERO) <= 0) break;
-
-            BigDecimal debtRemaining = debt.getAmount().subtract(
-                    debt.getSettledAmount() != null ? debt.getSettledAmount() : BigDecimal.ZERO);
-
-            if (debtRemaining.compareTo(BigDecimal.ZERO) <= 0) continue;
-
-            BigDecimal settleAmount = remaining.min(debtRemaining);
-
-            // 创建核销关联
-            DebtRepayment dr = new DebtRepayment();
-            dr.setDebtId(debt.getId());
-            dr.setRepaymentId(repaymentId);
-            dr.setAmount(settleAmount);
-            debtRepaymentService.save(dr);
-
-            // 更新欠款记录
-            BigDecimal newSettled = (debt.getSettledAmount() != null ? debt.getSettledAmount() : BigDecimal.ZERO)
-                    .add(settleAmount);
-            debt.setSettledAmount(newSettled);
-            if (newSettled.compareTo(debt.getAmount()) >= 0) {
-                debt.setStatus("SETTLED");
-                // 记录该欠款对应的订单ID，后续检查是否全部结清
-                if (debt.getOrderId() != null) {
-                    completedOrderIds.add(debt.getOrderId());
-                }
-            } else {
-                debt.setStatus("PARTIAL");
-            }
-            debtRecordService.updateById(debt);
-
-            remaining = remaining.subtract(settleAmount);
-        }
-
-        // 检查每个被完全结清的订单，是否所有欠款都已结清，是则改为"已完成"
-        for (Long orderId : completedOrderIds) {
-            checkAndCompleteOrder(orderId);
-        }
-    }
-
-    /**
-     * 检查指定订单的所有欠款是否已全部结清，如果是则更新订单状态为"已完成"
-     */
-    private void checkAndCompleteOrder(Long orderId) {
-        if (orderId == null) return;
-
-        // 直接查询该订单是否还有未结清/部分结清的欠款记录
-        long unsettledCount = debtRecordService.lambdaQuery()
-                .eq(DebtRecord::getOrderId, orderId)
-                .in(DebtRecord::getStatus, Arrays.asList("UNSETTLED", "PARTIAL"))
-                .count();
-
-        System.out.println("[checkAndCompleteOrder] orderId=" + orderId + ", 未结清欠款笔数=" + unsettledCount);
-
-        if (unsettledCount == 0) {
-            SaleOrder order = saleOrderService.getById(orderId);
-            System.out.println("[checkAndCompleteOrder] 订单状态=" + (order != null ? order.getStatus() : "null"));
-            if (order != null && "进行中".equals(order.getStatus())) {
-                order.setStatus("已完成");
-                order.setUpdateTime(LocalDateTime.now());
-                boolean updated = saleOrderService.updateById(order);
-                System.out.println("[checkAndCompleteOrder] 订单状态更新为已完成, result=" + updated);
-            }
-        }
-    }
 
     /**
      * 从 debt_record 实时计算并同步 user_customer 的欠款金额
