@@ -1521,7 +1521,7 @@
                                 </div>
                                 <div style="text-align:right;">
                                     <div style="font-size:18px;font-weight:600;color:#DC2626;">{{ s.totalUnsettled }} 元</div>
-                                    <button class="btn btn-sm btn-primary" @click="window.location.hash = '#/debt?customerId=' + s.customerId" style="margin-top:6px;">去还款</button>
+                                    <button class="btn btn-sm btn-primary" @click="goDebt(s.customerId)" style="margin-top:6px;">去还款</button>
                                 </div>
                             </div>
                         </div>
