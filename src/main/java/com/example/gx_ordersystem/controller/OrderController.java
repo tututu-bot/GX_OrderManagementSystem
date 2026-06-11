@@ -78,14 +78,18 @@ public class OrderController {
     }
 
     /**
-     * 获取当前用户对指定客户的欠款金额
+     * 获取当前用户对指定客户的实时欠款金额（直接从 debt_record 计算，不依赖 user_customer 缓存）
      */
     private BigDecimal getUserCustomerDebt(Long userId, Long customerId) {
-        UserCustomer uc = userCustomerService.lambdaQuery()
-                .eq(UserCustomer::getUserId, userId)
-                .eq(UserCustomer::getCustomerId, customerId)
-                .one();
-        return (uc != null && uc.getDebtAmount() != null) ? uc.getDebtAmount() : BigDecimal.ZERO;
+        List<DebtRecord> debts = debtRecordService.lambdaQuery()
+                .eq(DebtRecord::getUserId, userId)
+                .eq(DebtRecord::getCustomerId, customerId)
+                .in(DebtRecord::getStatus, Arrays.asList("UNSETTLED", "PARTIAL"))
+                .list();
+        return debts.stream()
+                .map(d -> d.getAmount().subtract(
+                        d.getSettledAmount() != null ? d.getSettledAmount() : BigDecimal.ZERO))
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
 
@@ -297,6 +301,7 @@ public class OrderController {
         result.put("customerContact", customer != null ? customer.getContactName() : "");
         result.put("customerPhone", customer != null ? customer.getPhone() : "");
         result.put("customerCoreProduct", customer != null ? customer.getCoreProduct() : "");
+        result.put("customerTotalDebt", getUserCustomerDebt(getCurrentUserId(request), order.getCustomerId()));
         return Result.success(result);
     }
 

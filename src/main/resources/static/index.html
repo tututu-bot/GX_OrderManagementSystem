@@ -24,6 +24,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>管兴订单管理系统</title>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6B4BFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="管兴订单系统">
+    <link rel="apple-touch-icon" href="/icon-logo.jpeg">
     <link rel="stylesheet" href="https://unpkg.com/element-plus@2.9.0/dist/index.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
 
@@ -1000,6 +1007,138 @@
                 display: none !important;
             }
         }
+        @media (max-width: 768px) {
+            /* ====== 布局与导航 ====== */
+            .app-layout { flex-direction: column; height: 100vh; }
+            .sidebar { display: none; }
+            .bottom-tab-bar {
+                display: flex;
+                position: fixed; bottom: 0; left: 0; right: 0;
+                height: 56px; background: #FFFFFF;
+                border-top: 1px solid #E5E5E5; z-index: 900;
+                justify-content: space-around; align-items: center;
+                padding-bottom: env(safe-area-inset-bottom, 0);
+            }
+            .bottom-tab {
+                display: flex; flex-direction: column; align-items: center; gap: 2px;
+                font-size: 10px; color: #666666; text-decoration: none;
+                padding: 4px 0; min-width: 48px; min-height: 44px;
+                justify-content: center; transition: color 0.2s;
+            }
+            .bottom-tab.active { color: #6B4BFF; }
+            .bottom-tab svg { width: 20px; height: 20px; }
+
+            /* ====== 顶栏 ====== */
+            .topbar { height: 48px; padding: 0 12px; flex-shrink: 0; }
+            .topbar-title { font-size: 15px; }
+            .user-name { display: none; }
+            .user-trigger { padding: 4px 8px; }
+            .user-avatar { width: 28px; height: 28px; font-size: 12px; }
+            .dropdown-menu { top: 40px; right: 0; min-width: 140px; }
+
+            /* ====== 内容区 ====== */
+            .main-area { overflow-y: auto; }
+            .content {
+                padding: 12px;
+                padding-bottom: calc(68px + env(safe-area-inset-bottom, 0));
+            }
+            .page-card { padding: 12px; border-radius: 8px; }
+            .page-header-row { flex-direction: column; align-items: flex-start; gap: 12px; }
+            .page-title { font-size: 16px; }
+
+            /* ====== 表格 ====== */
+            .data-table { font-size: 12px; min-width: 600px; }
+            .data-table th { padding: 8px 10px; font-size: 11px; white-space: nowrap; }
+            .data-table td { padding: 10px; white-space: nowrap; }
+            .data-table th:first-child, .data-table td:first-child {
+                position: sticky; left: 0; background: #FFFFFF; z-index: 1;
+                box-shadow: 2px 0 4px rgba(0,0,0,0.05);
+            }
+            .data-table th:first-child { background: #FAFAFA; z-index: 2; }
+            .data-table tr:hover td:first-child { background: #FAFAFA; }
+            .detail-table { font-size: 11px; min-width: 500px; }
+            .detail-table th { padding: 6px 8px; font-size: 10px; white-space: nowrap; }
+            .detail-table td { padding: 6px 8px; white-space: nowrap; }
+
+            /* ====== 筛选栏 ====== */
+            .page-card input[type="text"],
+            .page-card input[type="date"],
+            .page-card input[type="number"],
+            .page-card select {
+                width: 100% !important; max-width: none !important;
+                height: 40px !important; font-size: 16px !important;
+            }
+            .filter-tag-group { gap: 6px; }
+            .filter-tag-option { font-size: 12px; padding: 5px 10px; min-height: 32px; }
+            .filter-multi-wrap { width: 100%; }
+            .filter-multi-trigger { width: 100%; height: 40px; font-size: 16px; }
+            .filter-multi-panel {
+                position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+                width: 100%; max-height: 50vh; border-radius: 16px 16px 0 0;
+                z-index: 950;
+            }
+            .suggestion-dropdown {
+                position: fixed; top: auto; bottom: 0; left: 0; right: 0;
+                width: 100%; max-height: 50vh; border-radius: 16px 16px 0 0;
+                z-index: 950;
+            }
+
+            /* ====== 弹窗（通用） ====== */
+            .modal-overlay { align-items: flex-end; }
+            .modal-card {
+                max-width: 100% !important; width: 100%;
+                border-radius: 16px 16px 0 0; margin: 0;
+                max-height: 92vh;
+            }
+            .modal-header { padding: 20px 20px 0; }
+            .modal-header h3 { font-size: 16px; }
+            .modal-body { padding: 20px; }
+            .modal-footer { padding: 0 20px 20px; flex-wrap: wrap; gap: 8px; }
+            .modal-footer .btn { flex: 1; min-width: 0; height: 44px; font-size: 15px; }
+            .modal-body .form-row { margin-bottom: 14px; }
+            .modal-body .form-row input,
+            .modal-body .form-row select,
+            .modal-body .form-row textarea { height: 40px; font-size: 16px; }
+            .modal-body .form-row textarea { height: auto; }
+
+            /* ====== 订单弹窗 ====== */
+            .order-modal-card { max-width: 100% !important; max-height: 100vh; }
+            .item-card-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
+            .item-card-grid input, .item-card-grid select { height: 38px !important; font-size: 14px !important; }
+            .item-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+            .amount-bar { flex-direction: column; gap: 12px; padding: 12px 16px; }
+            .amount-bar-item { flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; }
+            .amount-bar-value { font-size: 16px; }
+            .detail-grid { grid-template-columns: 1fr !important; gap: 8px; }
+
+            /* ====== 商品选择弹窗 ====== */
+            .product-select-modal-card { max-width: 100% !important; max-height: 100vh; }
+            .product-tree { max-height: 60vh; }
+            .product-group-header { padding: 12px; font-size: 13px; }
+            .product-child-item { padding: 10px 12px 10px 32px; font-size: 12px; }
+
+            /* ====== 还款管理客户卡片 ====== */
+            .page-card [style*="grid-template-columns"] {
+                grid-template-columns: 1fr !important;
+            }
+
+            /* ====== 按钮与标签 ====== */
+            .btn { min-height: 44px; min-width: 44px; justify-content: center; }
+            .btn-sm { min-height: 36px; min-width: 36px; }
+            .btn-xs { min-height: 32px; min-width: 32px; }
+            .tag { padding: 3px 8px; font-size: 11px; }
+            .empty-state { padding: 24px 16px; }
+            .content .btn-sm { height: 40px; padding: 0 14px; font-size: 14px; min-width: 64px; }
+
+            /* ====== 打印票据 ====== */
+            .print-ticket { width: 100% !important; max-width: 100% !important; }
+        }
+
+        /* ---------- 底部导航栏（默认隐藏，移动端显示） ---------- */
+        .bottom-tab-bar { display: none; }
+
+        /* ---------- 表格滚动容器 ---------- */
+        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
     </style>
 </head>
 <body>
@@ -1054,6 +1193,30 @@
                 </a>
             </ul>
         </aside>
+
+        <!-- ========== 移动端底部导航栏 ========== -->
+        <nav class="bottom-tab-bar">
+            <a href="#/order" class="bottom-tab" :class="{ active: currentRoute === 'order' }">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <span>订单</span>
+            </a>
+            <a href="#/debt" class="bottom-tab" :class="{ active: currentRoute === 'debt' }">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                <span>欠款</span>
+            </a>
+            <a href="#/customer" class="bottom-tab" :class="{ active: currentRoute === 'customer' }">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+                <span>客户</span>
+            </a>
+            <a href="#/product" class="bottom-tab" :class="{ active: currentRoute === 'product' }">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+                <span>商品</span>
+            </a>
+            <a href="#/repayment" class="bottom-tab" :class="{ active: currentRoute === 'repayment' }">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+                <span>还款</span>
+            </a>
+        </nav>
 
         <!-- ========== 右侧主内容区 ========== -->
         <div class="main-area">
@@ -1126,7 +1289,7 @@
                         </select>
                     </div>
 
-                    <table class="data-table">
+                    <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
                                 <th>客户名称</th>
@@ -1165,7 +1328,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
 
                     <!-- 客户分页 -->
                     <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
@@ -1217,7 +1380,7 @@
                         >
                     </div>
 
-                    <table class="data-table">
+                    <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
                                 <th>商品编码</th>
@@ -1253,7 +1416,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
 
                     <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
                         <span style="font-size:13px;color:#666;">共 {{ productTotal }} 条</span>
@@ -1319,7 +1482,7 @@
                         <button class="btn btn-secondary" @click="resetOrderFilter" style="height:36px;">重置</button>
                     </div>
 
-                    <table class="data-table">
+                    <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
                                 <th>单据编号</th>
@@ -1368,7 +1531,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
 
                     <!-- 订单分页 -->
                     <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
@@ -1391,16 +1554,20 @@
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">客户</label>
                             <div id="debt-filter-wrap" class="filter-multi-wrap">
-                                <div class="filter-multi-trigger" :class="{ active: showDebtCustomerPanel }" @click="showDebtCustomerPanel = !showDebtCustomerPanel">
+                                <div class="filter-multi-trigger" :class="{ active: showDebtCustomerPanel }" @click="toggleDebtCustomerPanel">
                                     <span>{{ debtFilter.customerIds.length ? '已选 ' + debtFilter.customerIds.length + ' 个' : '全部客户' }}</span>
                                     <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polyline points="6 9 12 15 18 9"></polyline>
                                     </svg>
                                 </div>
-                                <div v-if="showDebtCustomerPanel" class="filter-multi-panel">
-                                    <div class="filter-multi-option" v-for="c in customerList" :key="c.id" @click.stop="toggleDebtCustomerFilter(c.id)">
-                                        <input type="checkbox" :checked="debtFilter.customerIds.includes(c.id)" @click.stop="toggleDebtCustomerFilter(c.id)">
-                                        <span>{{ c.customerName }}</span>
+                                <div v-if="showDebtCustomerPanel" class="filter-multi-panel" style="padding:8px;">
+                                    <input type="text" v-model="debtCustomerSearchText" placeholder="输入客户名称搜索..." style="width:100%;height:32px;padding:0 10px;font-size:13px;font-family:inherit;border:1px solid #E5E5E5;border-radius:6px;outline:none;margin-bottom:6px;box-sizing:border-box;">
+                                    <div style="max-height:200px;overflow-y:auto;">
+                                        <div v-if="debtCustomerFilteredList.length === 0" style="padding:12px;text-align:center;color:#9CA3AF;font-size:13px;">无匹配客户</div>
+                                        <div class="filter-multi-option" v-for="c in debtCustomerFilteredList" :key="c.id" @click.stop="toggleDebtCustomerFilter(c.id)">
+                                            <input type="checkbox" :checked="debtFilter.customerIds.includes(c.id)" @click.stop="toggleDebtCustomerFilter(c.id)">
+                                            <span>{{ c.customerName }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1421,7 +1588,7 @@
                         <button class="btn btn-secondary" @click="resetDebtFilter" style="height:36px;">重置</button>
                     </div>
 
-                    <table class="data-table">
+                    <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
                                 <th>客户名称</th>
@@ -1468,7 +1635,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
 
                     <!-- 欠款统计 -->
                     <div v-if="debtList.length > 0" style="margin-top:20px;padding:16px 20px;background:#FAFAFA;border-radius:10px;border:1px solid #E5E5E5;">
@@ -1501,9 +1668,6 @@
                 <div v-if="currentRoute === 'repayment'" class="page-card">
                     <div class="page-header-row">
                         <h2 class="page-title">还款管理</h2>
-                        <button class="btn btn-primary" @click="window.location.hash = '#/debt'">
-                            前往欠款列表还款
-                        </button>
                     </div>
 
                     <!-- 客户欠款概览 -->
@@ -1529,7 +1693,7 @@
 
                     <!-- 还款记录列表 -->
                     <h3 style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:12px;">还款记录</h3>
-                    <table class="data-table">
+                    <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
                                 <th>客户名称</th>
@@ -1552,7 +1716,7 @@
                                 <td colspan="6" style="text-align:center;color:#9CA3AF;padding:40px;">暂无还款记录</td>
                             </tr>
                             <tr v-for="item in repaymentList" :key="item.id">
-                                <td>{{ getCustomerName(item.customerId) }}</td>
+                                <td>{{ item.customerName || getCustomerName(item.customerId) }}</td>
                                 <td>
                                     <span style="color:#16A34A;font-weight:600;">{{ item.amount }} 元</span>
                                 </td>
@@ -1562,7 +1726,7 @@
                                 <td>{{ formatDateTime(item.createTime) }}</td>
                             </tr>
                         </tbody>
-                    </table>
+                    </table></div>
 
                     <!-- 还款分页 -->
                     <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;">
@@ -2114,7 +2278,9 @@
                                 <th>序号</th>
                                 <th>商品编号</th>
                                 <th>商品名称</th>
-                                <th>规格</th>
+                                <th>颜色</th>
+                                <th>尺寸</th>
+                                <th>码数</th>
                                 <th>单位</th>
                                 <th style="text-align:right;">数量</th>
                                 <th style="text-align:right;">单价</th>
@@ -2127,7 +2293,9 @@
                                 <td>{{ idx + 1 }}</td>
                                 <td>{{ item.productCode || '-' }}</td>
                                 <td>{{ item.productName }}</td>
-                                <td>{{ item.specification || '-' }}</td>
+                                <td>{{ getSpecPart(item.specification, 0) }}</td>
+                                <td>{{ getSpecPart(item.specification, 1) }}</td>
+                                <td>{{ getSpecPart(item.specification, 2) }}</td>
                                 <td>{{ item.unit || '-' }}</td>
                                 <td style="text-align:right;">{{ item.quantity }}</td>
                                 <td style="text-align:right;">{{ item.unitPrice }}</td>
@@ -2213,29 +2381,6 @@
         </div>
     </div>
 
-    <!-- ========== 扫码支付弹窗 ========== -->
-    <div v-cloak v-if="showQrDialog" class="modal-overlay" @click.self="showQrDialog = false">
-        <div class="modal-card" style="max-width:420px;">
-            <div class="modal-header">
-                <h3>扫码支付 — {{ qrPaymentMethod }}</h3>
-            </div>
-            <div class="modal-body" style="text-align:center;">
-                <p style="font-size:13px;color:#666;margin-bottom:16px;">
-                    请使用{{ qrPaymentMethod }}扫描下方二维码完成支付
-                </p>
-                <div style="display:inline-block;padding:16px;background:#FFF;border:1px solid #E5E5E5;border-radius:10px;margin-bottom:16px;">
-                    <img :src="qrCodeImageUrl" style="display:block;width:220px;height:220px;" alt="支付二维码">
-                </div>
-                <p style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:12px;">
-                    支付金额：¥{{ orderReceivable.toFixed(2) }}
-                </p>
-                <p :style="{fontSize:'14px',color:qrStatusColor,fontWeight:'500'}">
-                    {{ qrStatusText }}
-                </p>
-            </div>
-        </div>
-    </div>
-
     <!-- ========== 打印小票区域（隐藏，仅用于打印） ========== -->
     <div v-show="showOrderDetailDialog" id="print-area" style="display:none;">
         <div class="print-ticket">
@@ -2298,10 +2443,9 @@
             </table>
             <div class="print-summary">
                 <span>本单金额：{{ orderDetail.order?.totalAmount?.toFixed ? orderDetail.order.totalAmount.toFixed(2) : (orderDetail.order?.totalAmount || 0) }}</span>
-                <span>其他费用：{{ orderDetail.order?.otherFee?.toFixed ? orderDetail.order.otherFee.toFixed(2) : (orderDetail.order?.otherFee || 0) }}</span>
-                <span>本次收款：{{ orderDetail.order?.receivedAmount?.toFixed ? orderDetail.order.receivedAmount.toFixed(2) : (orderDetail.order?.receivedAmount || 0) }}</span>
-                <span>本次欠款：{{ orderDetail.order?.currentDebt?.toFixed ? orderDetail.order.currentDebt.toFixed(2) : (orderDetail.order?.currentDebt || 0) }}</span>
-                <span>累计欠款：{{ orderDetail.order?.totalDebt?.toFixed ? orderDetail.order.totalDebt.toFixed(2) : (orderDetail.order?.totalDebt || 0) }}</span>
+                <span>已收款：{{ orderDetail.order?.receivedAmount?.toFixed ? orderDetail.order.receivedAmount.toFixed(2) : (orderDetail.order?.receivedAmount || 0) }}</span>
+                <span>本单欠款：{{ orderDetail.order?.currentDebt?.toFixed ? orderDetail.order.currentDebt.toFixed(2) : (orderDetail.order?.currentDebt || 0) }}</span>
+                <span>累计欠款：{{ orderDetail.customerTotalDebt?.toFixed ? orderDetail.customerTotalDebt.toFixed(2) : (orderDetail.customerTotalDebt || 0) }}</span>
             </div>
             <div class="print-remark">备注：{{ orderDetail.order?.remark || '' }}</div>
             <div class="print-sign">
@@ -2447,6 +2591,13 @@
                 dateEnd: ''
             });
             const showDebtCustomerPanel = ref(false);
+            const debtCustomerSearchText = ref('');
+            const debtCustomerFilteredList = computed(() => {
+                const list = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
+                const text = debtCustomerSearchText.value.trim().toLowerCase();
+                if (!text) return list;
+                return list.filter(c => (c.customerName || '').toLowerCase().includes(text));
+            });
             const debtPageNum = ref(1);
             const debtPageSize = ref(10);
             const debtTotal = ref(0);
@@ -2472,15 +2623,6 @@
             const repaymentTotal = ref(0);
             const repaymentTotalPages = ref(0);
             const repaymentFilterCustomerId = ref(null);
-
-            /* ========== 扫码支付数据 ========== */
-            const showQrDialog = ref(false);
-            const qrPaymentMethod = ref('');
-            const qrPendingOrderData = ref(null); // 暂存待提交的订单数据
-            const qrPollTimer = ref(null);        // 轮询定时器
-            const qrCodeImageUrl = ref('');      // 二维码图片URL
-            const qrStatusText = ref('');      // 状态文字
-            const qrStatusColor = ref('#666'); // 状态颜色
 
             /* ========== 排序状态 ========== */
             const orderSort = reactive({ field: 'createTime', order: 'desc' });
@@ -2594,14 +2736,16 @@
                     loadDebts();
                 } else if (hash.startsWith('#/repayment')) {
                     currentRoute.value = 'repayment';
-                    // 解析 customerId 参数
                     const params = new URLSearchParams(hash.split('?')[1] || '');
                     repaymentFilterCustomerId.value = params.get('customerId') ? Number(params.get('customerId')) : null;
                     loadRepayments();
                     loadCustomerDebtSummaries();
-                } else {
+                } else if (hash.startsWith('#/customer')) {
                     currentRoute.value = 'customer';
                     loadCustomers();
+                } else {
+                    currentRoute.value = 'order';
+                    loadOrders();
                 }
             };
 
@@ -2621,12 +2765,8 @@
                 updateRoute();
                 window.addEventListener('hashchange', updateRoute);
 
-                loadCustomers();
-                loadOrders();
+                loadAllCustomers();
                 loadProductTree();
-                loadDebts();
-                loadRepayments();
-                loadCustomerDebtSummaries();
 
                 // 点击页面其他区域关闭筛选下拉面板
                 document.addEventListener('click', (e) => {
@@ -3025,9 +3165,10 @@
                 loadOrders();
             };
 
-            // 根据客户ID获取客户名称（用于订单列表显示）
+            // 根据客户ID获取客户名称（优先从全量列表查找）
             const getCustomerName = (customerId) => {
-                const c = customerList.value.find(c => c.id === customerId);
+                const list = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
+                const c = list.find(c => c.id === customerId);
                 return c ? c.customerName : customerId;
             };
 
@@ -3244,51 +3385,6 @@
                     return;
                 }
 
-                // 新增模式下，微信/支付宝需要先扫码支付
-                if (!isEdit && (orderForm.paymentMethod === '微信' || orderForm.paymentMethod === '支付宝')) {
-                    // 1. 向服务端创建支付会话
-                    const payRes = await fetch('/api/payment/create', {
-                        method: 'POST',
-                        headers: getAuthHeaders(),
-                        body: JSON.stringify({
-                            paymentMethod: orderForm.paymentMethod,
-                            amount: orderReceivable.value
-                        })
-                    });
-                    const payResult = await handleResponse(payRes);
-                    if (!payResult || payResult.code !== 200) {
-                        ElMessage.error('创建支付会话失败');
-                        return;
-                    }
-                    const token = payResult.data.token;
-
-                    // 2. 准备订单数据
-                    const now = new Date();
-                    const pad = (n, len) => String(n).padStart(len, '0');
-                    const orderNo = 'XSDD' + now.getFullYear() + pad(now.getMonth() + 1, 2) + pad(now.getDate(), 2)
-                        + pad(now.getHours(), 2) + pad(now.getMinutes(), 2) + pad(now.getSeconds(), 2) + pad(now.getMilliseconds(), 3);
-
-                    const orderData = {
-                        ...orderForm,
-                        orderNo,
-                        totalAmount: orderTotalAmount.value,
-                        receivableAmount: orderReceivable.value,
-                        currentDebt: orderCurrentDebt.value
-                    };
-                    qrPendingOrderData.value = { orderData, orderNo, token };
-                    qrPaymentMethod.value = orderForm.paymentMethod;
-
-                    // 3. 显示二维码图片（后端自动检测局域网 IP 生成）
-                    qrCodeImageUrl.value = '/api/payment/qrcode/' + token;
-                    qrStatusText.value = '等待扫码支付...';
-                    qrStatusColor.value = '#666';
-
-                    // 4. 显示二维码弹窗并开始轮询
-                    showQrDialog.value = true;
-                    pollPaymentStatus(token);
-                    return;
-                }
-
                 orderSaving.value = true;
                 try {
 
@@ -3411,85 +3507,6 @@
                 }
             };
 
-            // 轮询支付状态，确认后自动提交订单
-            const pollPaymentStatus = (token) => {
-                const poll = async () => {
-                    try {
-                        const res = await fetch(`/api/payment/status/${token}`, { headers: getAuthHeaders() });
-                        const result = await handleResponse(res);
-                        if (result && result.code === 200 && result.data.status === 'CONFIRMED') {
-                            stopPolling();
-                            qrStatusText.value = '支付成功！正在生成订单...';
-                            qrStatusColor.value = '#16A34A';
-                            await submitPendingOrder();
-                        }
-                    } catch (e) { /* 轮询失败继续 */ }
-                };
-                qrPollTimer.value = setInterval(poll, 2000);
-            };
-
-            const stopPolling = () => {
-                if (qrPollTimer.value) {
-                    clearInterval(qrPollTimer.value);
-                    qrPollTimer.value = null;
-                }
-            };
-
-            // 提交暂存的订单
-            const submitPendingOrder = async () => {
-                const pending = qrPendingOrderData.value;
-                if (!pending) return;
-
-                stopPolling();
-                showQrDialog.value = false;
-                orderSaving.value = true;
-                try {
-                    const orderRes = await fetch('/api/order', {
-                        method: 'POST',
-                        headers: getAuthHeaders(),
-                        body: JSON.stringify(pending.orderData)
-                    });
-                    const orderResult = await handleResponse(orderRes);
-                    if (!orderResult || orderResult.code !== 200) {
-                        ElMessage.error('提交订单失败'); return;
-                    }
-
-                    const savedOrderId = orderResult.data.orderId;
-                    for (let i = 0; i < orderItems.value.length; i++) {
-                        const item = orderItems.value[i];
-                        const specParts = [item.itemColor || '', item.itemSize || ''];
-                        if (item.itemYardCode) specParts.push(item.itemYardCode);
-                        const itemData = {
-                            orderId: savedOrderId,
-                            seqNo: i + 1,
-                            productCode: item.productCode,
-                            productName: item.productName,
-                            specification: specParts.join(';'),
-                            unit: item.unit,
-                            quantity: item.quantity,
-                            unitPrice: item.unitPrice,
-                            amount: item.amount,
-                            remark: item.remark
-                        };
-                        await fetch('/api/order/item', {
-                            method: 'POST',
-                            headers: getAuthHeaders(),
-                            body: JSON.stringify(itemData)
-                        });
-                    }
-
-                    ElMessage.success('支付成功，订单已创建');
-                    showOrderDialog.value = false;
-                    qrPendingOrderData.value = null;
-                    loadOrders();
-                    loadCustomers();
-                } catch (e) {
-                    ElMessage.error('订单生成失败');
-                } finally {
-                    orderSaving.value = false;
-                }
-            };
-
             // 查看订单详情
             const viewOrderDetail = async (orderId) => {
                 try {
@@ -3581,8 +3598,16 @@
                 debtFilter.dateStart = '';
                 debtFilter.dateEnd = '';
                 showDebtCustomerPanel.value = false;
+                debtCustomerSearchText.value = '';
                 debtPageNum.value = 1;
                 loadDebts();
+            };
+
+            const toggleDebtCustomerPanel = () => {
+                showDebtCustomerPanel.value = !showDebtCustomerPanel.value;
+                if (showDebtCustomerPanel.value && allCustomerList.value.length === 0) {
+                    loadAllCustomers();
+                }
             };
 
             const toggleDebtCustomerFilter = (id) => {
@@ -3628,7 +3653,8 @@
             const loadCustomerDebtSummaries = async () => {
                 try {
                     const summaries = [];
-                    for (const c of customerList.value) {
+                    const list = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
+                    for (const c of list) {
                         const res = await fetch(`/api/repayment/summary/${c.id}`, { headers: getAuthHeaders() });
                         const result = await handleResponse(res);
                         if (result && result.code === 200 && result.data && parseFloat(result.data.totalUnsettled) > 0) {
@@ -3975,7 +4001,6 @@
                 orderTotalQty, orderTotalAmount, orderReceivable, orderCurrentDebt,
                 getCustomerName, getStatusText, getStatusClass,
                 showOrderDetailDialog, orderDetail, viewOrderDetail, cancelOrder,
-                showQrDialog, qrPaymentMethod, qrCodeImageUrl, qrStatusText, qrStatusColor, stopPolling,
                 orderSort, debtSort, repaymentSort, toggleSort,
                 productTree, showProductSelectDialog, expandedProductNames, expandedColorKeys,
                 openProductSelect, selectProduct, toggleProductGroup, toggleColorGroup,
@@ -3983,7 +4008,8 @@
                 paymentMethodOptions, statusOptions,
                 topbarTitle,
                 debtList, debtLoading, loadDebts, formatDateTime, totalValidDebt, totalClearedDebt,
-                debtFilter, showDebtCustomerPanel, resetDebtFilter, toggleDebtCustomerFilter,
+                debtFilter, showDebtCustomerPanel, debtCustomerSearchText, debtCustomerFilteredList,
+                resetDebtFilter, toggleDebtCustomerFilter, toggleDebtCustomerPanel,
                 debtPageNum, debtPageSize, debtTotal, debtTotalPages, prevDebtPage, nextDebtPage,
                 printOrder, printTotalQty, printTotalAmount, amountToChinese,
                 repaymentList, repaymentLoading, showRepaymentDialog, repaymentSaving, repaymentForm,
@@ -3995,6 +4021,11 @@
             };
         }
     }).use(ElementPlus).mount('#app');
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
 </script>
 </body>
 </html>

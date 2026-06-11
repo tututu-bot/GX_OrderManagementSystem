@@ -27,6 +27,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登录 - 管兴订单管理系统</title>
+    <!-- PWA -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#6B4BFF">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="管兴订单系统">
+    <link rel="apple-touch-icon" href="/icon-logo.jpeg">
     <!-- Element Plus 样式 -->
     <link rel="stylesheet" href="https://unpkg.com/element-plus@2.9.0/dist/index.css">
     <!-- Inter 字体 -->
@@ -161,6 +168,15 @@
             margin-top: 4px;
             font-size: 13px;
             color: #DC2626;
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 16px; align-items: flex-start; padding-top: 10vh; }
+            .login-card { padding: 32px 20px; border-radius: 12px; }
+            .login-header h1 { font-size: 20px; }
+            .login-header p { font-size: 14px; }
+            .form-input { height: 44px; font-size: 16px; }
+            .btn-primary { height: 48px; font-size: 16px; }
         }
     </style>
 </head>
@@ -298,6 +314,11 @@
             return { form, errors, loading, handleLogin, goRegister };
         }
     }).use(ElementPlus).mount('#app');
+</script>
+<script>
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js');
+    }
 </script>
 </body>
 </html>

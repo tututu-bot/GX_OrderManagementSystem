@@ -1,0 +1,21 @@
+{
+    "name": "管兴订单系统",
+    "short_name": "管兴",
+    "start_url": "/index.html",
+    "display": "standalone",
+    "background_color": "#FAFAFA",
+    "theme_color": "#6B4BFF",
+    "description": "管兴松紧带销售订单管理平台",
+    "icons": [
+        {
+            "src": "/icon-logo.jpeg",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icon-logo.jpeg",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
