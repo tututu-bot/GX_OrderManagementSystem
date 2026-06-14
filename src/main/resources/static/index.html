@@ -2733,7 +2733,7 @@
                             <option value="现金">现金</option>
                             <option value="微信">微信</option>
                             <option value="支付宝">支付宝</option>
-                            <option value="赊账">赊账</option>
+                            <option value="月结">月结</option>
                         </select>
                     </div>
                     <div class="form-row" style="flex:1;min-width:120px;">
@@ -3300,7 +3300,7 @@
                 orderDateEnd: ''
             });
 
-            const paymentMethodOptions = ['现金', '微信', '支付宝', '赊账'];
+            const paymentMethodOptions = ['现金', '微信', '支付宝', '月结'];
             const statusOptions = ['进行中', '已完成', '已作废'];
 
             /* ========== 新增/编辑订单数据 ========== */
@@ -4146,19 +4146,19 @@
                 return debt > 0 ? debt : 0;
             });
 
-            const debtDefaultMethods = ['赊账', '现金', '支付宝', '微信'];
+            const debtDefaultMethods = ['月结', '现金', '支付宝', '微信'];
 
             const calcOrderTotal = () => {
                 orderForm.receivableAmount = orderReceivable.value;
                 if (orderDialogMode.value !== 'edit') {
-                    // 赊账/现金/支付宝/微信：默认产生欠款，不自动填写收款金额
+                    // 月结/现金/支付宝/微信：默认产生欠款，不自动填写收款金额
                     if (orderForm.paymentMethod && !debtDefaultMethods.includes(orderForm.paymentMethod)) {
                         orderForm.receivedAmount = orderReceivable.value;
                     }
                 }
             };
 
-            // 收款方式变化时：赊账/现金/支付宝/微信默认本次收款=0（全部计为欠款）
+            // 收款方式变化时：月结/现金/支付宝/微信默认本次收款=0（全部计为欠款）
             const onPaymentMethodChange = () => {
                 if (orderDialogMode.value === 'edit') return;
                 if (debtDefaultMethods.includes(orderForm.paymentMethod)) {

@@ -223,7 +223,7 @@ CREATE TABLE IF NOT EXISTS sale_order (
 
     -- 本次收款
     -- 作用: 客户本次实际支付的金额
-    -- 说明: 若为赊账方式，此值通常为0或部分金额
+    -- 说明: 若为月结方式，此值通常为0或部分金额
     received_amount     DECIMAL(18,2) DEFAULT 0.00,
 
     -- 本次欠款
@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS sale_order (
 
     -- 收款方式
     -- 作用: 标识客户支付的方式
-    -- 取值: 现金 / 微信 / 支付宝 / 银行转账 / 赊账
+    -- 取值: 现金 / 微信 / 支付宝 / 银行转账 / 月结
     payment_method      VARCHAR(30),
 
     -- 备注
@@ -384,7 +384,7 @@ CREATE TABLE IF NOT EXISTS debt_record (
 
     -- 备注
     -- 作用: 对该笔欠款记录的说明，如产生原因
-    -- 示例: "订单欠款，收款方式：赊账"、"订单修改，新增欠款"
+    -- 示例: "订单欠款，收款方式：月结"、"订单修改，新增欠款"
     remark          VARCHAR(500),
 
     -- 创建时间

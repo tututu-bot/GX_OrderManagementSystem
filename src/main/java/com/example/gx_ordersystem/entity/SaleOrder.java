@@ -133,7 +133,7 @@ public class SaleOrder {
     /**
      * 收款方式
      * 数据库字段: payment_method， VARCHAR(30)
-     * 取值: 现金 / 微信 / 支付宝 / 银行转账 / 赊账 / 预收定金
+     * 取值: 现金 / 微信 / 支付宝  / 月结 / 预收定金
      */
     private String paymentMethod;
 
