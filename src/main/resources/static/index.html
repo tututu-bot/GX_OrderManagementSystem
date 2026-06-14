@@ -34,6 +34,13 @@
     <link rel="stylesheet" href="https://unpkg.com/element-plus@2.9.0/dist/index.css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap">
 
+    <script>
+        (function(){
+            if (window.innerWidth <= 768) {
+                document.documentElement.classList.add('is-mobile');
+            }
+        })();
+    </script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         /* Vue 初始化前隐藏 v-cloak 元素，防止弹窗闪烁 */
@@ -95,6 +102,7 @@
             cursor: pointer;
             transition: all 0.2s;
             margin-bottom: 4px;
+            text-decoration: none;
         }
 
         .nav-item:hover {
@@ -236,14 +244,14 @@
         }
 
         .btn-sm {
-            height: 28px;
-            padding: 0 12px;
+            height: 32px;
+            padding: 0 14px;
             font-size: 13px;
         }
 
         .btn-xs {
-            height: 24px;
-            padding: 0 8px;
+            height: 28px;
+            padding: 0 10px;
             font-size: 12px;
         }
 
@@ -298,6 +306,7 @@
             border-radius: 4px;
             font-size: 12px;
             font-weight: 500;
+            white-space: nowrap;
         }
 
         .tag-success {
@@ -886,51 +895,56 @@
             box-sizing: border-box;
         }
 
+        .print-banner {
+            display: table;
+            margin: 0 auto 16px auto;
+        }
+
         .print-title {
-            text-align: center;
             font-size: 28px;
             font-weight: bold;
-            margin-bottom: 16px;
+            margin-bottom: 8px;
             letter-spacing: 2px;
         }
 
-        .print-header {
-            margin-bottom: 12px;
+        .print-user-info {
+            font-size: 13px;
+            color: #333;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
         }
 
-        .print-row {
+        .print-user-row {
+            line-height: 1.6;
+        }
+
+        .print-customer-info {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px 24px;
-            margin-bottom: 6px;
-            font-size: 14px;
-        }
-
-        .print-row span {
-            white-space: nowrap;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 12px;
         }
 
         .print-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 13px;
+            font-size: 14px;
             margin-bottom: 0;
         }
 
         .print-table th,
         .print-table td {
             border: 1px solid #000000;
-            padding: 6px 8px;
+            padding: 8px 10px;
             text-align: center;
         }
 
         @media print {
             .print-table th,
             .print-table td {
-                border-width: 0.5pt;
-            }
-            .print-amount-words {
-                border-width: 0.5pt;
+                border: 1px solid #000000 !important;
             }
         }
 
@@ -940,25 +954,16 @@
         }
 
         .print-table td {
-            height: 28px;
-        }
-
-        .print-amount-words {
-            border: 1px solid #000000;
-            border-top: none;
-            padding: 8px 12px;
-            font-size: 14px;
-            font-weight: bold;
-            margin-bottom: 0;
-            margin-top: 0;
+            height: 30px;
         }
 
         .print-summary {
             display: flex;
             flex-wrap: wrap;
             gap: 8px 32px;
-            padding: 8px 0;
-            font-size: 14px;
+            padding: 10px 0;
+            font-size: 15px;
+            font-weight: bold;
             margin-bottom: 8px;
         }
 
@@ -971,7 +976,8 @@
         .print-sign {
             display: flex;
             justify-content: space-between;
-            font-size: 14px;
+            font-size: 15px;
+            font-weight: bold;
             padding-top: 16px;
         }
 
@@ -1007,138 +1013,281 @@
                 display: none !important;
             }
         }
-        @media (max-width: 768px) {
-            /* ====== 布局与导航 ====== */
-            .app-layout { flex-direction: column; height: 100vh; }
-            .sidebar { display: none; }
-            .bottom-tab-bar {
-                display: flex;
-                position: fixed; bottom: 0; left: 0; right: 0;
-                height: 56px; background: #FFFFFF;
-                border-top: 1px solid #E5E5E5; z-index: 900;
-                justify-content: space-around; align-items: center;
-                padding-bottom: env(safe-area-inset-bottom, 0);
-            }
-            .bottom-tab {
-                display: flex; flex-direction: column; align-items: center; gap: 2px;
-                font-size: 10px; color: #666666; text-decoration: none;
-                padding: 4px 0; min-width: 48px; min-height: 44px;
-                justify-content: center; transition: color 0.2s;
-            }
-            .bottom-tab.active { color: #6B4BFF; }
-            .bottom-tab svg { width: 20px; height: 20px; }
+        /* ====== Mobile Adaptation: JS-driven class (more reliable than @media) ====== */
+        html.is-mobile .app-layout { flex-direction: column; height: 100vh; }
+        html.is-mobile .sidebar { display: none; }
+        html.is-mobile .desktop-only { display: none !important; }
+        html.is-mobile .mobile-only { display: block !important; }
+        html.is-mobile .table-wrap { display: none; }
+        html.is-mobile .data-table { display: none; }
+        html.is-mobile .detail-table { font-size: 11px; }
 
-            /* ====== 顶栏 ====== */
-            .topbar { height: 48px; padding: 0 12px; flex-shrink: 0; }
-            .topbar-title { font-size: 15px; }
-            .user-name { display: none; }
-            .user-trigger { padding: 4px 8px; }
-            .user-avatar { width: 28px; height: 28px; font-size: 12px; }
-            .dropdown-menu { top: 40px; right: 0; min-width: 140px; }
+        /* ====== Topbar ====== */
+        html.is-mobile .topbar { height: 48px; padding: 0 12px; flex-shrink: 0; position: sticky; top: 0; z-index: 100; }
+        html.is-mobile .topbar-title { font-size: 14px; }
+        html.is-mobile .page-title { display: none; }
+        html.is-mobile .user-name { font-size: 12px; }
+        html.is-mobile .user-trigger { padding: 2px 6px; gap: 6px; }
+        html.is-mobile .user-avatar { width: 26px; height: 26px; font-size: 11px; }
+        html.is-mobile .dropdown-menu { top: 40px; right: 0; min-width: 130px; }
 
-            /* ====== 内容区 ====== */
-            .main-area { overflow-y: auto; }
-            .content {
-                padding: 12px;
-                padding-bottom: calc(68px + env(safe-area-inset-bottom, 0));
-            }
-            .page-card { padding: 12px; border-radius: 8px; }
-            .page-header-row { flex-direction: column; align-items: flex-start; gap: 12px; }
-            .page-title { font-size: 16px; }
+        /* ====== Bottom Tab Bar ====== */
+        html.is-mobile .bottom-tab-bar {
+            display: flex; position: fixed; bottom: 0; left: 0; right: 0;
+            height: 64px; background: #FFFFFF; border-top: 1px solid #E5E5E5;
+            z-index: 900; justify-content: space-around; align-items: center;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+        }
+        html.is-mobile .bottom-tab {
+            display: flex; flex-direction: column; align-items: center; gap: 3px;
+            font-size: 12px; color: #666666; text-decoration: none;
+            padding: 6px 0; min-width: 56px; min-height: 48px;
+            justify-content: center; transition: color 0.2s;
+        }
+        html.is-mobile .bottom-tab.active { color: #6B4BFF; }
+        html.is-mobile .bottom-tab svg { width: 24px; height: 24px; }
+        html.is-mobile .order-search-bar { display: flex !important; gap: 8px; margin-bottom: 12px; }
 
-            /* ====== 表格 ====== */
-            .data-table { font-size: 12px; min-width: 600px; }
-            .data-table th { padding: 8px 10px; font-size: 11px; white-space: nowrap; }
-            .data-table td { padding: 10px; white-space: nowrap; }
-            .data-table th:first-child, .data-table td:first-child {
-                position: sticky; left: 0; background: #FFFFFF; z-index: 1;
-                box-shadow: 2px 0 4px rgba(0,0,0,0.05);
-            }
-            .data-table th:first-child { background: #FAFAFA; z-index: 2; }
-            .data-table tr:hover td:first-child { background: #FAFAFA; }
-            .detail-table { font-size: 11px; min-width: 500px; }
-            .detail-table th { padding: 6px 8px; font-size: 10px; white-space: nowrap; }
-            .detail-table td { padding: 6px 8px; white-space: nowrap; }
+        /* ====== Content Area ====== */
+        html.is-mobile .content {
+            padding: 12px;
+            padding-bottom: calc(76px + env(safe-area-inset-bottom, 0));
+            -webkit-overflow-scrolling: touch;
+        }
+        html.is-mobile .page-card { padding: 12px; border-radius: 10px; }
+        html.is-mobile .page-header-row { flex-direction: column; align-items: flex-start; gap: 10px; }
+        html.is-mobile .page-title { font-size: 17px; }
 
-            /* ====== 筛选栏 ====== */
-            .page-card input[type="text"],
-            .page-card input[type="date"],
-            .page-card input[type="number"],
-            .page-card select {
-                width: 100% !important; max-width: none !important;
-                height: 40px !important; font-size: 16px !important;
-            }
-            .filter-tag-group { gap: 6px; }
-            .filter-tag-option { font-size: 12px; padding: 5px 10px; min-height: 32px; }
-            .filter-multi-wrap { width: 100%; }
-            .filter-multi-trigger { width: 100%; height: 40px; font-size: 16px; }
-            .filter-multi-panel {
-                position: fixed; top: auto; bottom: 0; left: 0; right: 0;
-                width: 100%; max-height: 50vh; border-radius: 16px 16px 0 0;
-                z-index: 950;
-            }
-            .suggestion-dropdown {
-                position: fixed; top: auto; bottom: 0; left: 0; right: 0;
-                width: 100%; max-height: 50vh; border-radius: 16px 16px 0 0;
-                z-index: 950;
-            }
-
-            /* ====== 弹窗（通用） ====== */
-            .modal-overlay { align-items: flex-end; }
-            .modal-card {
-                max-width: 100% !important; width: 100%;
-                border-radius: 16px 16px 0 0; margin: 0;
-                max-height: 92vh;
-            }
-            .modal-header { padding: 20px 20px 0; }
-            .modal-header h3 { font-size: 16px; }
-            .modal-body { padding: 20px; }
-            .modal-footer { padding: 0 20px 20px; flex-wrap: wrap; gap: 8px; }
-            .modal-footer .btn { flex: 1; min-width: 0; height: 44px; font-size: 15px; }
-            .modal-body .form-row { margin-bottom: 14px; }
-            .modal-body .form-row input,
-            .modal-body .form-row select,
-            .modal-body .form-row textarea { height: 40px; font-size: 16px; }
-            .modal-body .form-row textarea { height: auto; }
-
-            /* ====== 订单弹窗 ====== */
-            .order-modal-card { max-width: 100% !important; max-height: 100vh; }
-            .item-card-grid { grid-template-columns: 1fr !important; gap: 8px !important; }
-            .item-card-grid input, .item-card-grid select { height: 38px !important; font-size: 14px !important; }
-            .item-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
-            .amount-bar { flex-direction: column; gap: 12px; padding: 12px 16px; }
-            .amount-bar-item { flex-direction: row; justify-content: space-between; align-items: center; gap: 8px; }
-            .amount-bar-value { font-size: 16px; }
-            .detail-grid { grid-template-columns: 1fr !important; gap: 8px; }
-
-            /* ====== 商品选择弹窗 ====== */
-            .product-select-modal-card { max-width: 100% !important; max-height: 100vh; }
-            .product-tree { max-height: 60vh; }
-            .product-group-header { padding: 12px; font-size: 13px; }
-            .product-child-item { padding: 10px 12px 10px 32px; font-size: 12px; }
-
-            /* ====== 还款管理客户卡片 ====== */
-            .page-card [style*="grid-template-columns"] {
-                grid-template-columns: 1fr !important;
-            }
-
-            /* ====== 按钮与标签 ====== */
-            .btn { min-height: 44px; min-width: 44px; justify-content: center; }
-            .btn-sm { min-height: 36px; min-width: 36px; }
-            .btn-xs { min-height: 32px; min-width: 32px; }
-            .tag { padding: 3px 8px; font-size: 11px; }
-            .empty-state { padding: 24px 16px; }
-            .content .btn-sm { height: 40px; padding: 0 14px; font-size: 14px; min-width: 64px; }
-
-            /* ====== 打印票据 ====== */
-            .print-ticket { width: 100% !important; max-width: 100% !important; }
+        /* ====== Mobile Card List ====== */
+        html.is-mobile .mobile-card-list { display: flex; flex-direction: column; gap: 10px; }
+        html.is-mobile .data-card {
+            background: #FFF; border: 1px solid #E5E5E5; border-radius: 12px;
+            padding: 14px; transition: background 0.15s; position: relative;
+            overflow: hidden; cursor: pointer;
+        }
+        html.is-mobile .data-card:active { background: #FAFAFA; }
+        html.is-mobile .data-card-header {
+            display: flex; justify-content: space-between; align-items: flex-start;
+            margin-bottom: 10px;
+        }
+        html.is-mobile .data-card-title { font-size: 15px; font-weight: 600; color: #1A1A1A; line-height: 1.3; }
+        html.is-mobile .data-card-subtitle { font-size: 12px; color: #9CA3AF; margin-top: 3px; }
+        html.is-mobile .data-card-body { display: flex; flex-direction: column; gap: 6px; }
+        html.is-mobile .data-card-row { display: flex; justify-content: space-between; align-items: center; }
+        html.is-mobile .data-card-label { font-size: 12px; color: #666; flex-shrink: 0; }
+        html.is-mobile .data-card-value { font-size: 13px; font-weight: 500; color: #1A1A1A; text-align: right; }
+        html.is-mobile .data-card-actions {
+            display: flex; gap: 8px; margin-top: 10px; padding-top: 10px;
+            border-top: 1px solid #F0F0F0;
+        }
+        html.is-mobile .data-card-actions .btn {
+            flex: 1; min-width: 0; justify-content: center;
         }
 
-        /* ---------- 底部导航栏（默认隐藏，移动端显示） ---------- */
-        .bottom-tab-bar { display: none; }
+        /* ====== FAB ====== */
+        html.is-mobile .fab-btn {
+            display: flex; position: fixed;
+            bottom: calc(72px + env(safe-area-inset-bottom, 0));
+            right: 20px; width: 52px; height: 52px; border-radius: 50%;
+            background: #6B4BFF; color: #FFF; border: none;
+            box-shadow: 0 4px 16px rgba(107, 75, 255, 0.4);
+            align-items: center; justify-content: center; z-index: 700;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+        }
+        html.is-mobile .fab-btn:active { transform: scale(0.95); box-shadow: 0 2px 8px rgba(107, 75, 255, 0.3); }
+        html.is-mobile .fab-btn svg { width: 22px; height: 22px; }
 
-        /* ---------- 表格滚动容器 ---------- */
-        .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        /* ====== Filter Chips ====== */
+        html.is-mobile .filter-bar { display: flex !important; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
+        html.is-mobile .filter-chip {
+            display: inline-flex; align-items: center; gap: 4px;
+            padding: 6px 12px; border-radius: 16px; font-size: 13px;
+            border: 1px solid #E5E5E5; background: #FFF; cursor: pointer;
+            transition: all 0.15s; font-family: inherit;
+        }
+        html.is-mobile .filter-chip.active { background: #F5F3FF; border-color: #6B4BFF; color: #6B4BFF; }
+        html.is-mobile .filter-chip .count {
+            background: #6B4BFF; color: #FFF; border-radius: 10px;
+            padding: 1px 6px; font-size: 10px; min-width: 18px; text-align: center;
+        }
+        html.is-mobile .filter-sheet-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            width: 100vw; height: 100vh;
+            background: rgba(0,0,0,0.4); z-index: 950;
+            display: flex; align-items: flex-start; justify-content: center;
+        }
+        html.is-mobile .filter-sheet {
+            background: #FFF; width: 100%; height: 55vh;
+            border-radius: 0 0 16px 16px; overflow-y: auto;
+            display: flex; flex-direction: column;
+            padding-top: env(safe-area-inset-top, 0);
+        }
+        html.is-mobile .filter-sheet-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px 12px; border-bottom: 1px solid #F0F0F0;
+            flex-shrink: 0;
+        }
+        html.is-mobile .filter-sheet-title { font-size: 16px; font-weight: 600; }
+        html.is-mobile .filter-sheet-body { padding: 16px 20px; flex: 1; overflow-y: auto; }
+        html.is-mobile .filter-sheet-body .form-row { margin-bottom: 16px; }
+        html.is-mobile .filter-sheet-body .form-row label { font-size: 13px; margin-bottom: 6px; }
+        html.is-mobile .filter-sheet-footer {
+            display: flex; flex-direction: column; gap: 10px; padding: 16px 20px;
+            border-top: 1px solid #F0F0F0; flex-shrink: 0; background: #FFF;
+        }
+        html.is-mobile .filter-sheet-footer .btn { width: 100%; height: 44px; font-size: 15px; }
+        html.is-mobile .filter-sheet-handle {
+            width: 36px; height: 4px; background: #D4D4D8;
+            border-radius: 2px; margin: 0 auto 12px; flex-shrink: 0;
+        }
+
+        /* ====== Bottom Sheet Modal (general) ====== */
+        html.is-mobile .modal-overlay { align-items: flex-end; }
+        html.is-mobile .modal-card {
+            max-width: 100% !important; width: 100%;
+            border-radius: 16px 16px 0 0; margin: 0;
+            max-height: 85vh; display: flex; flex-direction: column;
+        }
+        html.is-mobile .modal-handle {
+            width: 36px; height: 4px; background: #D4D4D8;
+            border-radius: 2px; margin: 10px auto 0; flex-shrink: 0;
+        }
+        html.is-mobile .modal-header { padding: 16px 20px 0; flex-shrink: 0; }
+        html.is-mobile .modal-header h3 { font-size: 16px; }
+        html.is-mobile .modal-body { padding: 16px 20px; overflow-y: auto; flex: 1; }
+        html.is-mobile .modal-body .form-row { margin-bottom: 14px; overflow: hidden; }
+        html.is-mobile .modal-body .form-row input,
+        html.is-mobile .modal-body .form-row select,
+        html.is-mobile .modal-body .form-row textarea { height: 40px; font-size: 16px; max-width: 100%; }
+        html.is-mobile .modal-body .form-row textarea { height: auto; }
+        html.is-mobile .modal-body input[type="date"] { -webkit-appearance: none; appearance: none; }
+        html.is-mobile .modal-footer {
+            padding: 0 20px 20px; flex-wrap: wrap; gap: 8px;
+            flex-shrink: 0;
+        }
+        html.is-mobile .modal-footer .btn { flex: 1; min-width: 0; height: 44px; font-size: 15px; }
+
+        /* ====== Order Modal (full-screen) ====== */
+        html.is-mobile .order-modal-card { max-width: 100% !important; max-height: 100vh; border-radius: 0 !important; }
+        html.is-mobile .item-card-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+        html.is-mobile .item-card-grid input, html.is-mobile .item-card-grid select { height: 38px !important; font-size: 14px !important; }
+        html.is-mobile .item-card-header { flex-direction: column; align-items: flex-start; gap: 8px; }
+        html.is-mobile .amount-bar { flex-direction: column; gap: 10px; padding: 12px; }
+        html.is-mobile .amount-bar-item { flex-direction: row; justify-content: space-between; align-items: center; gap: 6px; }
+        html.is-mobile .amount-bar-value { font-size: 16px; }
+        html.is-mobile .detail-grid { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+
+        /* ====== Product Select Modal ====== */
+        html.is-mobile .product-select-modal-card { max-width: 100% !important; max-height: 100vh; }
+        html.is-mobile .product-tree { max-height: 55vh; }
+        html.is-mobile .product-group-header { padding: 12px; font-size: 13px; }
+        html.is-mobile .product-child-item { padding: 10px 12px 10px 32px; font-size: 12px; }
+
+        /* ====== Order Detail fullscreen ====== */
+        html.is-mobile .detail-fullscreen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: #FAFAFA; z-index: 1000; overflow-y: auto;
+            display: flex; flex-direction: column;
+        }
+        html.is-mobile .detail-fullscreen-header {
+            padding: 12px 16px; background: #FFF;
+            border-bottom: 1px solid #E5E5E5; display: flex;
+            align-items: center; gap: 12px; position: sticky; top: 0; z-index: 10;
+        }
+        html.is-mobile .detail-fullscreen-body { flex: 1; padding: 12px; overflow-y: auto; }
+        html.is-mobile .back-btn {
+            display: flex; align-items: center; justify-content: center;
+            width: 36px; height: 36px; border: none; background: none;
+            cursor: pointer; color: #1A1A1A; padding: 4px;
+        }
+
+        /* ====== Skeleton Loading ====== */
+        html.is-mobile .skeleton {
+            background: linear-gradient(90deg, #F0F0F0 25%, #E8E8E8 50%, #F0F0F0 75%);
+            background-size: 200% 100%; animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+        }
+        html.is-mobile .skeleton-card {
+            padding: 16px; border: 1px solid #F0F0F0; border-radius: 12px;
+            margin-bottom: 10px; background: #FFF;
+        }
+        html.is-mobile .skeleton-line { height: 14px; margin-bottom: 10px; }
+        html.is-mobile .skeleton-line.short { width: 50%; }
+        html.is-mobile .skeleton-line.medium { width: 75%; }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ====== Pull to Refresh ====== */
+        html.is-mobile .ptr-indicator {
+            display: flex; align-items: center; justify-content: center;
+            height: 0; overflow: hidden; transition: height 0.2s;
+            color: #9CA3AF; font-size: 13px; gap: 8px;
+        }
+        html.is-mobile .ptr-indicator.active { height: 48px; }
+
+        /* ====== FAB Button ====== */
+        html.is-mobile .fab-btn {
+            display: flex; position: fixed; bottom: calc(80px + env(safe-area-inset-bottom, 0));
+            right: 16px; width: 52px; height: 52px; border-radius: 50%;
+            background: #6B4BFF; color: #FFF; border: none;
+            align-items: center; justify-content: center; cursor: pointer;
+            z-index: 800; box-shadow: 0 4px 16px rgba(107,75,255,0.35);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        html.is-mobile .fab-btn:active { transform: scale(0.92); box-shadow: 0 2px 8px rgba(107,75,255,0.25); }
+        html.is-mobile .fab-btn svg { width: 26px; height: 26px; }
+
+        /* ====== Buttons & Tags ====== */
+        html.is-mobile .btn { min-height: 44px; min-width: 44px; justify-content: center; }
+        html.is-mobile .btn-sm { min-height: 42px; min-width: 56px; font-size: 14px; padding: 0 16px; }
+        html.is-mobile .btn-xs { min-height: 36px; min-width: 52px; font-size: 13px; padding: 0 14px; }
+        html.is-mobile .tag { padding: 3px 8px; font-size: 11px; }
+        html.is-mobile .empty-state { padding: 24px 16px; }
+        html.is-mobile .content .btn-sm { height: 40px; padding: 0 14px; font-size: 14px; min-width: 64px; }
+        html.is-mobile .content .btn-xs { height: 32px; min-width: 48px; font-size: 12px; }
+
+        /* ====== Pagination ====== */
+        html.is-mobile .pagination-row { flex-wrap: wrap; justify-content: center !important; gap: 6px; }
+        html.is-mobile .pagination-row .btn-sm { height: 36px; padding: 0 12px; font-size: 13px; }
+        .page-size-select {
+            height: 32px;
+            padding: 0 8px;
+            border: 1px solid #D1D5DB;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #333;
+            background: #FFF;
+            cursor: pointer;
+            outline: none;
+        }
+        .page-size-select:focus {
+            border-color: #6B4BFF;
+            box-shadow: 0 0 0 2px rgba(107,75,255,0.1);
+        }
+        html.is-mobile .page-size-select { height: 36px; font-size: 14px; }
+
+        /* ====== Print ====== */
+        html.is-mobile .print-ticket { width: 100% !important; max-width: 100% !important; }
+        html.is-mobile .print-table th,
+        html.is-mobile .print-table td { border: 1px solid #000 !important; }
+        html.is-mobile .print-table { border-collapse: collapse !important; }
+
+        /* ====== Debt Stats ====== */
+        html.is-mobile .customer-debt-grid { grid-template-columns: 1fr !important; }
+        html.is-mobile .debt-stats-row { flex-direction: column !important; gap: 8px; }
+        html.is-mobile .debt-stats-top-wrap { position: fixed; bottom: 56px; left: 0; right: 0; z-index: 15; background: #FFF; padding: 10px 12px; border-top: 1px solid #E5E5E5; box-shadow: 0 -2px 8px rgba(0,0,0,0.06); }
+        html.is-mobile .debt-stats-top { }
+
+        /* ====== Desktop filter row hidden ====== */
+        html.is-mobile .desktop-filter-row { display: none !important; }
+
+        /* ---------- Base: mobile-only hidden on desktop ---------- */
+        .mobile-only { display: none; }
+        .filter-sheet-overlay { display: none; }
+        .bottom-tab-bar { display: none; }
     </style>
 </head>
 <body>
@@ -1151,7 +1300,7 @@
                 <p>销售订单管理平台</p>
             </div>
             <ul class="nav-menu">
-                <a href="#/order" class="nav-item" :class="{ active: currentRoute === 'order' }">
+                <li style="list-style:none;"><a href="#/order" class="nav-item" :class="{ active: currentRoute === 'order' }" @click.prevent="goNav('order')">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
                         <polyline points="14 2 14 8 20 8"></polyline>
@@ -1159,15 +1308,15 @@
                         <line x1="16" y1="17" x2="8" y2="17"></line>
                     </svg>
                     订单列表
-                </a>
-                <a href="#/debt" class="nav-item" :class="{ active: currentRoute === 'debt' }">
+                </a></li>
+                <li style="list-style:none;"><a href="#/debt" class="nav-item" :class="{ active: currentRoute === 'debt' }" @click.prevent="goNav('debt')">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="12" y1="1" x2="12" y2="23"></line>
                         <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                     </svg>
                     欠款列表
-                </a>
-                <a href="#/customer" class="nav-item" :class="{ active: currentRoute === 'customer' }">
+                </a></li>
+                <li style="list-style:none;"><a href="#/customer" class="nav-item" :class="{ active: currentRoute === 'customer' }" @click.prevent="goNav('customer')">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
                         <circle cx="9" cy="7" r="4"></circle>
@@ -1175,45 +1324,45 @@
                         <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
                     </svg>
                     客户管理
-                </a>
-                <a href="#/product" class="nav-item" :class="{ active: currentRoute === 'product' }">
+                </a></li>
+                <li style="list-style:none;"><a href="#/product" class="nav-item" :class="{ active: currentRoute === 'product' }" @click.prevent="goNav('product')">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
                         <path d="M16 10a4 4 0 0 1-8 0"></path>
                     </svg>
                     商品管理
-                </a>
-                <a href="#/repayment" class="nav-item" :class="{ active: currentRoute === 'repayment' }">
+                </a></li>
+                <li style="list-style:none;"><a href="#/repayment" class="nav-item" :class="{ active: currentRoute === 'repayment' }" @click.prevent="goNav('repayment')">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
                         <line x1="1" y1="10" x2="23" y2="10"></line>
                     </svg>
                     还款管理
-                </a>
+                </a></li>
             </ul>
         </aside>
 
         <!-- ========== 移动端底部导航栏 ========== -->
         <nav class="bottom-tab-bar">
-            <a href="#/order" class="bottom-tab" :class="{ active: currentRoute === 'order' }">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            <a href="#/order" class="bottom-tab" :class="{ active: currentRoute === 'order' }" @click.prevent="goNav('order')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                 <span>订单</span>
             </a>
-            <a href="#/debt" class="bottom-tab" :class="{ active: currentRoute === 'debt' }">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+            <a href="#/debt" class="bottom-tab" :class="{ active: currentRoute === 'debt' }" @click.prevent="goNav('debt')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
                 <span>欠款</span>
             </a>
-            <a href="#/customer" class="bottom-tab" :class="{ active: currentRoute === 'customer' }">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            <a href="#/customer" class="bottom-tab" :class="{ active: currentRoute === 'customer' }" @click.prevent="goNav('customer')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
                 <span>客户</span>
             </a>
-            <a href="#/product" class="bottom-tab" :class="{ active: currentRoute === 'product' }">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
+            <a href="#/product" class="bottom-tab" :class="{ active: currentRoute === 'product' }" @click.prevent="goNav('product')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line></svg>
                 <span>商品</span>
             </a>
-            <a href="#/repayment" class="bottom-tab" :class="{ active: currentRoute === 'repayment' }">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+            <a href="#/repayment" class="bottom-tab" :class="{ active: currentRoute === 'repayment' }" @click.prevent="goNav('repayment')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
                 <span>还款</span>
             </a>
         </nav>
@@ -1231,7 +1380,6 @@
                             <polyline points="6 9 12 15 18 9"></polyline>
                         </svg>
                     </div>
-                    <!-- 下拉菜单 -->
                     <div v-if="showDropdown" class="dropdown-menu">
                         <div class="dropdown-item" @click="showDropdown = false; openUserEdit()">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1259,7 +1407,7 @@
                 <div v-if="currentRoute === 'customer'" class="page-card">
                     <div class="page-header-row">
                         <h2 class="page-title">客户列表</h2>
-                        <button class="btn btn-primary" @click="openCustomerDialog()">
+                        <button class="btn btn-primary desktop-only" @click="openCustomerDialog()">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1269,7 +1417,7 @@
                     </div>
 
                     <!-- 搜索和筛选区域 -->
-                    <div style="display:flex;gap:12px;margin-bottom:20px;">
+                    <div class="desktop-filter-row" style="display:flex;gap:12px;margin-bottom:20px;">
                         <input
                             type="text"
                             v-model="searchKeyword"
@@ -1289,6 +1437,14 @@
                         </select>
                     </div>
 
+                    <!-- 移动端搜索栏 -->
+                    <div class="mobile-only" style="margin-bottom:12px;">
+                        <input type="text" v-model="searchKeyword" placeholder="搜索客户名称或联系人..." @input="applyCustomerFilter"
+                            style="width:100%;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:10px;outline:none;">
+                    </div>
+
+                    <!-- 桌面端表格 -->
+                    <div class="desktop-only">
                     <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
@@ -1329,14 +1485,71 @@
                             </tr>
                         </tbody>
                     </table></div>
-
-                    <!-- 客户分页 -->
-                    <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
-                        <span style="font-size:13px;color:#666;">共 {{ customerTotal }} 条</span>
-                        <button class="btn btn-sm btn-secondary" @click="prevCustomerPage" :disabled="customerPageNum <= 1">上一页</button>
-                        <span style="font-size:14px;">{{ customerPageNum }} / {{ customerTotalPages }}</span>
-                        <button class="btn btn-sm btn-secondary" @click="nextCustomerPage" :disabled="customerPageNum >= customerTotalPages">下一页</button>
+                    <!-- PC 分页 -->
+                    <div class="pagination-row" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid #E5E5E5;">
+                        <span style="font-size:13px;color:#666;">共 {{ customerTotal }} 条，第 {{ customerPageNum }} / {{ customerTotalPages }} 页</span>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <select v-model="customerPageSize" @change="customerPageNum=1; loadCustomers()" class="page-size-select">
+                                <option :value="10">10条/页</option>
+                                <option :value="30">30条/页</option>
+                                <option :value="50">50条/页</option>
+                                <option :value="100">100条/页</option>
+                                <option :value="500">500条/页</option>
+                            </select>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-sm btn-secondary" :disabled="customerPageNum <= 1" @click="customerPageNum--; loadCustomers()">上一页</button>
+                                <button class="btn btn-sm btn-secondary" :disabled="customerPageNum >= customerTotalPages" @click="customerPageNum++; loadCustomers()">下一页</button>
+                            </div>
+                        </div>
                     </div>
+                    </div>
+
+                    <!-- 移动端卡片列表 -->
+                    <div class="mobile-only">
+                        <div v-if="customerLoading" class="mobile-card-list">
+                            <div class="skeleton-card" v-for="n in 4" :key="n">
+                                <div class="skeleton skeleton-line"></div>
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div v-else-if="filteredCustomerList.length === 0" class="empty-state">
+                            <p>暂无客户数据</p>
+                        </div>
+                        <div v-else class="mobile-card-list">
+                            <div class="data-card" v-for="item in filteredCustomerList" :key="item.id" @click="openCustomerDialog(item)">
+                                <div class="data-card-header">
+                                    <div>
+                                        <div class="data-card-title">{{ item.customerName }}</div>
+                                        <div class="data-card-subtitle">{{ item.coreProduct || '未设置主营产品' }}</div>
+                                    </div>
+                                    <span class="tag" :class="item.category === '批发' ? 'tag-success' : item.category === '老客户' ? 'tag-warning' : 'tag-default'">{{ item.category }}</span>
+                                </div>
+                                <div class="data-card-body">
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">联系人</span>
+                                        <span class="data-card-value">{{ item.contactName || '-' }}</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">电话</span>
+                                        <span class="data-card-value">{{ item.phone || '-' }}</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">累计欠款</span>
+                                        <span class="data-card-value" :style="{color: item.totalDebt > 0 ? '#DC2626' : '#16A34A'}">{{ item.totalDebt }} 元</span>
+                                    </div>
+                                </div>
+                                <div class="data-card-actions" @click.stop>
+                                    <button class="btn btn-xs btn-primary" @click="openCustomerDialog(item)">详情</button>
+                                    <button v-if="item.totalDebt > 0" class="btn btn-xs btn-warning" @click="goDebt(item.id)">还款</button>
+                                    <button class="btn btn-xs btn-danger" @click="deleteCustomer(item.id)">删除</button>
+                                </div>
+                            </div>
+                            <div v-if="customerLoading && filteredCustomerList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">加载中...</div>
+                            <div v-else-if="customerPageNum >= customerTotalPages && filteredCustomerList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">已加载全部 {{ customerTotal }} 条</div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- ===== 商品管理 ===== -->
@@ -1370,7 +1583,7 @@
                         </div>
                     </div>
 
-                    <div style="display:flex;gap:12px;margin-bottom:20px;">
+                    <div class="desktop-filter-row" style="display:flex;gap:12px;margin-bottom:20px;">
                         <input
                             type="text"
                             v-model="productSearchKeyword"
@@ -1380,6 +1593,14 @@
                         >
                     </div>
 
+                    <!-- 移动端搜索栏 -->
+                    <div class="mobile-only" style="margin-bottom:12px;">
+                        <input type="text" v-model="productSearchKeyword" placeholder="搜索商品名称或编码..." @input="productPageNum = 1; loadProducts()"
+                            style="width:100%;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:10px;outline:none;">
+                    </div>
+
+                    <!-- 桌面端表格 -->
+                    <div class="desktop-only">
                     <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
@@ -1417,20 +1638,77 @@
                             </tr>
                         </tbody>
                     </table></div>
-
-                    <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
-                        <span style="font-size:13px;color:#666;">共 {{ productTotal }} 条</span>
-                        <button class="btn btn-sm btn-secondary" @click="prevProductPage" :disabled="productPageNum <= 1">上一页</button>
-                        <span style="font-size:14px;">{{ productPageNum }} / {{ productTotalPages }}</span>
-                        <button class="btn btn-sm btn-secondary" @click="nextProductPage" :disabled="productPageNum >= productTotalPages">下一页</button>
+                    <!-- PC 分页 -->
+                    <div class="pagination-row" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid #E5E5E5;">
+                        <span style="font-size:13px;color:#666;">共 {{ productTotal }} 条，第 {{ productPageNum }} / {{ productTotalPages || 1 }} 页</span>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <select v-model="productPageSize" @change="productPageNum=1; loadProducts()" class="page-size-select">
+                                <option :value="10">10条/页</option>
+                                <option :value="30">30条/页</option>
+                                <option :value="50">50条/页</option>
+                                <option :value="100">100条/页</option>
+                                <option :value="500">500条/页</option>
+                            </select>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-sm btn-secondary" :disabled="productPageNum <= 1" @click="productPageNum--; loadProducts()">上一页</button>
+                                <button class="btn btn-sm btn-secondary" :disabled="productPageNum >= productTotalPages" @click="productPageNum++; loadProducts()">下一页</button>
+                            </div>
+                        </div>
                     </div>
+                    </div>
+
+                    <!-- 移动端卡片列表 -->
+                    <div class="mobile-only">
+                        <div v-if="productLoading" class="mobile-card-list">
+                            <div class="skeleton-card" v-for="n in 4" :key="n">
+                                <div class="skeleton skeleton-line"></div>
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div v-else-if="filteredProductList.length === 0" class="empty-state">
+                            <p>暂无商品数据</p>
+                        </div>
+                        <div v-else class="mobile-card-list">
+                            <div class="data-card" v-for="item in filteredProductList" :key="item.id" @click="openProductDialog(item)">
+                                <div class="data-card-header">
+                                    <div>
+                                        <div class="data-card-title">{{ item.productName }}</div>
+                                        <div class="data-card-subtitle">{{ item.productCode || '无编码' }}</div>
+                                    </div>
+                                    <span style="font-size:16px;font-weight:600;color:#6B4BFF;">{{ item.unitPrice }} 元</span>
+                                </div>
+                                <div class="data-card-body">
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">规格</span>
+                                        <span class="data-card-value">{{ item.specification || '-' }}</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">单位</span>
+                                        <span class="data-card-value">{{ item.unit || '-' }}</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">备注</span>
+                                        <span class="data-card-value">{{ item.remark || '-' }}</span>
+                                    </div>
+                                </div>
+                                <div class="data-card-actions" @click.stop>
+                                    <button class="btn btn-xs btn-primary" @click="openProductDialog(item)">编辑</button>
+                                    <button class="btn btn-xs btn-danger" @click="deleteProduct(item.id)">删除</button>
+                                </div>
+                            </div>
+                            <div v-if="productLoading && filteredProductList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">加载中...</div>
+                            <div v-else-if="productPageNum >= productTotalPages && filteredProductList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">已加载全部 {{ productTotal }} 条</div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- ===== 订单列表 ===== -->
                 <div v-if="currentRoute === 'order'" class="page-card">
                     <div class="page-header-row">
                         <h2 class="page-title">订单列表</h2>
-                        <button class="btn btn-primary" @click="openOrderDialog()">
+                        <button class="btn btn-primary desktop-only" @click="openOrderDialog()">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                                 <line x1="12" y1="5" x2="12" y2="19"></line>
                                 <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -1439,16 +1717,13 @@
                         </button>
                     </div>
 
-                    <!-- 订单筛选区域 -->
-                    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
-                        <!-- 客户名称模糊搜索 -->
+                    <!-- 订单筛选区域 - 桌面端 -->
+                    <div class="desktop-filter-row" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">客户</label>
                             <input type="text" v-model="orderFilter.customerName" placeholder="输入客户名称搜索..."
                                 style="width:200px;height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
                         </div>
-
-                        <!-- 收款方式多选 -->
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">收款方式</label>
                             <div class="filter-tag-group">
@@ -1458,8 +1733,6 @@
                                 </label>
                             </div>
                         </div>
-
-                        <!-- 状态多选 -->
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">状态</label>
                             <div class="filter-tag-group">
@@ -1469,7 +1742,6 @@
                                 </label>
                             </div>
                         </div>
-
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">开始日期</label>
                             <input type="date" v-model="orderFilter.orderDateStart" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
@@ -1482,6 +1754,71 @@
                         <button class="btn btn-secondary" @click="resetOrderFilter" style="height:36px;">重置</button>
                     </div>
 
+                    <!-- 移动端搜索 + 筛选按钮 -->
+                    <div class="mobile-only order-search-bar">
+                        <input type="text" v-model="orderFilter.customerName" placeholder="搜索客户名称..."
+                            style="flex:1;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:10px;outline:none;background:#FFF;">
+                        <button class="filter-chip" :class="{ active: showOrderFilterSheet }" @click="showOrderFilterSheet = !showOrderFilterSheet"
+                            style="height:40px;padding:0 14px;flex-shrink:0;font-family:inherit;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="9" y1="14" x2="15" y2="14"></line><line x1="9" y1="10" x2="15" y2="10"></line></svg>
+                            筛选
+                            <span v-if="orderFilter.customerName || orderFilter.paymentMethods.length || orderFilter.statusList.length || orderFilter.orderDateStart || orderFilter.orderDateEnd" class="count">{{ (orderFilter.customerName ? 1 : 0) + (orderFilter.paymentMethods.length > 0 ? 1 : 0) + (orderFilter.statusList.length > 0 ? 1 : 0) + (orderFilter.orderDateStart || orderFilter.orderDateEnd ? 1 : 0) }}</span>
+                        </button>
+                    </div>
+
+                    <!-- 移动端筛选面板（顶部弹出） -->
+                    <div v-show="showOrderFilterSheet" class="filter-sheet-overlay" @click.self="showOrderFilterSheet = false">
+                        <div class="filter-sheet">
+                            <div class="filter-sheet-header">
+                                <span class="filter-sheet-title">筛选条件</span>
+                            </div>
+                            <div class="filter-sheet-body">
+                                <!-- 客户搜索 -->
+                                <div class="form-row">
+                                    <label>客户搜索</label>
+                                    <input type="text" v-model="orderFilter.customerName" placeholder="搜索客户名称..."
+                                        style="width:100%;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;background:#FFF;">
+                                </div>
+                                <!-- 收款方式 -->
+                                <div class="form-row">
+                                    <label>收款方式</label>
+                                    <div class="filter-tag-group">
+                                        <label class="filter-tag-option" :class="{ checked: orderFilter.paymentMethods.includes(opt) }" v-for="opt in paymentMethodOptions" :key="opt">
+                                            <input type="checkbox" :value="opt" v-model="orderFilter.paymentMethods"><span>{{ opt }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- 订单状态 -->
+                                <div class="form-row">
+                                    <label>订单状态</label>
+                                    <div class="filter-tag-group">
+                                        <label class="filter-tag-option" :class="{ checked: orderFilter.statusList.includes(opt) }" v-for="opt in statusOptions" :key="opt">
+                                            <input type="checkbox" :value="opt" v-model="orderFilter.statusList"><span>{{ opt }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- 日期 -->
+                                <div class="form-row">
+                                    <label>日期</label>
+                                    <div style="display:flex;gap:10px;">
+                                        <input type="date" v-model="orderFilter.orderDateStart"
+                                            style="flex:1;height:40px;padding:0 10px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;background:#FFF;">
+                                        <span style="display:flex;align-items:center;color:#999;font-size:13px;flex-shrink:0;">至</span>
+                                        <input type="date" v-model="orderFilter.orderDateEnd"
+                                            style="flex:1;height:40px;padding:0 10px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;background:#FFF;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-sheet-footer">
+                                <button class="btn btn-secondary" @click="resetOrderFilter(); showOrderFilterSheet = false">重置</button>
+                                <button class="btn btn-primary" @click="showOrderFilterSheet = false; orderPageNum = 1; loadOrders()">查询</button>
+                            </div>
+                            <div class="filter-sheet-handle"></div>
+                        </div>
+                    </div>
+
+                    <!-- 桌面端表格 -->
+                    <div class="desktop-only">
                     <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
@@ -1532,25 +1869,131 @@
                             </tr>
                         </tbody>
                     </table></div>
-
-                    <!-- 订单分页 -->
-                    <div style="display:flex;justify-content:flex-end;align-items:center;margin-top:20px;gap:8px;">
-                        <span style="font-size:13px;color:#666;">共 {{ orderTotal }} 条</span>
-                        <button class="btn btn-sm btn-secondary" @click="prevOrderPage" :disabled="orderPageNum <= 1">上一页</button>
-                        <span style="font-size:14px;">{{ orderPageNum }} / {{ orderTotalPages }}</span>
-                        <button class="btn btn-sm btn-secondary" @click="nextOrderPage" :disabled="orderPageNum >= orderTotalPages">下一页</button>
+                    <!-- PC 分页 -->
+                    <div class="pagination-row" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid #E5E5E5;">
+                        <span style="font-size:13px;color:#666;">共 {{ orderTotal }} 条，第 {{ orderPageNum }} / {{ orderTotalPages }} 页</span>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <select v-model="orderPageSize" @change="orderPageNum=1; loadOrders()" class="page-size-select">
+                                <option :value="10">10条/页</option>
+                                <option :value="30">30条/页</option>
+                                <option :value="50">50条/页</option>
+                                <option :value="100">100条/页</option>
+                                <option :value="500">500条/页</option>
+                            </select>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-sm btn-secondary" :disabled="orderPageNum <= 1" @click="orderPageNum--; loadOrders()">上一页</button>
+                                <button class="btn btn-sm btn-secondary" :disabled="orderPageNum >= orderTotalPages" @click="orderPageNum++; loadOrders()">下一页</button>
+                            </div>
+                        </div>
                     </div>
+                    </div>
+
+                    <!-- 移动端卡片列表（无限滚动） -->
+                    <div class="mobile-only">
+                        <div v-if="orderLoading && orderList.length === 0" class="mobile-card-list">
+                            <div class="skeleton-card" v-for="n in 4" :key="n">
+                                <div class="skeleton skeleton-line"></div>
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div v-else-if="!orderLoading && orderList.length === 0" class="empty-state">
+                            <p>暂无订单数据</p>
+                        </div>
+                        <div v-else class="mobile-card-list">
+                            <div class="data-card" v-for="item in orderList" :key="item.id" @click="viewOrderDetail(item.id)">
+                                <div class="data-card-header">
+                                    <div>
+                                        <div class="data-card-title">{{ item.orderNo }}</div>
+                                        <div class="data-card-subtitle">{{ getCustomerName(item.customerId) }} · {{ item.orderDate }}</div>
+                                    </div>
+                                    <span class="tag" :class="getStatusClass(item.status)">{{ getStatusText(item.status) }}</span>
+                                </div>
+                                <div class="data-card-body">
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">应收 / 已收</span>
+                                        <span class="data-card-value">{{ item.receivableAmount }} / {{ item.receivedAmount }} 元</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">本次欠款</span>
+                                        <span class="data-card-value" :style="{color: item.currentDebt > 0 ? '#DC2626' : '#16A34A'}">{{ item.currentDebt }} 元</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">收款方式</span>
+                                        <span class="data-card-value">{{ item.paymentMethod || '-' }}</span>
+                                    </div>
+                                </div>
+                                <div class="data-card-actions" @click.stop>
+                                    <button v-if="item.status !== '已作废' && item.status !== '已完成'" class="btn btn-xs btn-warning" @click="openEditOrderDialog(item)">修改</button>
+                                    <button v-if="item.status !== '已作废' && item.status !== '已完成'" class="btn btn-xs btn-danger" @click="cancelOrder(item.id)">作废</button>
+                                </div>
+                            </div>
+                            <!-- 加载更多指示器 -->
+                            <div v-if="orderLoading && orderList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">
+                                加载中...
+                            </div>
+                            <div v-else-if="orderPageNum >= orderTotalPages && orderList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">
+                                已加载全部 {{ orderTotal }} 条
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- ===== 欠款列表 ===== -->
                 <div v-if="currentRoute === 'debt'" class="page-card">
-                    <div class="page-header-row">
+                    <div class="page-header-row desktop-only">
                         <h2 class="page-title">欠款记录</h2>
                     </div>
 
-                    <!-- 欠款筛选区域 -->
-                    <div style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
-                        <!-- 客户多选 -->
+                    <!-- 欠款汇总 - 桌面端 -->
+                    <div v-if="debtList.length > 0" class="desktop-only" style="margin-bottom:20px;padding:16px 20px;background:#FAFAFA;border-radius:10px;border:1px solid #E5E5E5;">
+                        <div class="debt-stats-row" style="display:flex;gap:32px;flex-wrap:wrap;">
+                            <div>
+                                <span style="font-size:12px;color:#666;">总欠款笔数</span>
+                                <div style="font-size:20px;font-weight:600;color:#1A1A1A;">{{ debtList.length }} 笔</div>
+                            </div>
+                            <div>
+                                <span style="font-size:12px;color:#666;">有效欠款总额</span>
+                                <div style="font-size:20px;font-weight:600;color:#DC2626;">{{ totalValidDebt }} 元</div>
+                            </div>
+                            <div>
+                                <span style="font-size:12px;color:#666;">已结清金额</span>
+                                <div style="font-size:20px;font-weight:600;color:#16A34A;">{{ totalClearedDebt }} 元</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 移动端汇总（固定顶部） -->
+                    <div class="mobile-only debt-stats-top-wrap">
+                        <div class="debt-stats-top">
+                            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+                                <div>
+                                    <span style="font-size:12px;color:#666;">总欠款笔数</span>
+                                    <div style="font-size:20px;font-weight:600;color:#1A1A1A;">{{ debtList.length }} 笔</div>
+                                </div>
+                                <div>
+                                    <span style="font-size:12px;color:#666;">有效欠款总额</span>
+                                    <div style="font-size:20px;font-weight:600;color:#DC2626;">{{ totalValidDebt }} 元</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 移动端筛选栏 -->
+                    <div class="mobile-only filter-bar" style="margin-bottom:12px;">
+                        <input type="text" v-model="debtFilter.orderNo" placeholder="搜索单据编号..." @input="debtPageNum = 1; loadDebts()"
+                            style="flex:1;min-width:120px;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:10px;outline:none;">
+                        <button class="filter-chip" :class="{ active: showDebtFilterSheet }" @click="toggleDebtFilter"
+                            style="height:40px;padding:0 14px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"></line><line x1="4" y1="10" x2="4" y2="3"></line><line x1="12" y1="21" x2="12" y2="12"></line><line x1="12" y1="8" x2="12" y2="3"></line><line x1="20" y1="21" x2="20" y2="16"></line><line x1="20" y1="12" x2="20" y2="3"></line><line x1="9" y1="14" x2="15" y2="14"></line><line x1="9" y1="10" x2="15" y2="10"></line></svg>
+                            筛选
+                            <span v-if="debtFilter.customerIds.length || debtFilter.orderNo || debtFilter.dateStart || debtFilter.dateEnd || debtFilter.status.length" class="count">{{ (debtFilter.customerIds.length > 0 ? 1 : 0) + (debtFilter.orderNo ? 1 : 0) + (debtFilter.dateStart || debtFilter.dateEnd ? 1 : 0) + (debtFilter.status.length > 0 ? 1 : 0) }}</span>
+                        </button>
+                    </div>
+
+                    <!-- 欠款筛选区域 - 桌面端 -->
+                    <div class="desktop-filter-row" style="display:flex;gap:12px;margin-bottom:20px;flex-wrap:wrap;align-items:flex-end;">
                         <div style="display:flex;flex-direction:column;gap:4px;">
                             <label style="font-size:12px;color:#666;">客户</label>
                             <div id="debt-filter-wrap" class="filter-multi-wrap">
@@ -1584,10 +2027,91 @@
                             <label style="font-size:12px;color:#666;">结束日期</label>
                             <input type="date" v-model="debtFilter.dateEnd" style="height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;">
                         </div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <label style="font-size:12px;color:#666;">欠款状态</label>
+                            <div class="filter-multi-wrap">
+                                <div class="filter-multi-trigger" :class="{ active: showDebtStatusPanel }" @click="showDebtStatusPanel = !showDebtStatusPanel">
+                                    <span>{{ debtFilter.status.length ? '已选 ' + debtFilter.status.length + ' 个' : '全部状态' }}</span>
+                                    <svg class="arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                                <div v-if="showDebtStatusPanel" class="filter-multi-panel">
+                                    <div class="filter-multi-option" v-for="s in debtStatusOptions" :key="s.value" @click.stop="toggleDebtStatusFilter(s.value)">
+                                        <input type="checkbox" :checked="debtFilter.status.includes(s.value)" @click.stop="toggleDebtStatusFilter(s.value)">
+                                        <span>{{ s.label }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <button class="btn btn-primary" @click="loadDebts();" style="height:36px;">查询</button>
                         <button class="btn btn-secondary" @click="resetDebtFilter" style="height:36px;">重置</button>
                     </div>
 
+                    <!-- 移动端筛选面板 -->
+                    <div v-show="showDebtFilterSheet" class="filter-sheet-overlay" id="debt-filter-overlay" @click.self="showDebtFilterSheet = false">
+                        <div class="filter-sheet">
+                            <div class="filter-sheet-header">
+                                <span class="filter-sheet-title">筛选条件</span>
+                            </div>
+                            <div class="filter-sheet-body" @click="clearDebtCustomerSearch">
+                                <!-- 客户搜索（实时模糊匹配 + 多选） -->
+                                <div class="form-row debt-customer-search-wrap">
+                                    <label>客户搜索</label>
+                                    <div style="position:relative;">
+                                        <input type="text" v-model="debtCustomerSearchText" placeholder="搜索客户名称..."
+                                            style="width:100%;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;background:#FFF;">
+                                        <span v-if="debtFilter.customerIds.length" style="position:absolute;right:34px;top:50%;transform:translateY(-50%);font-size:11px;color:#6B4BFF;background:#F0EAFF;padding:2px 8px;border-radius:10px;pointer-events:none;">{{ debtFilter.customerIds.length }}个</span>
+                                        <div v-show="debtCustomerSearchText" @mousedown.prevent
+                                             style="position:absolute;top:100%;left:0;right:0;max-height:160px;overflow-y:auto;background:#FFF;border:1px solid #E5E5E5;border-radius:8px;z-index:10;margin-top:4px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+                                            <div v-if="debtCustomerFilteredList.length === 0" style="padding:12px;text-align:center;color:#9CA3AF;font-size:13px;">无匹配客户</div>
+                                            <div v-for="c in debtCustomerFilteredList" :key="c.id"
+                                                 @click="toggleDebtCustomerFilter(c.id)"
+                                                 style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;font-size:14px;cursor:pointer;border-bottom:1px solid #F5F5F5;"
+                                                 :style="{ background: debtFilter.customerIds.includes(c.id) ? '#F0EAFF' : '#FFF', color: debtFilter.customerIds.includes(c.id) ? '#6B4BFF' : '#333' }">
+                                                <span>{{ c.customerName }}</span>
+                                                <svg v-if="debtFilter.customerIds.includes(c.id)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6B4BFF" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- 单据编号 -->
+                                <div class="form-row">
+                                    <label>单据编号</label>
+                                    <input type="text" v-model="debtFilter.orderNo" placeholder="输入单据编号"
+                                        style="width:100%;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;background:#FFF;">
+                                </div>
+                                <!-- 欠款状态 -->
+                                <div class="form-row">
+                                    <label>欠款状态</label>
+                                    <div class="filter-tag-group">
+                                        <label class="filter-tag-option" :class="{ checked: debtFilter.status.includes(s.value) }" v-for="s in debtStatusOptions" :key="s.value">
+                                            <input type="checkbox" :value="s.value" v-model="debtFilter.status"><span>{{ s.label }}</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <!-- 日期 -->
+                                <div class="form-row">
+                                    <label>日期</label>
+                                    <div style="display:flex;gap:10px;">
+                                        <input type="date" v-model="debtFilter.dateStart"
+                                            style="flex:1;height:40px;padding:0 10px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;background:#FFF;">
+                                        <span style="display:flex;align-items:center;color:#999;font-size:13px;flex-shrink:0;">至</span>
+                                        <input type="date" v-model="debtFilter.dateEnd"
+                                            style="flex:1;height:40px;padding:0 10px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;background:#FFF;">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="filter-sheet-footer">
+                                <button class="btn btn-secondary" @click="resetDebtFilter(); showDebtFilterSheet = false">重置</button>
+                                <button class="btn btn-primary" @click="applyDebtFilterSheet(); showDebtFilterSheet = false">查询</button>
+                            </div>
+                            <div class="filter-sheet-handle"></div>
+                        </div>
+                    </div>
+
+                    <!-- 桌面端表格 -->
+                    <div class="desktop-only">
                     <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
@@ -1636,32 +2160,72 @@
                             </tr>
                         </tbody>
                     </table></div>
-
-                    <!-- 欠款统计 -->
-                    <div v-if="debtList.length > 0" style="margin-top:20px;padding:16px 20px;background:#FAFAFA;border-radius:10px;border:1px solid #E5E5E5;">
-                        <div style="display:flex;gap:32px;flex-wrap:wrap;">
-                            <div>
-                                <span style="font-size:12px;color:#666;">总欠款笔数</span>
-                                <div style="font-size:20px;font-weight:600;color:#1A1A1A;">{{ debtList.length }} 笔</div>
-                            </div>
-                            <div>
-                                <span style="font-size:12px;color:#666;">有效欠款总额</span>
-                                <div style="font-size:20px;font-weight:600;color:#DC2626;">{{ totalValidDebt }} 元</div>
-                            </div>
-                            <div>
-                                <span style="font-size:12px;color:#666;">已结清金额</span>
-                                <div style="font-size:20px;font-weight:600;color:#16A34A;">{{ totalClearedDebt }} 元</div>
+                    <!-- PC 分页 -->
+                    <div class="pagination-row" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid #E5E5E5;">
+                        <span style="font-size:13px;color:#666;">共 {{ debtTotal }} 条，第 {{ debtPageNum }} / {{ debtTotalPages || 1 }} 页</span>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <select v-model="debtPageSize" @change="debtPageNum=1; loadDebts()" class="page-size-select">
+                                <option :value="10">10条/页</option>
+                                <option :value="30">30条/页</option>
+                                <option :value="50">50条/页</option>
+                                <option :value="100">100条/页</option>
+                                <option :value="500">500条/页</option>
+                            </select>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-sm btn-secondary" :disabled="debtPageNum <= 1" @click="debtPageNum--; loadDebts()">上一页</button>
+                                <button class="btn btn-sm btn-secondary" :disabled="debtPageNum >= debtTotalPages" @click="debtPageNum++; loadDebts()">下一页</button>
                             </div>
                         </div>
                     </div>
-
-                    <!-- 欠款分页 -->
-                    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;">
-                        <span style="font-size:13px;color:#666;">共 {{ debtTotal }} 条</span>
-                        <button class="btn btn-sm btn-secondary" @click="prevDebtPage" :disabled="debtPageNum <= 1">上一页</button>
-                        <span style="font-size:14px;">{{ debtPageNum }} / {{ debtTotalPages }}</span>
-                        <button class="btn btn-sm btn-secondary" @click="nextDebtPage" :disabled="debtPageNum >= debtTotalPages">下一页</button>
                     </div>
+
+                    <!-- 移动端卡片列表 -->
+                    <div class="mobile-only" style="padding-bottom: 52px;">
+                        <div v-if="debtLoading" class="mobile-card-list">
+                            <div class="skeleton-card" v-for="n in 4" :key="n">
+                                <div class="skeleton skeleton-line"></div>
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div v-else-if="debtList.length === 0" class="empty-state">
+                            <p>暂无欠款记录</p>
+                        </div>
+                        <div v-else class="mobile-card-list">
+                            <div class="data-card" v-for="item in debtList" :key="item.id">
+                                <div class="data-card-header">
+                                    <div>
+                                        <div class="data-card-title">{{ item.customerName || '-' }}</div>
+                                        <div class="data-card-subtitle">{{ item.orderNo || '-' }} · {{ formatDateTime(item.createTime) }}</div>
+                                    </div>
+                                    <span class="tag" :class="item.status === 'UNSETTLED' ? 'tag-danger' : (item.status === 'PARTIAL' ? 'tag-warning' : 'tag-success')">
+                                        {{ item.status === 'UNSETTLED' ? '未结清' : (item.status === 'PARTIAL' ? '部分结清' : '已结清') }}
+                                    </span>
+                                </div>
+                                <div class="data-card-body">
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">欠款金额</span>
+                                        <span class="data-card-value">{{ item.amount }} 元</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">剩余欠款</span>
+                                        <span class="data-card-value" :style="{color: item.unsettledAmount > 0 ? '#DC2626' : '#16A34A'}">{{ item.unsettledAmount }} 元</span>
+                                    </div>
+                                    <div class="data-card-row" v-if="item.remark">
+                                        <span class="data-card-label">备注</span>
+                                        <span class="data-card-value">{{ item.remark }}</span>
+                                    </div>
+                                </div>
+                                <div class="data-card-actions" v-if="item.status === 'UNSETTLED' || item.status === 'PARTIAL'">
+                                    <button class="btn btn-xs btn-primary" @click="openDebtRepay(item)">还款</button>
+                                    <button class="btn btn-xs" style="background:#16A34A;color:#fff;" @click="clearDebt(item)">结清</button>
+                                </div>
+                            </div>
+                            <div v-if="debtLoading && debtList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">加载中...</div>
+                            <div v-else-if="debtPageNum >= debtTotalPages && debtList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">已加载全部 {{ debtTotal }} 条</div>
+                        </div>
+                    </div>
+
                 </div>
 
                 <!-- ===== 还款管理 ===== -->
@@ -1676,7 +2240,7 @@
                         <div v-if="customerDebtSummaries.length === 0" style="color:#9CA3AF;padding:24px;text-align:center;background:#FAFAFA;border-radius:10px;">
                             暂无欠款客户
                         </div>
-                        <div v-else style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:12px;">
+                        <div v-else class="customer-debt-grid" style="display:grid;grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));gap:12px;">
                             <div v-for="s in customerDebtSummaries" :key="s.customerId"
                                  style="padding:16px 20px;background:#FAFAFA;border-radius:10px;border:1px solid #E5E5E5;display:flex;justify-content:space-between;align-items:center;">
                                 <div>
@@ -1693,6 +2257,8 @@
 
                     <!-- 还款记录列表 -->
                     <h3 style="font-size:14px;font-weight:600;color:#1A1A1A;margin-bottom:12px;">还款记录</h3>
+                    <!-- 桌面端表格 -->
+                    <div class="desktop-only">
                     <div class="table-wrap"><table class="data-table">
                         <thead>
                             <tr>
@@ -1727,22 +2293,84 @@
                             </tr>
                         </tbody>
                     </table></div>
-
-                    <!-- 还款分页 -->
-                    <div style="display:flex;align-items:center;justify-content:center;gap:16px;margin-top:16px;">
-                        <span style="font-size:13px;color:#666;">共 {{ repaymentTotal }} 条</span>
-                        <button class="btn btn-sm btn-secondary" @click="prevRepaymentPage" :disabled="repaymentPageNum <= 1">上一页</button>
-                        <span style="font-size:14px;">{{ repaymentPageNum }} / {{ repaymentTotalPages }}</span>
-                        <button class="btn btn-sm btn-secondary" @click="nextRepaymentPage" :disabled="repaymentPageNum >= repaymentTotalPages">下一页</button>
+                    <!-- PC 分页 -->
+                    <div class="pagination-row" style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:1px solid #E5E5E5;">
+                        <span style="font-size:13px;color:#666;">共 {{ repaymentTotal }} 条，第 {{ repaymentPageNum }} / {{ repaymentTotalPages || 1 }} 页</span>
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <select v-model="repaymentPageSize" @change="repaymentPageNum=1; loadRepayments()" class="page-size-select">
+                                <option :value="10">10条/页</option>
+                                <option :value="30">30条/页</option>
+                                <option :value="50">50条/页</option>
+                                <option :value="100">100条/页</option>
+                                <option :value="500">500条/页</option>
+                            </select>
+                            <div style="display:flex;gap:8px;">
+                                <button class="btn btn-sm btn-secondary" :disabled="repaymentPageNum <= 1" @click="repaymentPageNum--; loadRepayments()">上一页</button>
+                                <button class="btn btn-sm btn-secondary" :disabled="repaymentPageNum >= repaymentTotalPages" @click="repaymentPageNum++; loadRepayments()">下一页</button>
+                            </div>
+                        </div>
                     </div>
+                    </div>
+
+                    <!-- 移动端卡片列表 -->
+                    <div class="mobile-only">
+                        <div v-if="repaymentLoading" class="mobile-card-list">
+                            <div class="skeleton-card" v-for="n in 4" :key="n">
+                                <div class="skeleton skeleton-line"></div>
+                                <div class="skeleton skeleton-line medium"></div>
+                                <div class="skeleton skeleton-line short"></div>
+                            </div>
+                        </div>
+                        <div v-else-if="repaymentList.length === 0" class="empty-state">
+                            <p>暂无还款记录</p>
+                        </div>
+                        <div v-else class="mobile-card-list">
+                            <div class="data-card" v-for="item in repaymentList" :key="item.id">
+                                <div class="data-card-header">
+                                    <div>
+                                        <div class="data-card-title">{{ item.customerName || getCustomerName(item.customerId) }}</div>
+                                        <div class="data-card-subtitle">{{ item.repaymentDate || '-' }}</div>
+                                    </div>
+                                    <span style="font-size:16px;font-weight:600;color:#16A34A;">{{ item.amount }} 元</span>
+                                </div>
+                                <div class="data-card-body">
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">还款方式</span>
+                                        <span class="data-card-value">{{ item.paymentMethod || '-' }}</span>
+                                    </div>
+                                    <div class="data-card-row">
+                                        <span class="data-card-label">登记时间</span>
+                                        <span class="data-card-value">{{ formatDateTime(item.createTime) }}</span>
+                                    </div>
+                                    <div class="data-card-row" v-if="item.remark">
+                                        <span class="data-card-label">备注</span>
+                                        <span class="data-card-value">{{ item.remark }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div v-if="repaymentLoading && repaymentList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">加载中...</div>
+                            <div v-else-if="repaymentPageNum >= repaymentTotalPages && repaymentList.length > 0" style="text-align:center;padding:20px;color:#9CA3AF;font-size:13px;">已加载全部 {{ repaymentTotal }} 条</div>
+                        </div>
+                    </div>
+
                 </div>
             </main>
         </div>
     </div>
 
+
+    <!-- ========== 移动端 FAB 新增订单按钮 ========== -->
+    <button v-if="currentRoute === 'order' || currentRoute === 'customer'" class="fab-btn mobile-only" @click="currentRoute === 'order' ? openOrderDialog() : openCustomerDialog()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+    </button>
+
     <!-- ========== 用户信息修改弹窗 ========== -->
     <div v-cloak v-if="showUserDialog" class="modal-overlay" @click.self="showUserDialog = false">
         <div class="modal-card">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>修改用户信息</h3>
             </div>
@@ -1754,6 +2382,10 @@
                 <div class="form-row">
                     <label>用户姓名</label>
                     <input type="text" v-model="userForm.realName">
+                </div>
+                <div class="form-row">
+                    <label>主营产品</label>
+                    <input type="text" v-model="userForm.coreProduct" placeholder="如：松紧带">
                 </div>
                 <div class="form-row">
                     <label>地址</label>
@@ -1780,6 +2412,7 @@
     <!-- ========== 客户新增/客户详情弹窗 ========== -->
     <div v-cloak v-if="showCustomerDialog" class="modal-overlay" @click.self="showCustomerDialog = false">
         <div class="modal-card">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>{{ customerForm.id ? '编辑客户' : '新增客户' }}</h3>
             </div>
@@ -1834,6 +2467,7 @@
     <!-- ========== 商品新增/编辑弹窗 ========== -->
     <div v-cloak v-if="showProductDialog" class="modal-overlay" @click.self="showProductDialog = false">
         <div class="modal-card">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>{{ productForm.id ? '编辑商品' : '新增商品' }}</h3>
             </div>
@@ -1885,6 +2519,7 @@
     <!-- ========== 商品批量导入弹窗 ========== -->
     <div v-cloak v-if="showImportDialog" class="modal-overlay" @click.self="showImportDialog = false">
         <div class="modal-card">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>批量导入商品</h3>
             </div>
@@ -1923,6 +2558,7 @@
     <!-- ========== 新增/编辑订单弹窗 ========== -->
     <div v-cloak v-if="showOrderDialog" class="modal-overlay" @click.self="showOrderDialog = false">
         <div class="modal-card order-modal-card">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>{{ orderDialogMode === 'edit' ? '编辑订单' : '新增销售订单' }}</h3>
             </div>
@@ -1955,15 +2591,35 @@
                             </div>
                         </div>
                     </div>
-                    <!-- 编辑模式：下拉选择 -->
-                    <select v-if="orderDialogMode === 'edit'" v-model="orderForm.customerId" @change="onOrderCustomerChange" disabled>
-                        <option value="">请选择客户</option>
-                        <option v-for="c in customerList" :key="c.id" :value="c.id">{{ c.customerName }}（{{ c.phone || '无电话' }}）</option>
-                    </select>
+                    <!-- 编辑模式：只读显示客户完整信息 -->
+                    <div v-if="orderDialogMode === 'edit'" class="detail-section" style="background:#F5F3FF;border:1px solid #DDD6FE;border-radius:8px;padding:12px 16px;margin-bottom:4px;">
+                        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6B4BFF" stroke-width="2" style="flex-shrink:0;">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                                <circle cx="12" cy="7" r="4"></circle>
+                            </svg>
+                            <span style="font-weight:600;font-size:15px;">{{ orderForm.customerName || '未知客户' }}</span>
+                            <span v-if="orderForm.totalDebt > 0" class="tag tag-warning" style="margin-left:auto;">累计欠款 {{ orderForm.totalDebt }} 元</span>
+                        </div>
+                        <div class="detail-grid" style="grid-template-columns: repeat(3, 1fr);">
+                            <div class="detail-item">
+                                <span class="detail-item-label">联系人</span>
+                                <span class="detail-item-value">{{ orderForm.contactName || '-' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-item-label">电话</span>
+                                <span class="detail-item-value">{{ orderForm.phone || '-' }}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-item-label">地址</span>
+                                <span class="detail-item-value">{{ orderForm.address || '-' }}</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 客户信息展示（选择后自动填充） -->
-                <div v-if="orderForm.customerId" class="detail-section" style="background:#F5F3FF;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
+                <!-- 客户信息展示（新增模式：选择后自动填充） -->
+                <div v-if="orderForm.customerId && orderDialogMode !== 'edit'" class="detail-section" style="background:#F5F3FF;border-radius:8px;padding:12px 16px;margin-bottom:16px;">
                     <div class="detail-grid" style="grid-template-columns: repeat(3, 1fr);">
                         <div class="detail-item">
                             <span class="detail-item-label">地址</span>
@@ -1981,11 +2637,9 @@
                 </div>
 
                 <!-- 基本信息 -->
-                <div style="display:flex;gap:16px;flex-wrap:wrap;">
-                    <div class="form-row" style="flex:1;min-width:180px;">
-                        <label>单据日期</label>
-                        <input type="date" v-model="orderForm.orderDate">
-                    </div>
+                <div class="form-row">
+                    <label>单据日期</label>
+                    <input type="date" v-model="orderForm.orderDate">
                 </div>
 
                 <!-- 商品明细区域（美化后） -->
@@ -2006,13 +2660,6 @@
                         <div class="item-card-header">
                             <span class="item-card-title">商品 {{ idx + 1 }}</span>
                             <div style="display:flex;gap:8px;">
-                                <button class="btn btn-xs btn-primary" @click="openProductSelect(idx)">
-                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <circle cx="11" cy="11" r="8"></circle>
-                                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                                    </svg>
-                                    选择商品
-                                </button>
                                 <button class="btn btn-xs btn-danger" @click="removeOrderItem(idx)">
                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2025,7 +2672,7 @@
                         <div class="item-card-grid">
                             <div class="form-row">
                                 <label>商品名称 <span style="color:#DC2626;">*</span></label>
-                                <input type="text" v-model="item.productName" placeholder="如：针织42#">
+                                <input type="text" v-model="item.productName" placeholder="点击选择商品..." readonly @click="openProductSelect(idx)" style="cursor:pointer;background:#F9F9F9;">
                             </div>
                             <div class="form-row">
                                 <label>颜色</label>
@@ -2142,6 +2789,7 @@
     <!-- ========== 商品选择弹窗（三级树：名称 → 颜色 → 规格） ========== -->
     <div v-cloak v-if="showProductSelectDialog" class="modal-overlay" @click.self="showProductSelectDialog = false">
         <div class="modal-card product-select-modal-card">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>选择商品</h3>
             </div>
@@ -2199,6 +2847,7 @@
     <!-- ========== 订单详情弹窗 ========== -->
     <div v-cloak v-if="showOrderDetailDialog" class="modal-overlay" @click.self="showOrderDetailDialog = false">
         <div class="modal-card order-modal-card">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>订单详情</h3>
             </div>
@@ -2326,9 +2975,111 @@
         </div>
     </div>
 
+    <!-- ========== 移动端全屏订单详情 ========== -->
+    <div v-cloak v-if="showOrderDetailFullscreen" class="detail-fullscreen mobile-only"
+         @touchstart="detailTouchX = $event.touches[0].clientX"
+         @touchend="handleDetailSwipe($event)">
+        <div class="detail-fullscreen-header">
+            <button class="back-btn" @click="closeDetailFullscreen()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+            <span style="font-size:16px;font-weight:600;">订单详情</span>
+            <button v-if="orderDetail.order?.status !== '已作废'" class="btn btn-xs btn-primary" @click="printOrder" style="margin-left:auto;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;">
+                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                    <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                打印
+            </button>
+        </div>
+        <div class="detail-fullscreen-body">
+            <div class="detail-section">
+                <div class="detail-section-title">基本信息</div>
+                <div class="detail-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="detail-item">
+                        <span class="detail-item-label">单据编号</span>
+                        <span class="detail-item-value">{{ orderDetail.order?.orderNo }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">客户名称</span>
+                        <span class="detail-item-value">{{ orderDetail.customerName }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">销售人员</span>
+                        <span class="detail-item-value">{{ orderDetail.order?.salesPerson || '-' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">单据日期</span>
+                        <span class="detail-item-value">{{ orderDetail.order?.orderDate || '-' }}</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">状态</span>
+                        <span class="detail-item-value">
+                            <span class="tag" :class="getStatusClass(orderDetail.order?.status)">{{ getStatusText(orderDetail.order?.status) }}</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-section-title">金额信息</div>
+                <div class="detail-grid" style="grid-template-columns: 1fr 1fr;">
+                    <div class="detail-item">
+                        <span class="detail-item-label">本单金额</span>
+                        <span class="detail-item-value">{{ orderDetail.order?.totalAmount }} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">应收金额</span>
+                        <span class="detail-item-value">{{ orderDetail.order?.receivableAmount }} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">本次收款</span>
+                        <span class="detail-item-value">{{ orderDetail.order?.receivedAmount || 0 }} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">本次欠款</span>
+                        <span class="detail-item-value" style="color:#DC2626;">{{ orderDetail.order?.currentDebt || 0 }} 元</span>
+                    </div>
+                    <div class="detail-item">
+                        <span class="detail-item-label">收款方式</span>
+                        <span class="detail-item-value">{{ orderDetail.order?.paymentMethod || '-' }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-section-title">商品明细（{{ orderDetail.items?.length || 0 }} 项）</div>
+                <div v-for="(item, idx) in orderDetail.items" :key="item.id"
+                     style="background:#FFF;border:1px solid #E5E5E5;border-radius:8px;padding:12px;margin-bottom:8px;">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                        <span style="font-weight:600;font-size:14px;">{{ idx + 1 }}. {{ item.productName }}</span>
+                        <span style="color:#6B4BFF;font-weight:600;">{{ item.amount }} 元</span>
+                    </div>
+                    <div style="display:flex;gap:24px;font-size:12px;color:#666;flex-wrap:wrap;">
+                        <span>颜色: {{ getSpecPart(item.specification, 0) }}</span>
+                        <span>尺寸: {{ getSpecPart(item.specification, 1) }}</span>
+                        <span v-if="getSpecPart(item.specification, 2) !== '-'">码数: {{ getSpecPart(item.specification, 2) }}</span>
+                        <span>数量: {{ item.quantity }}{{ item.unit }}</span>
+                        <span>单价: {{ item.unitPrice }}</span>
+                    </div>
+                    <div v-if="item.remark" style="font-size:12px;color:#9CA3AF;margin-top:4px;">{{ item.remark }}</div>
+                </div>
+            </div>
+
+            <div v-if="orderDetail.order?.remark" class="detail-section">
+                <div class="detail-section-title">备注</div>
+                <p style="font-size:14px;color:#666;line-height:1.6;">{{ orderDetail.order.remark }}</p>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== 还款登记弹窗 ========== -->
     <div v-cloak v-if="showRepaymentDialog" class="modal-overlay" @click.self="showRepaymentDialog = false">
         <div class="modal-card" style="max-width:480px;">
+            <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
                 <h3>登记还款</h3>
             </div>
@@ -2384,18 +3135,17 @@
     <!-- ========== 打印小票区域（隐藏，仅用于打印） ========== -->
     <div v-show="showOrderDetailDialog" id="print-area" style="display:none;">
         <div class="print-ticket">
-            <div class="print-title">管兴松紧带 销售订单</div>
-            <div class="print-header">
-                <div class="print-row">
-                    <span>客户：{{ orderDetail.customerName || '-' }}</span>
-                    <span>主营产品：{{ orderDetail.customerCoreProduct || '-' }}</span>
-                    <span>单据日期：{{ orderDetail.order?.orderDate || '-' }}</span>
+            <div class="print-banner">
+                <div class="print-title">管兴松紧带 销售订单</div>
+                <div class="print-user-info">
+                    <div class="print-user-row">地址：{{ currentUser.address || '' }}</div>
+                    <div class="print-user-row">主营产品：{{ currentUser.coreProduct || '' }}</div>
+                    <div class="print-user-row">联系人：{{ currentUser.realName || '' }} {{ currentUser.phone || '' }}</div>
                 </div>
-                <div class="print-row">
-                    <span>地址：{{ orderDetail.customerAddress || '-' }}</span>
-                    <span>联系人：{{ orderDetail.customerContact || '-' }}</span>
-                    <span>电话：{{ orderDetail.customerPhone || '-' }}</span>
-                </div>
+            </div>
+            <div class="print-customer-info">
+                <span>客户名称：{{ orderDetail.customerName || '' }}</span>
+                <span>单据日期：{{ orderDetail.order?.orderDate || '' }}</span>
             </div>
             <table class="print-table">
                 <thead>
@@ -2428,15 +3178,13 @@
                 </tbody>
                 <tfoot>
                     <tr>
-                        <td colspan="6" style="text-align:right;font-weight:bold;">合计：</td>
-                        <td>{{ printTotalQty }}</td>
-                        <td></td>
+                        <td colspan="8" style="text-align:right;font-weight:bold;">合计：</td>
                         <td style="font-weight:bold;">{{ printTotalAmount }}</td>
                         <td></td>
                     </tr>
                     <tr>
-                        <td colspan="10" style="text-align:right;font-weight:bold;border-top:none;">
-                            合计金额大写：{{ amountToChinese(orderDetail.order?.totalAmount || 0) }}
+                        <td colspan="10" style="text-align:right;font-weight:bold;font-size:15px;">
+                            大写：<span style="font-size:16px;">{{ amountToChinese(orderDetail.order?.totalAmount || 0) }}</span>
                         </td>
                     </tr>
                 </tfoot>
@@ -2465,13 +3213,18 @@
     createApp({
         setup() {
             /* ========== 导航 & 用户数据 ========== */
-            const currentRoute = ref('order');
+            const currentRoute = ref(null);
             const currentUser = ref({});
             const token = ref('');
             const showDropdown = ref(false);
             const showUserDialog = ref(false);
             const userSaving = ref(false);
-            const userForm = reactive({ id: null, account: '', realName: '', address: '', phone: '', extraInfo: '' });
+            const userForm = reactive({ id: null, account: '', realName: '', coreProduct: '', address: '', phone: '', extraInfo: '' });
+            const isMobile = ref(false);
+
+            /* ========== 移动端筛选面板 ========== */
+            const showOrderFilterSheet = ref(false);
+            const showDebtFilterSheet = ref(false);
 
             /* ========== 客户管理数据 ========== */
             const customerList = ref([]);
@@ -2579,6 +3332,17 @@
 
             /* ========== 订单详情数据 ========== */
             const showOrderDetailDialog = ref(false);
+            const showOrderDetailFullscreen = ref(false);
+            const detailTouchX = ref(0);
+            const closeDetailFullscreen = () => {
+                showOrderDetailFullscreen.value = false;
+                if (isMobile.value) history.back();
+            };
+            const handleDetailSwipe = (e) => {
+                if (e.changedTouches[0].clientX - detailTouchX.value > 80) {
+                    closeDetailFullscreen();
+                }
+            };
             const orderDetail = ref({ order: null, items: [], customerName: '' });
 
             /* ========== 欠款列表数据 ========== */
@@ -2588,9 +3352,16 @@
                 customerIds: [],
                 orderNo: '',
                 dateStart: '',
-                dateEnd: ''
+                dateEnd: '',
+                status: []
             });
             const showDebtCustomerPanel = ref(false);
+            const debtStatusOptions = [
+                { value: 'UNSETTLED', label: '未结清' },
+                { value: 'PARTIAL', label: '部分结清' },
+                { value: 'SETTLED', label: '已结清' }
+            ];
+            const showDebtStatusPanel = ref(false);
             const debtCustomerSearchText = ref('');
             const debtCustomerFilteredList = computed(() => {
                 const list = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
@@ -2617,6 +3388,7 @@
             });
             // 逐笔还款的欠款记录上下文
             const currentRepayDebt = ref(null);
+            const repaymentCustomerDebt = ref(0);
             const customerDebtSummaries = ref([]);
             const repaymentPageNum = ref(1);
             const repaymentPageSize = ref(10);
@@ -2687,6 +3459,9 @@
                 return '客户管理';
             });
 
+            // 未结清欠款数量（用于抽屉徽章）
+            const unsettledDebtCount = ref(0);
+
             // 欠款统计计算属性
             const totalValidDebt = computed(() => {
                 return debtList.value
@@ -2709,8 +3484,10 @@
                 return (orderDetail.value.items || []).reduce((s, i) => s + (parseFloat(i.amount) || 0), 0).toFixed(2);
             });
 
-            const updateRoute = () => {
-                // 切换路由时关闭所有弹窗
+            // 核心路由切换（被 goNav 和 hashchange 共用）
+            const applyRoute = (route) => {
+                console.log("applyRoute")
+                // 关闭所有弹窗和面板
                 showUserDialog.value = false;
                 showCustomerDialog.value = false;
                 showOrderDialog.value = false;
@@ -2720,33 +3497,57 @@
                 showImportDialog.value = false;
                 showRepaymentDialog.value = false;
                 showDropdown.value = false;
+                showOrderDetailFullscreen.value = false;
+                showOrderFilterSheet.value = false;
+                showDebtFilterSheet.value = false;
 
-                const hash = window.location.hash;
-                if (hash === '#/product') {
-                    currentRoute.value = 'product';
+                currentRoute.value = route;
+                if (route === 'product') {
+                    productPageNum.value = 1;
                     loadProducts();
-                } else if (hash === '#/order') {
-                    currentRoute.value = 'order';
+                } else if (route === 'order') {
+                    orderPageNum.value = 1;
                     loadOrders();
-                } else if (hash.startsWith('#/debt')) {
-                    currentRoute.value = 'debt';
+                } else if (route === 'debt') {
+                    debtPageNum.value = 1;
+                    loadDebts();
+                } else if (route === 'repayment') {
+                    repaymentPageNum.value = 1;
+                    loadRepayments();
+                    loadCustomerDebtSummaries();
+                } else if (route === 'customer') {
+                    customerPageNum.value = 1;
+                    loadCustomers();
+                }
+            };
+
+            // 统一导航函数 — 直接切换路由，不依赖 hashchange 事件
+            const goNav = (route) => {
+                console.log("goNav")
+                if (currentRoute.value === route) return;
+                window.location.hash = '#/' + route;
+                applyRoute(route);
+            };
+
+            // hashchange 处理 — 用于浏览器前进/后退和直接 URL 访问
+            const updateRoute = () => {
+                const hash = window.location.hash;
+                let route;
+                if (hash === '#/product') route = 'product';
+                else if (hash === '#/order') route = 'order';
+                else if (hash.startsWith('#/debt')) {
+                    route = 'debt';
                     const dParams = new URLSearchParams(hash.split('?')[1] || '');
                     const cid = dParams.get('customerId');
                     debtFilter.customerIds = cid ? [Number(cid)] : [];
-                    loadDebts();
                 } else if (hash.startsWith('#/repayment')) {
-                    currentRoute.value = 'repayment';
+                    route = 'repayment';
                     const params = new URLSearchParams(hash.split('?')[1] || '');
                     repaymentFilterCustomerId.value = params.get('customerId') ? Number(params.get('customerId')) : null;
-                    loadRepayments();
-                    loadCustomerDebtSummaries();
-                } else if (hash.startsWith('#/customer')) {
-                    currentRoute.value = 'customer';
-                    loadCustomers();
-                } else {
-                    currentRoute.value = 'order';
-                    loadOrders();
-                }
+                } else if (hash === '#/customer') route = 'customer';
+                else route = 'order';
+                if (currentRoute.value === route) return;
+                applyRoute(route);
             };
 
             /* ========== 页面初始化 ========== */
@@ -2761,9 +3562,26 @@
                 currentUser.value = JSON.parse(userStr);
                 Object.assign(userForm, currentUser.value);
 
+                // 检测移动端
+                const checkMobile = () => {
+                    isMobile.value = window.innerWidth <= 768;
+                    document.documentElement.classList.toggle('is-mobile', window.innerWidth <= 768);
+                };
+                checkMobile();
+                window.addEventListener('resize', checkMobile);
+
                 // 初始化路由并监听 hash 变化
                 updateRoute();
                 window.addEventListener('hashchange', updateRoute);
+
+                // 移动端：监听浏览器返回（包括手势滑动返回），关闭全屏视图而非跳转路由
+                window.addEventListener('popstate', () => {
+                    if (showOrderDetailFullscreen.value) {
+                        showOrderDetailFullscreen.value = false;
+                    } else if (showOrderDialog.value) {
+                        showOrderDialog.value = false;
+                    }
+                });
 
                 loadAllCustomers();
                 loadProductTree();
@@ -2776,6 +3594,22 @@
                         showDebtCustomerPanel.value = false;
                     }
                 });
+
+                // 移动端无限滚动
+                const contentEl = document.querySelector('.content');
+                if (contentEl) {
+                    contentEl.addEventListener('scroll', () => {
+                        if (!isMobile.value) return;
+                        const { scrollTop, scrollHeight, clientHeight } = contentEl;
+                        if (scrollHeight - scrollTop - clientHeight < 200) {
+                            if (currentRoute.value === 'order') loadMoreOrders();
+                            else if (currentRoute.value === 'customer') loadMoreCustomers();
+                            else if (currentRoute.value === 'product') loadMoreProducts();
+                            else if (currentRoute.value === 'debt') loadMoreDebts();
+                            else if (currentRoute.value === 'repayment') loadMoreRepayments();
+                        }
+                    });
+                }
             });
 
             /* ========== 用户操作 ========== */
@@ -2815,13 +3649,18 @@
             };
 
             /* ========== 客户管理 ========== */
-            const loadCustomers = async () => {
+            const loadCustomers = async (append) => {
+                console.log("loadCustomers")
                 customerLoading.value = true;
                 try {
                     const res = await fetch(`/api/customer/page?pageNum=${customerPageNum.value}&pageSize=${customerPageSize.value}`, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200) {
-                        customerList.value = result.data.list;
+                        if (append) {
+                            customerList.value = [...customerList.value, ...(result.data.list || [])];
+                        } else {
+                            customerList.value = result.data.list;
+                        }
                         customerTotal.value = result.data.total;
                         customerTotalPages.value = result.data.pages;
                     }
@@ -2833,8 +3672,12 @@
                 }
             };
 
-            const prevCustomerPage = () => { if (customerPageNum.value > 1) { customerPageNum.value--; loadCustomers(); } };
-            const nextCustomerPage = () => { if (customerPageNum.value < customerTotalPages.value) { customerPageNum.value++; loadCustomers(); } };
+            const loadMoreCustomers = () => {
+                if (customerLoading.value) return;
+                if (customerPageNum.value >= customerTotalPages.value) return;
+                customerPageNum.value++;
+                loadCustomers(true);
+            };
 
             const applyCustomerFilter = () => {
                 let list = customerList.value;
@@ -2922,14 +3765,18 @@
             };
 
             /* ========== 商品管理 ========== */
-            const loadProducts = async () => {
+            const loadProducts = async (append) => {
                 productLoading.value = true;
                 try {
                     const url = `/api/product/page?pageNum=${productPageNum.value}&pageSize=${productPageSize.value}&keyword=${encodeURIComponent(productSearchKeyword.value || '')}`;
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200) {
-                        productList.value = result.data.list || [];
+                        if (append) {
+                            productList.value = [...productList.value, ...(result.data.list || [])];
+                        } else {
+                            productList.value = result.data.list || [];
+                        }
                         productTotal.value = result.data.total || 0;
                         productTotalPages.value = result.data.pages || 0;
                     }
@@ -2940,8 +3787,12 @@
                 }
             };
 
-            const prevProductPage = () => { if (productPageNum.value > 1) { productPageNum.value--; loadProducts(); } };
-            const nextProductPage = () => { if (productPageNum.value < productTotalPages.value) { productPageNum.value++; loadProducts(); } };
+            const loadMoreProducts = () => {
+                if (productLoading.value) return;
+                if (productPageNum.value >= productTotalPages.value) return;
+                productPageNum.value++;
+                loadProducts(true);
+            };
 
             // 下载 CSV 模板
             const downloadProductTemplate = () => {
@@ -2949,7 +3800,89 @@
                 const header = '商品名称,颜色,尺码,码数,单位,单价,备注';
                 const examples = [
                     '针织42#,白,1.9cm/6分,码数45y,公斤,5.5,',
+                    '针织42#,黑,1.9cm/6分,码数45y,公斤,6.0,',
+                    '针织42#,白,2.2cm/7分,码数45y,公斤,6.6,',
+                    '针织42#,黑,2.2cm/7分,码数45y,公斤,7.0,',
+                    '针织42#,白,2.5cm/1寸,码数45y,公斤,7.5,',
+                    '针织42#,黑,2.5cm/1寸,码数45y,公斤,8.0,',
+                    '针织42#,白,3.0cm/1寸1分,码数45y,公斤,8.9,',
+                    '针织42#,黑,3.0cm/1寸1分,码数45y,公斤,9.5,',
+                    '针织42#,白,3.2cm/1寸2分,码数45y,公斤,9.5,',
+                    '针织42#,黑,3.2cm/1寸2分,码数45y,公斤,10.2,',
+                    '针织42#,白,3.5cm/1寸3分,码数45y,公斤,10.5,',
+                    '针织42#,黑,3.5cm/1寸3分,码数45y,公斤,11.2,',
+                    '针织42#,白,3.8cm/1寸半,码数45y,公斤,11.4,',
+                    '针织42#,黑,3.8cm/1寸半,码数45y,公斤,12.0,',
+                    '针织42#,白,4.0cm/1寸5分,码数45y,公斤,12.0,',
+                    '针织42#,黑,4.0cm/1寸5分,码数45y,公斤,12.8,',
+                    '针织42#,白,4.5cm/1寸6分,码数45y,公斤,13.3,',
+                    '针织42#,黑,4.5cm/1寸6分,码数45y,公斤,14.2,',
+                    '针织42#,白,5.0cm/2寸,码数45y,公斤,15.0,',
+                    '针织42#,黑,5.0cm/2寸,码数45y,公斤,16.0,',
+                    '针织42#,白,5.7cm/2寸2分,码数45y,公斤,18.5,',
+                    '针织42#,黑,5.7cm/2寸2分,码数45y,公斤,19.5,',
+                    '针织42#,白,6.3cm/2寸半,码数45y,公斤,20.5,',
+                    '针织42#,黑,6.3cm/2寸半,码数45y,公斤,21.8,',
+                    '针织42#,白,7.0cm/2寸6分,码数45y,公斤,22.0,',
+                    '针织42#,黑,7.0cm/2寸6分,码数45y,公斤,23.0,',
+                    '针织42#,白,7.6cm/3寸,码数45y,公斤,24.5,',
+                    '针织42#,黑,7.6cm/3寸,码数45y,公斤,26.0,',
+                    '针织42#,白,8.0cm/3寸1分,码数45y,公斤,26.0,',
+                    '针织42#,黑,8.0cm/3寸1分,码数45y,公斤,28.0,',
+                    '针织42#,白,9.0cm/3寸半,码数45y,公斤,38.0,',
+                    '针织42#,黑,9.0cm/3寸半,码数45y,公斤,40.0,',
+                    '针织42#,白,10.0cm/4寸,码数45y,公斤,44.0,',
+                    '针织42#,黑,10.0cm/4寸,码数45y,公斤,46.0,',
+                    '针织42#,白,15.0cm/6寸,码数45y,公斤,72.0,',
+                    '针织42#,黑,15.0cm/6寸,码数45y,公斤,72.0,',
+                    '针织37#,白,1.0cm/3分,码数95y,公斤,12.0,',
+                    '针织37#,黑,1.0cm/3分,码数95y,公斤,13.0,',
+                    '针织37#,白,1.2cm/4分,码数95y,公斤,14.0,',
+                    '针织37#,黑,1.2cm/4分,码数95y,公斤,15.0,',
+                    '针织37#,白,1.5cm/5分,码数95y,公斤,16.0,',
+                    '针织37#,黑,1.5cm/5分,码数95y,公斤,17.0,',
+                    '针织37#,白,1.9cm/6分,码数41y,公斤,6.4,',
+                    '针织37#,黑,1.9cm/6分,码数41y,公斤,6.8,',
+                    '针织37#,白,2.2cm/7分,码数41y,公斤,7.4,',
                     '针织37#,黑,2.2cm/7分,码数41y,公斤,8.0,',
+                    '针织37#,白,2.5cm/1寸,码数41y,公斤,8.2,',
+                    '针织37#,黑,2.5cm/1寸,码数41y,公斤,9.0,',
+                    '针织37#,白,3.0cm/1寸1分,码数41y,公斤,9.8,',
+                    '针织37#,黑,3.0cm/1寸1分,码数41y,公斤,10.8,',
+                    '针织37#,白,3.2cm/1寸2分,码数41y,公斤,10.2,',
+                    '针织37#,黑,3.2cm/1寸2分,码数41y,公斤,10.9,',
+                    '针织37#,白,3.5cm/1寸3分,码数41y,公斤,11.5,',
+                    '针织37#,黑,3.5cm/1寸3分,码数41y,公斤,12.4,',
+                    '针织37#,白,3.8cm/1寸半,码数41y,公斤,12.5,',
+                    '针织37#,黑,3.8cm/1寸半,码数41y,公斤,13.5,',
+                    '针织37#,白,4.0cm/1寸5分,码数41y,公斤,13.3,',
+                    '针织37#,黑,4.0cm/1寸5分,码数41y,公斤,14.2,',
+                    '针织37#,白,4.5cm/1寸6分,码数41y,公斤,14.5,',
+                    '针织37#,黑,4.5cm/1寸6分,码数41y,公斤,15.5,',
+                    '针织37#,白,5.0cm/2寸,码数41y,公斤,16.5,',
+                    '针织37#,黑,5.0cm/2寸,码数41y,公斤,17.5,',
+                    '针织37#,白,5.7cm/2寸2分,码数41y,公斤,20.5,',
+                    '针织37#,黑,5.7cm/2寸2分,码数41y,公斤,22.0,',
+                    '针织37#,白,6.3cm/2寸半,码数41y,公斤,22.5,',
+                    '针织37#,黑,6.3cm/2寸半,码数41y,公斤,24.0,',
+                    '针织32#,白,1.9cm/6分,码数40y,公斤,7.7,',
+                    '针织32#,黑,1.9cm/6分,码数40y,公斤,8.1,',
+                    '针织32#,白,2.5cm/1寸,码数40y,公斤,10.0,',
+                    '针织32#,黑,2.5cm/1寸,码数40y,公斤,10.7,',
+                    '针织32#,白,3.0cm/1寸1分,码数40y,公斤,12.0,',
+                    '针织32#,黑,3.0cm/1寸1分,码数40y,公斤,12.8,',
+                    '针织32#,白,3.2cm/1寸2分,码数40y,公斤,12.3,',
+                    '针织32#,黑,3.2cm/1寸2分,码数40y,公斤,13.2,',
+                    '针织32#,白,3.5cm/1寸3分,码数40y,公斤,13.9,',
+                    '针织32#,黑,3.5cm/1寸3分,码数40y,公斤,14.8,',
+                    '针织32#,白,3.8cm/1寸半,码数40y,公斤,14.8,',
+                    '针织32#,黑,3.8cm/1寸半,码数40y,公斤,15.8,',
+                    '针织32#,白,4.0cm/1寸5分,码数40y,公斤,15.5,',
+                    '针织32#,黑,4.0cm/1寸5分,码数40y,公斤,16.5,',
+                    '针织32#,白,4.5cm/1寸6分,码数40y,公斤,17.5,',
+                    '针织32#,黑,4.5cm/1寸6分,码数40y,公斤,18.8,',
+                    '针织32#,白,5.0cm/2寸,码数40y,公斤,19.0,',
+                    '针织32#,黑,5.0cm/2寸,码数40y,公斤,20.0,',
                 ].join('\n');
                 const csv = bom + header + '\n' + examples;
                 const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -3128,7 +4061,9 @@
             };
 
             /* ========== 订单列表 ========== */
-            const loadOrders = async () => {
+            // append=true 时追加数据（移动端无限滚动），否则替换
+            const loadOrders = async (append) => {
+                console.log("loadOrders")
                 orderLoading.value = true;
                 try {
                     let url = `/api/order/page?pageNum=${orderPageNum.value}&pageSize=${orderPageSize.value}`;
@@ -3142,7 +4077,11 @@
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200) {
-                        orderList.value = result.data.list;
+                        if (append) {
+                            orderList.value = [...orderList.value, ...(result.data.list || [])];
+                        } else {
+                            orderList.value = result.data.list;
+                        }
                         orderTotal.value = result.data.total;
                         orderTotalPages.value = result.data.pages;
                     }
@@ -3153,8 +4092,6 @@
                 }
             };
 
-            const prevOrderPage = () => { if (orderPageNum.value > 1) { orderPageNum.value--; loadOrders(); } };
-            const nextOrderPage = () => { if (orderPageNum.value < orderTotalPages.value) { orderPageNum.value++; loadOrders(); } };
             const resetOrderFilter = () => {
                 orderFilter.customerName = '';
                 orderFilter.paymentMethods = [];
@@ -3163,6 +4100,14 @@
                 orderFilter.orderDateEnd = '';
                 orderPageNum.value = 1;
                 loadOrders();
+            };
+
+            // 加载更多订单（移动端无限滚动）
+            const loadMoreOrders = () => {
+                if (orderLoading.value) return;
+                if (orderPageNum.value >= orderTotalPages.value) return;
+                orderPageNum.value++;
+                loadOrders(true);
             };
 
             // 根据客户ID获取客户名称（优先从全量列表查找）
@@ -3201,19 +4146,22 @@
                 return debt > 0 ? debt : 0;
             });
 
+            const debtDefaultMethods = ['赊账', '现金', '支付宝', '微信'];
+
             const calcOrderTotal = () => {
                 orderForm.receivableAmount = orderReceivable.value;
                 if (orderDialogMode.value !== 'edit') {
-                    if (orderForm.paymentMethod && orderForm.paymentMethod !== '赊账') {
+                    // 赊账/现金/支付宝/微信：默认产生欠款，不自动填写收款金额
+                    if (orderForm.paymentMethod && !debtDefaultMethods.includes(orderForm.paymentMethod)) {
                         orderForm.receivedAmount = orderReceivable.value;
                     }
                 }
             };
 
-            // 收款方式变化时给出默认值，但允许用户手动修改（编辑模式不改）
+            // 收款方式变化时：赊账/现金/支付宝/微信默认本次收款=0（全部计为欠款）
             const onPaymentMethodChange = () => {
                 if (orderDialogMode.value === 'edit') return;
-                if (orderForm.paymentMethod === '赊账') {
+                if (debtDefaultMethods.includes(orderForm.paymentMethod)) {
                     orderForm.receivedAmount = 0;
                 } else if (orderForm.paymentMethod) {
                     orderForm.receivedAmount = orderReceivable.value;
@@ -3237,6 +4185,7 @@
                 // 加载全部客户用于搜索匹配
                 loadAllCustomers();
                 showOrderDialog.value = true;
+                if (isMobile.value) history.pushState({ fullscreenView: true }, '');
             };
 
             // 加载全部客户（不分页），用于订单弹窗搜索
@@ -3265,12 +4214,15 @@
                 const detail = result.data;
                 // 填充表单
                 Object.assign(orderForm, detail.order);
-                // 填充客户信息
-                const c = customerList.value.find(c => c.id === detail.order.customerId);
+                // 从全量客户列表中查找（分页列表可能不包含该客户）
+                const allList = allCustomerList.value.length > 0 ? allCustomerList.value : customerList.value;
+                const c = allList.find(c => c.id === detail.order.customerId);
                 if (c) {
+                    orderForm.customerName = c.customerName || '';
                     orderForm.address = c.address || '';
                     orderForm.contactName = c.contactName || '';
                     orderForm.phone = c.phone || '';
+                    orderForm.totalDebt = c.totalDebt || 0;
                 }
                 // 填充明细
                 orderItems.value = detail.items.map(item => {
@@ -3292,6 +4244,7 @@
                     };
                 });
                 showOrderDialog.value = true;
+                if (isMobile.value) history.pushState({ fullscreenView: true }, '');
             };
 
             // 选择客户后自动填充客户信息
@@ -3507,14 +4460,19 @@
                 }
             };
 
-            // 查看订单详情
+            // 查看订单详情（移动端全屏，桌面端弹窗）
             const viewOrderDetail = async (orderId) => {
                 try {
                     const res = await fetch(`/api/order/detail/${orderId}`, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200) {
                         orderDetail.value = result.data;
-                        showOrderDetailDialog.value = true;
+                        if (isMobile.value) {
+                            showOrderDetailFullscreen.value = true;
+                            history.pushState({ fullscreenView: true }, '');
+                        } else {
+                            showOrderDetailDialog.value = true;
+                        }
                     } else {
                         ElMessage.error('加载订单详情失败');
                     }
@@ -3545,7 +4503,7 @@
             };
 
             /* ========== 欠款列表 ========== */
-            const loadDebts = async () => {
+            const loadDebts = async (append) => {
                 debtLoading.value = true;
                 try {
                     let url = '/api/order/debts/all';
@@ -3564,6 +4522,9 @@
                     if (debtFilter.dateEnd) {
                         params.push('dateEnd=' + debtFilter.dateEnd);
                     }
+                    if (debtFilter.status.length > 0) {
+                        params.push('status=' + debtFilter.status.join(','));
+                    }
                     params.push('sortField=' + debtSort.field);
                     params.push('sortOrder=' + debtSort.order);
                     url += '?' + params.join('&');
@@ -3571,25 +4532,35 @@
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200 && result.data) {
-                        debtList.value = result.data.list || [];
+                        if (append) {
+                            debtList.value = [...debtList.value, ...(result.data.list || [])];
+                        } else {
+                            debtList.value = result.data.list || [];
+                        }
                         debtTotal.value = result.data.total || 0;
                         debtTotalPages.value = result.data.pages || 0;
-                    } else {
+                        // 更新未结清欠款数量
+                        unsettledDebtCount.value = (result.data.list || []).filter(
+                            d => d.status === 'UNSETTLED' || d.status === 'PARTIAL'
+                        ).length;
+                    } else if (!append) {
                         debtList.value = [];
+                        unsettledDebtCount.value = 0;
                     }
                 } catch (e) {
-                    debtList.value = [];
+                    if (!append) debtList.value = [];
+                    if (!append) unsettledDebtCount.value = 0;
                     ElMessage.error('加载欠款记录失败');
                 } finally {
                     debtLoading.value = false;
                 }
             };
 
-            const prevDebtPage = () => {
-                if (debtPageNum.value > 1) { debtPageNum.value--; loadDebts(); }
-            };
-            const nextDebtPage = () => {
-                if (debtPageNum.value < debtTotalPages.value) { debtPageNum.value++; loadDebts(); }
+            const loadMoreDebts = () => {
+                if (debtLoading.value) return;
+                if (debtPageNum.value >= debtTotalPages.value) return;
+                debtPageNum.value++;
+                loadDebts(true);
             };
 
             const resetDebtFilter = () => {
@@ -3597,6 +4568,7 @@
                 debtFilter.orderNo = '';
                 debtFilter.dateStart = '';
                 debtFilter.dateEnd = '';
+                debtFilter.status = [];
                 showDebtCustomerPanel.value = false;
                 debtCustomerSearchText.value = '';
                 debtPageNum.value = 1;
@@ -3610,6 +4582,15 @@
                 }
             };
 
+            const toggleDebtFilter = () => {
+                showDebtFilterSheet.value = !showDebtFilterSheet.value;
+                // DOM fallback
+                const el = document.getElementById('debt-filter-overlay');
+                if (el) {
+                    el.style.display = showDebtFilterSheet.value ? 'flex' : 'none';
+                }
+            };
+
             const toggleDebtCustomerFilter = (id) => {
                 const idx = debtFilter.customerIds.indexOf(id);
                 if (idx > -1) {
@@ -3619,8 +4600,30 @@
                 }
             };
 
+            const toggleDebtStatusFilter = (status) => {
+                const idx = debtFilter.status.indexOf(status);
+                if (idx > -1) {
+                    debtFilter.status.splice(idx, 1);
+                } else {
+                    debtFilter.status.push(status);
+                }
+            };
+
+            // 点击筛选面板其他地方时清空客户搜索文本
+            const clearDebtCustomerSearch = (e) => {
+                if (!e.target.closest('.debt-customer-search-wrap')) {
+                    debtCustomerSearchText.value = '';
+                }
+            };
+
+            // 移动端筛选面板：应用筛选
+            const applyDebtFilterSheet = () => {
+                debtPageNum.value = 1;
+                loadDebts();
+            };
+
             /* ========== 还款管理 ========== */
-            const loadRepayments = async () => {
+            const loadRepayments = async (append) => {
                 repaymentLoading.value = true;
                 try {
                     let url = '/api/repayment?pageNum=' + repaymentPageNum.value + '&pageSize=' + repaymentPageSize.value;
@@ -3629,25 +4632,29 @@
                     const res = await fetch(url, { headers: getAuthHeaders() });
                     const result = await handleResponse(res);
                     if (result && result.code === 200 && result.data) {
-                        repaymentList.value = result.data.list || [];
+                        if (append) {
+                            repaymentList.value = [...repaymentList.value, ...(result.data.list || [])];
+                        } else {
+                            repaymentList.value = result.data.list || [];
+                        }
                         repaymentTotal.value = result.data.total || 0;
                         repaymentTotalPages.value = result.data.pages || 0;
-                    } else {
+                    } else if (!append) {
                         repaymentList.value = [];
                     }
                 } catch (e) {
-                    repaymentList.value = [];
+                    if (!append) repaymentList.value = [];
                     ElMessage.error('加载还款记录失败');
                 } finally {
                     repaymentLoading.value = false;
                 }
             };
 
-            const prevRepaymentPage = () => {
-                if (repaymentPageNum.value > 1) { repaymentPageNum.value--; loadRepayments(); }
-            };
-            const nextRepaymentPage = () => {
-                if (repaymentPageNum.value < repaymentTotalPages.value) { repaymentPageNum.value++; loadRepayments(); }
+            const loadMoreRepayments = () => {
+                if (repaymentLoading.value) return;
+                if (repaymentPageNum.value >= repaymentTotalPages.value) return;
+                repaymentPageNum.value++;
+                loadRepayments(true);
             };
 
             const loadCustomerDebtSummaries = async () => {
@@ -3973,26 +4980,25 @@
             };
 
             return {
-                currentRoute, currentUser, token, showDropdown,
+                currentRoute, currentUser, token, showDropdown, goNav,
                 showUserDialog, userForm, userSaving, openUserEdit, logout, saveUser,
-                customerList, customerLoading, showCustomerDialog, customerForm, customerSaving,
+                customerList, allCustomerList, customerLoading, showCustomerDialog, customerForm, customerSaving,
                 openCustomerDialog, saveCustomer, deleteCustomer, goDebt,
                 searchKeyword, categoryFilter, filteredCustomerList, applyCustomerFilter, customerNameError,
                 productList, productLoading, showProductDialog, productForm, productSaving,
                 productSearchKeyword, filteredProductList,
                 productFormColor, productFormSize, productFormYardCode,
                 productPageNum, productPageSize, productTotal, productTotalPages,
-                prevProductPage, nextProductPage,
-                getSpecPart, loadProducts, openProductDialog, saveProduct, deleteProduct,
+                getSpecPart, loadProducts, loadMoreProducts, openProductDialog, saveProduct, deleteProduct,
                 onProductNameChange, onProductFieldChange,
                 showImportDialog, importFileName, importFileData, importFileInput,
                 importing, importResult,
                 downloadProductTemplate, handleImportFile, clearImportFile, submitImport,
                 customerPageNum, customerPageSize, customerTotal, customerTotalPages,
-                prevCustomerPage, nextCustomerPage, loadCustomers,
+                loadCustomers, loadMoreCustomers,
                 orderList, orderLoading,
                 orderPageNum, orderPageSize, orderTotal, orderTotalPages,
-                orderFilter, prevOrderPage, nextOrderPage, resetOrderFilter, loadOrders,
+                orderFilter, resetOrderFilter, loadOrders, loadMoreOrders,
                 showOrderDialog, orderDialogMode, orderSaving, orderForm, orderItems,
                 openOrderDialog, openEditOrderDialog, onOrderCustomerChange, addOrderItem, removeOrderItem,
                 customerSearchText, showCustomerSuggestions, customerSuggestions,
@@ -4000,24 +5006,27 @@
                 calcOrderTotal, onPaymentMethodChange, calcItemAmount, formatItemAmount, submitOrder,
                 orderTotalQty, orderTotalAmount, orderReceivable, orderCurrentDebt,
                 getCustomerName, getStatusText, getStatusClass,
-                showOrderDetailDialog, orderDetail, viewOrderDetail, cancelOrder,
+                showOrderDetailDialog, showOrderDetailFullscreen, orderDetail, viewOrderDetail, cancelOrder, closeDetailFullscreen, detailTouchX, handleDetailSwipe,
                 orderSort, debtSort, repaymentSort, toggleSort,
                 productTree, showProductSelectDialog, expandedProductNames, expandedColorKeys,
                 openProductSelect, selectProduct, toggleProductGroup, toggleColorGroup,
                 countProductsInGroup, getSizeFromSpec,
                 paymentMethodOptions, statusOptions,
                 topbarTitle,
-                debtList, debtLoading, loadDebts, formatDateTime, totalValidDebt, totalClearedDebt,
+                debtList, debtLoading, loadDebts, loadMoreDebts, formatDateTime, totalValidDebt, totalClearedDebt,
                 debtFilter, showDebtCustomerPanel, debtCustomerSearchText, debtCustomerFilteredList,
-                resetDebtFilter, toggleDebtCustomerFilter, toggleDebtCustomerPanel,
-                debtPageNum, debtPageSize, debtTotal, debtTotalPages, prevDebtPage, nextDebtPage,
+                resetDebtFilter, toggleDebtFilter, toggleDebtCustomerFilter, toggleDebtCustomerPanel,
+                debtStatusOptions, toggleDebtStatusFilter, showDebtStatusPanel,
+                debtPageNum, debtPageSize, debtTotal, debtTotalPages,
                 printOrder, printTotalQty, printTotalAmount, amountToChinese,
                 repaymentList, repaymentLoading, showRepaymentDialog, repaymentSaving, repaymentForm,
                 currentRepayDebt, customerDebtSummaries,
-                loadRepayments, loadCustomerDebtSummaries, openRepaymentDialog, quickRepay,
+                loadRepayments, loadMoreRepayments, loadCustomerDebtSummaries, openRepaymentDialog, quickRepay,
                 openDebtRepay, clearDebt, submitRepayment,
                 repaymentPageNum, repaymentPageSize, repaymentTotal, repaymentTotalPages,
-                prevRepaymentPage, nextRepaymentPage
+                isMobile,
+                showOrderFilterSheet, showDebtFilterSheet, clearDebtCustomerSearch,
+                applyDebtFilterSheet, unsettledDebtCount
             };
         }
     }).use(ElementPlus).mount('#app');

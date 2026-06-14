@@ -113,14 +113,28 @@ public class ProductController {
             String color = specParts[0].trim();
             String size = specParts[1].trim();
 
-            Map<String, String> colorMap = Map.of("白", "B", "黑", "H");
+            Map<String, String> colorMap = Map.of("白", "B", "黑", "H","彩","C");
             String colorInit = colorMap.getOrDefault(color, null);
             if (colorInit == null) {
                 colorInit = color.substring(0, 1).toUpperCase();
             }
 
             String typeCode = null;
-            if (name.contains("针织")) typeCode = "ZZ";
+            if (name.contains("针织")){
+                typeCode = "ZZ";
+            } else if (name.contains("走马带")) {
+                typeCode = "ZMD";
+            }else if (name.contains("丝光")) {
+                typeCode = "GS";
+            }else if (name.contains("防滑带")){
+                typeCode = "FHD";
+            }else if (name.contains("弹力圆绳")) {
+                typeCode = "TLYS";
+            }else if (name.contains("包边带")) {
+                typeCode = "BBD";
+            }else {
+                typeCode = "QT";
+            }
 
             String modelNum = null;
             java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)#").matcher(name);

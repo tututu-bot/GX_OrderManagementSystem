@@ -146,6 +146,8 @@ public class OrderController {
 
         if (currentDebt.compareTo(BigDecimal.ZERO) <= 0) {
             order.setStatus("已完成");
+        } else {
+            order.setStatus("进行中");
         }
 
         order.setCreateTime(LocalDateTime.now());
@@ -502,6 +504,7 @@ public class OrderController {
             @RequestParam(required = false) String orderNo,
             @RequestParam(required = false) String dateStart,
             @RequestParam(required = false) String dateEnd,
+            @RequestParam(required = false) String status,
             @RequestParam(defaultValue = "createTime") String sortField,
             @RequestParam(defaultValue = "desc") String sortOrder,
             HttpServletRequest request) {
@@ -535,6 +538,17 @@ public class OrderController {
         }
         if (dateEnd != null && !dateEnd.isEmpty()) {
             wrapper.le(DebtRecord::getCreateTime, LocalDate.parse(dateEnd).atTime(23, 59, 59));
+        }
+
+        // 欠款状态多选筛选
+        if (status != null && !status.isEmpty()) {
+            List<String> statusList = Arrays.stream(status.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .toList();
+            if (!statusList.isEmpty()) {
+                wrapper.in(DebtRecord::getStatus, statusList);
+            }
         }
 
         if ("asc".equalsIgnoreCase(sortOrder)) {

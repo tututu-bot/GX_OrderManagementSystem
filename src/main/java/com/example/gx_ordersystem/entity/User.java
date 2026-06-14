@@ -65,6 +65,13 @@ public class User {
     private String phone;
 
     /**
+     * 主营产品
+     * 数据库字段: core_product， VARCHAR(100)
+     * 用途: 用户主营产品，用于单据打印
+     */
+    private String coreProduct;
+
+    /**
      * 其他信息（扩展字段）
      * 数据库字段: extra_info， VARCHAR(500)
      * 用途: 存储用户的其他补充信息
