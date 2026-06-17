@@ -82,19 +82,26 @@ public class ProductController {
         Long userId = getCurrentUserId(request);
         product.setUserId(userId);
 
-        String code = product.getProductCode();
-        if (code == null || code.isBlank()) {
-            code = generateProductCode(product, userId);
-            if (code == null) {
-                return Result.error("无法自动生成商品编码，请检查商品名称、颜色和尺码");
-            }
-            product.setProductCode(code);
+        // 检查该用户是否已添加过同名同规格商品
+        long dupCount = productService.lambdaQuery()
+                .eq(Product::getUserId, userId)
+                .eq(Product::getProductName, product.getProductName())
+                .eq(Product::getSpecification, product.getSpecification())
+                .count();
+        if (dupCount > 0) {
+            return Result.error("该商品已存在");
         }
 
-        long count = productService.lambdaQuery()
+        // 编码为空时自动生成随机编码
+        if (product.getProductCode() == null || product.getProductCode().isBlank()) {
+            product.setProductCode(generateProductCode());
+        }
+
+        // 编码唯一性校验
+        long codeCount = productService.lambdaQuery()
                 .eq(Product::getProductCode, product.getProductCode())
                 .count();
-        if (count > 0) {
+        if (codeCount > 0) {
             return Result.error("商品编码 " + product.getProductCode() + " 已存在");
         }
 
@@ -102,54 +109,8 @@ public class ProductController {
         return Result.success(product);
     }
 
-    private String generateProductCode(Product product, Long userId) {
-        try {
-            String name = product.getProductName();
-            String spec = product.getSpecification();
-            if (name == null || spec == null) return null;
-
-            String[] specParts = spec.split(";");
-            if (specParts.length < 2) return null;
-            String color = specParts[0].trim();
-            String size = specParts[1].trim();
-
-            Map<String, String> colorMap = Map.of("白", "B", "黑", "H","彩","C");
-            String colorInit = colorMap.getOrDefault(color, null);
-            if (colorInit == null) {
-                colorInit = color.substring(0, 1).toUpperCase();
-            }
-
-            String typeCode = null;
-            if (name.contains("针织")){
-                typeCode = "ZZ";
-            } else if (name.contains("走马带")) {
-                typeCode = "ZMD";
-            }else if (name.contains("丝光")) {
-                typeCode = "GS";
-            }else if (name.contains("防滑带")){
-                typeCode = "FHD";
-            }else if (name.contains("弹力圆绳")) {
-                typeCode = "TLYS";
-            }else if (name.contains("包边带")) {
-                typeCode = "BBD";
-            }else {
-                typeCode = "QT";
-            }
-
-            String modelNum = null;
-            java.util.regex.Matcher m = java.util.regex.Pattern.compile("(\\d+)#").matcher(name);
-            if (m.find()) modelNum = m.group(1);
-
-            String specNum = null;
-            java.util.regex.Matcher sm = java.util.regex.Pattern.compile("^(\\d+\\.?\\d*)cm").matcher(size);
-            if (sm.find()) specNum = sm.group(1).replace(".", "");
-
-            if (colorInit != null && typeCode != null && modelNum != null && specNum != null) {
-                return colorInit + typeCode + "-" + modelNum + "-" + specNum + "-" + userId;
-            }
-        } catch (Exception ignored) {
-        }
-        return null;
+    private String generateProductCode() {
+        return "SP" + (100000000 + new Random().nextInt(900000000));
     }
 
     /** 修改商品，校验归属 */
@@ -217,21 +178,27 @@ public class ProductController {
                     }
                     p.setUserId(userId);
 
-                    // 编码自动生成
-                    if (p.getProductCode() == null || p.getProductCode().isBlank()) {
-                        String code = generateProductCode(p, userId);
-                        if (code == null) {
-                            errors.add("第" + rowNum + "行：无法生成编码");
-                            continue;
-                        }
-                        p.setProductCode(code);
+                    // 检查该用户是否已添加过同名同规格商品
+                    long dupCount = productService.lambdaQuery()
+                            .eq(Product::getUserId, userId)
+                            .eq(Product::getProductName, p.getProductName())
+                            .eq(Product::getSpecification, p.getSpecification())
+                            .count();
+                    if (dupCount > 0) {
+                        errors.add("第" + rowNum + "行：商品已存在");
+                        continue;
                     }
 
-                    // 检查重复
-                    long count = productService.lambdaQuery()
+                    // 编码自动生成
+                    if (p.getProductCode() == null || p.getProductCode().isBlank()) {
+                        p.setProductCode(generateProductCode());
+                    }
+
+                    // 编码唯一性校验
+                    long codeCount = productService.lambdaQuery()
                             .eq(Product::getProductCode, p.getProductCode())
                             .count();
-                    if (count > 0) {
+                    if (codeCount > 0) {
                         errors.add("第" + rowNum + "行：编码 " + p.getProductCode() + " 已存在");
                         continue;
                     }

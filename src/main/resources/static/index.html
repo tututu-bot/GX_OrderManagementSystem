@@ -477,7 +477,16 @@
             max-width: 860px;
             max-height: 92vh;
             overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: transparent transparent;
         }
+        .order-modal-card:hover {
+            scrollbar-color: #D4D4D8 transparent;
+        }
+        .order-modal-card::-webkit-scrollbar { width: 6px; }
+        .order-modal-card::-webkit-scrollbar-track { background: transparent; }
+        .order-modal-card::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
+        .order-modal-card:hover::-webkit-scrollbar-thumb { background: #D4D4D8; }
 
         /* 商品明细卡片式布局 */
         .item-card {
@@ -1587,7 +1596,7 @@
                         <input
                             type="text"
                             v-model="productSearchKeyword"
-                            placeholder="搜索商品名称或编码..."
+                            placeholder="搜索商品或编码..."
                             style="flex:1;max-width:320px;height:36px;padding:0 12px;font-size:14px;font-family:inherit;border:1px solid #E5E5E5;border-radius:8px;outline:none;"
                             @input="productPageNum = 1; loadProducts()"
                         >
@@ -1595,7 +1604,7 @@
 
                     <!-- 移动端搜索栏 -->
                     <div class="mobile-only" style="margin-bottom:12px;">
-                        <input type="text" v-model="productSearchKeyword" placeholder="搜索商品名称或编码..." @input="productPageNum = 1; loadProducts()"
+                        <input type="text" v-model="productSearchKeyword" placeholder="搜索商品或编码..." @input="productPageNum = 1; loadProducts()"
                             style="width:100%;height:40px;padding:0 12px;font-size:16px;font-family:inherit;border:1px solid #E5E5E5;border-radius:10px;outline:none;">
                     </div>
 
@@ -1605,7 +1614,7 @@
                         <thead>
                             <tr>
                                 <th>商品编码</th>
-                                <th>商品名称</th>
+                                <th>商品</th>
                                 <th>颜色</th>
                                 <th>尺码</th>
                                 <th>码数</th>
@@ -2473,7 +2482,7 @@
             </div>
             <div class="modal-body">
                 <div class="form-row">
-                    <label>商品名称 <span style="color:#DC2626;">*</span></label>
+                    <label>商品 <span style="color:#DC2626;">*</span></label>
                     <input type="text" v-model="productForm.productName" placeholder="如：针织42#" @input="onProductNameChange">
                 </div>
                 <div class="form-row">
@@ -2556,7 +2565,7 @@
     </div>
 
     <!-- ========== 新增/编辑订单弹窗 ========== -->
-    <div v-cloak v-if="showOrderDialog" class="modal-overlay" @click.self="showOrderDialog = false">
+    <div v-cloak v-if="showOrderDialog" class="modal-overlay">
         <div class="modal-card order-modal-card">
             <div class="modal-handle mobile-only"></div>
             <div class="modal-header">
@@ -2671,7 +2680,7 @@
                         </div>
                         <div class="item-card-grid">
                             <div class="form-row">
-                                <label>商品名称 <span style="color:#DC2626;">*</span></label>
+                                <label>商品 <span style="color:#DC2626;">*</span></label>
                                 <input type="text" v-model="item.productName" placeholder="点击选择商品..." readonly @click="openProductSelect(idx)" style="cursor:pointer;background:#F9F9F9;">
                             </div>
                             <div class="form-row">
@@ -2926,7 +2935,7 @@
                             <tr>
                                 <th>序号</th>
                                 <th>商品编号</th>
-                                <th>商品名称</th>
+                                <th>商品</th>
                                 <th>颜色</th>
                                 <th>尺寸</th>
                                 <th>码数</th>
@@ -3151,7 +3160,7 @@
                 <thead>
                     <tr>
                         <th style="width:36px;">序号</th>
-                        <th>商品名称</th>
+                        <th>商品</th>
                         <th style="width:48px;">颜色</th>
                         <th style="width:72px;">尺寸</th>
                         <th style="width:72px;">码数</th>
@@ -3797,7 +3806,7 @@
             // 下载 CSV 模板
             const downloadProductTemplate = () => {
                 const bom = '﻿';
-                const header = '商品名称,颜色,尺码,码数,单位,单价,备注';
+                const header = '商品,颜色,尺码,码数,单位,单价,备注';
                 const examples = [
                     '针织42#,白,1.9cm/6分,码数45y,公斤,5.5,',
                     '针织42#,黑,1.9cm/6分,码数45y,公斤,6.0,',
@@ -3967,7 +3976,7 @@
                 showProductDialog.value = true;
             };
 
-            // 颜色/商品名称变更时尝试生成编码
+            // 颜色/商品变更时尝试生成编码
             const onProductNameChange = () => {
                 if (!productForm.id) tryGenerateCode();
             };
@@ -4005,7 +4014,7 @@
                 const color = productFormColor.value.trim();
                 const size = productFormSize.value.trim();
                 const yardCode = productFormYardCode.value.trim();
-                if (!productForm.productName.trim()) { ElMessage.error('请输入商品名称'); return; }
+                if (!productForm.productName.trim()) { ElMessage.error('请输入商品'); return; }
                 if (!color) { ElMessage.error('请输入颜色'); return; }
                 if (!size) { ElMessage.error('请输入尺码'); return; }
 
